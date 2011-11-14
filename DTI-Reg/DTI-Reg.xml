@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>Diffusion.Utilities</category>
+  <title>DTI-Reg</title>
+  <description>DTI-Reg performs pair-wise DTI registration via two methods: 1)Using FA map to drive the registration 2)Directly registering the tensor images with DTI-TK</description>
+  <version>1.0</version>
+  <documentation-url>http://www.nitrc.org/projects/dti-reg/</documentation-url>
+  <license></license>
+  <contributor>Clement Vachet (NIRAL, UNC-Chapel Hill)</contributor>
+  <acknowledgements>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</acknowledgements>
+
+  <parameters>
+    <label>Inputs</label>
+    <description>Input volumes</description>
+
+    <image type="tensor">
+      <name>fixedVolume</name>
+      <longflag>fixedVolume</longflag>
+      <label>Fixed DTI Volume</label>
+      <description>Fixed DTI image</description>
+      <channel>input</channel>
+      <default></default>
+    </image>
+
+    <image type="tensor">
+      <name>movingVolume</name>
+      <longflag>movingVolume</longflag>
+      <label>Moving DTI Volume</label>
+      <description>Moving DTI image</description>
+      <default></default>
+      <channel>input</channel>
+    </image>
+
+  </parameters> 
+
+  <parameters>
+    <label>Optional input mask volumes</label>
+    <description>Optional input mask volumes</description>
+
+    <image type="scalar">
+      <name>fixedMaskVolume</name>
+      <longflag>fixedMaskVolume</longflag>
+      <label>Fixed Mask Volume</label>
+      <description>Optional: Fixed binary mask image</description>
+      <channel>input</channel>
+      <default></default>
+    </image>
+
+    <image type="scalar">
+      <name>movingMaskVolume</name>
+      <longflag>movingMaskVolume</longflag>
+      <label>Moving Mask Volume</label>
+      <description>Optional: Moving binary mask image</description>
+      <default></default>
+      <channel>input</channel>
+    </image>
+  </parameters> 
+
+
+  <parameters>
+    <label>Registration type</label>
+    <description>Registration type</description>
+
+    <string-enumeration>
+      <name>method</name>
+      <longflag>method</longflag>
+      <label>Computational method</label>
+      <description>Method: 1)Use scalar (FA map) to drive the registration 2)Register directly the tensor images with DTI-TK</description>
+      <default>useScalar</default>
+      <element>useScalar</element>
+      <element>useTensor</element>
+    </string-enumeration>
+
+    <string-enumeration>
+      <name>linearRegType</name>
+      <longflag>linearRegType</longflag>
+      <label>Linear Registration Type</label>
+      <description>Linear Registration type: None, Rigid, Affine. Each type is initialized with previous stages.</description>
+      <default>Affine</default>
+      <element>None</element>
+      <element>Rigid</element>
+      <element>Affine</element>
+    </string-enumeration>
+
+    <string-enumeration>
+      <name>warpingType</name>
+      <longflag>warpingType</longflag>
+      <label>Warping Type</label>
+      <description>Warping type: None,BSpline,Diffeomorphic,LogDemons,SymmetricLogDemons</description>
+      <default>LogDemons</default>
+      <element>None</element>
+      <element>BSspline</element>
+      <element>Diffeomorphic</element>
+      <element>Demons</element>
+      <element>LogDemons</element>
+      <element>SymmetricLogDemons</element>
+    </string-enumeration>
+  </parameters> 
+
+  <parameters>
+    <label>Registration initialization</label>
+    <description>Registration initialization</description>
+
+    <string-enumeration>
+      <name>initializeTransformMode</name>
+      <longflag>initializeTransformMode</longflag>
+      <label>Intitialize Transform Mode</label>
+      <description>Determine how to initialize the transform center. GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures.  MomentsAlign assumes that the center of mass of the images represent similar structures.  useCenterOfHeadAlign attempts to use the top of head and shape of neck to drive a center of mass estimate.  Off assumes that the physical space of the images are close, and that centering in terms of the image Origins is a good starting point.  This flag is mutually exclusive with the initialTransform flag.</description>
+      <default>useCenterOfHeadAlign</default>
+      <element>Off</element>
+      <element>useMomentsAlign</element>
+      <element>useCenterOfHeadAlign</element>
+      <element>useGeometryAlign</element>
+    </string-enumeration>  
+
+    <transform fileExtensions=".txt">
+      <name>initialTransform</name>
+      <longflag>initialTransform</longflag>
+      <label>Initial transformation file</label>
+      <description>Filename of transform used to initialize the registration.  This CAN NOT be used with initializeTransformMode option.</description>
+      <channel>input</channel>
+    </transform>
+
+    <transform fileExtensions=".nrrd" type="nonlinear">
+      <name>initialDeformationField</name>
+      <longflag>initialDeformationField</longflag>
+      <description>Initial deformation field vector image file</description>
+      <label>Initial Deformation Field Volume</label>
+      <channel>input</channel>
+    </transform>
+  </parameters> 
+
+
+  <parameters>
+    <label>Outputs</label>
+    <description>Outputs</description>
+
+    <image type="tensor">
+      <name>outputVolume</name>
+      <longflag>outputVolume</longflag>
+      <label>Output DTI Volume</label>
+      <description>Output DTI image</description>
+      <default></default>
+      <channel>output</channel>
+    </image>
+
+    <transform fileExtensions=".txt">
+      <name>outputTransform</name>
+      <longflag>outputTransform</longflag>
+      <description>Output Transformation File</description>
+      <label>Output Transform File</label>
+      <channel>output</channel>
+    </transform>
+
+    <transform fileExtensions=".nrrd" type="nonlinear" reference="movingVolume">
+      <name>outputDeformationFieldVolume</name>
+      <longflag alias="output_field">outputDeformationFieldVolume</longflag>
+      <description>Output deformation field vector image (will have the same physical space as the fixedVolume).</description>
+      <label>Output Deformation Field Volume</label>
+      <channel>output</channel>
+    </transform>
+
+    <image type="scalar">
+      <name>outputFixedFAVolume</name>
+      <longflag>outputFixedFAVolume</longflag>
+      <label>fixed FA Volume</label>
+      <description>fixed FA Volume</description>
+      <default></default>
+      <channel>output</channel>
+    </image>
+
+    <image type="scalar">
+      <name>outputMovingFAVolume</name>
+      <longflag>outputMovingFAVolume</longflag>
+      <label>moving FA Volume</label>
+      <description>moving FA Volume</description>
+      <default></default>
+      <channel>output</channel>
+    </image>
+
+    <image type="scalar">
+      <name>outputResampledFAVolume</name>
+      <longflag>outputResampledFAVolume</longflag>
+      <label>Resampled FA Volume</label>
+      <description>Resampled FA Volume</description>
+      <default></default>
+      <channel>output</channel>
+    </image>
+  </parameters> 
+
+  <parameters advanced="true">
+    <label>Advanced Histogram matching parameters</label>
+    <description>Advanced Histogram matching parameters</description>
+
+    <integer>
+      <name>numberOfHistogramLevels</name>
+      <longflag>numberOfHistogramLevels</longflag>
+      <description>The number of histogram levels to use</description>
+      <label>Number of Histogram Levels</label>
+      <default>1024</default>
+    </integer>
+
+    <integer>
+      <name>numberOfMatchPoints</name>
+      <longflag>numberOfMatchPoints</longflag>
+      <description>The number of match points to use</description>
+      <label>Number of Match Points</label>
+      <default>50</default>
+    </integer>
+  </parameters> 
+
+</executable>
