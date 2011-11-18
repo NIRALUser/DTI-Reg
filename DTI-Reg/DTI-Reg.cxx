@@ -29,7 +29,7 @@ int main (int argc, char *argv[])
   
   std::vector< std::string > path_vec ;
 
-  std::cout<<"DTI-Reg..."<<std::endl;
+  std::cout<<"DTI-Reg: ";
 
   if( fixedVolume.empty() || movingVolume.empty() )
     {
@@ -42,7 +42,7 @@ int main (int argc, char *argv[])
       std::cout<<"Computational method not implemented yet..."<<std::endl;
       return EXIT_FAILURE;
     }
-  if (!linearRegType.compare("None") && !warpingType.compare("None"))
+  if (!ANTSRegistrationType.compare("None") && !BRAINSRegistrationType.compare("None"))
     {
       std::cout<<"No registration to be performed..."<<std::endl;
       return EXIT_FAILURE;
@@ -67,35 +67,20 @@ int main (int argc, char *argv[])
     file <<"set (movingMaskVolume \'\')"<<std::endl;
 
   file <<"\n# Registration type"<<std::endl;
-  file <<"set (linearRegType "<<linearRegType<<")"<<std::endl;
-  if (!linearRegType.compare("None"))
-    file <<"set (IsLinearRegistration 0)"<<std::endl;
-  else
-    file <<"set (IsLinearRegistration 1)"<<std::endl;
-
-  file <<"set (warpingType "<<warpingType<<")"<<std::endl;
-  if (!warpingType.compare("None") || !warpingType.compare("BSpline"))
-    file <<"set (IsDemonsWarping 0)"<<std::endl;
-  else
-    file <<"set (IsDemonsWarping 1)"<<std::endl;
-  
-  file <<"\n# Registration initialization"<<std::endl;
-    file <<"set (initializeTransformMode "<<initializeTransformMode<<")"<<std::endl;
-  if (initialTransform.compare(""))
-    file <<"set (initialTransform "<<initialTransform<<")"<<std::endl;
-  else
-    file <<"set (initialTransform \'\')"<<std::endl;
-  if (initialDeformationField.compare(""))
-    file <<"set (initialDeformationField "<<initialDeformationField<<")"<<std::endl;
-  else
-    file <<"set (initialDeformationField \'\')"<<std::endl;
+  file <<"set (Method "<<method<<")"<<std::endl;
+  file <<"set (ANTSRegistrationType "<<ANTSRegistrationType<<")"<<std::endl;
+  file <<"set (BRAINSRegistrationType "<<BRAINSRegistrationType<<")"<<std::endl;
 
   file <<"\n# Outputs"<<std::endl;
   if (outputVolume.compare(""))
-  file <<"set (outputVolume "<<outputVolume<<")"<<std::endl;
+    file <<"set (outputVolume "<<outputVolume<<")"<<std::endl;
   else
-    file <<"set (outputVolume \'\')"<<std::endl;
-  
+    file <<"set (outputVolume \'\')"<<std::endl;  
+  if (ANTSOutbase.compare(""))
+    file <<"set (ANTSOutbase "<<ANTSOutbase<<")"<<std::endl;
+  else
+    file <<"set (ANTSOutbase \'\')"<<std::endl;  
+
   if (outputTransform.compare(""))
     file <<"set (outputTransform "<<outputTransform<<")"<<std::endl;
   else
@@ -116,10 +101,33 @@ int main (int argc, char *argv[])
     file <<"set (outputResampledFAVolume "<<outputResampledFAVolume<<")"<<std::endl;
   else
     file <<"set (outputResampledFAVolume \'\')"<<std::endl;
+
   
-  file <<"\n# Advanced Histogram matching parameters"<<std::endl;
+  file <<"\n# BRAINS Registration Parameters"<<std::endl;
+  file <<"set (BRAINSsmoothDefFieldSigma "<<BRAINSsmoothDefFieldSigma<<")"<<std::endl;
+  file <<"set (BRAINSnumberOfPyramidLevels "<<BRAINSnumberOfPyramidLevels<<")"<<std::endl;
+  file <<"set (BRAINSarrayOfPyramidLevelIterations "<<BRAINSarrayOfPyramidLevelIterations<<")"<<std::endl;
+
+  file <<"set (initializeTransformMode "<<initializeTransformMode<<")"<<std::endl;
+  if (initialTransform.compare(""))
+    file <<"set (initialTransform "<<initialTransform<<")"<<std::endl;
+  else
+    file <<"set (initialTransform \'\')"<<std::endl;
+  if (initialDeformationField.compare(""))
+    file <<"set (initialDeformationField "<<initialDeformationField<<")"<<std::endl;
+  else
+    file <<"set (initialDeformationField \'\')"<<std::endl;  
+  file <<"# Histogram matching"<<std::endl;
   file <<"set (numberOfHistogramLevels "<<numberOfHistogramLevels<<")"<<std::endl;
   file <<"set (numberOfMatchPoints "<<numberOfMatchPoints<<")"<<std::endl;
+
+  file <<"\n# ANTS Registration Parameters"<<std::endl;
+  file <<"set (ANTSIterations "<<ANTSIterations<<")"<<std::endl;
+  file <<"set (ANTSSimilarityMetric "<<ANTSSimilarityMetric<<")"<<std::endl;
+  file <<"set (ANTSSimilarityParameter "<<ANTSSimilarityParameter<<")"<<std::endl;
+  file <<"set (ANTSTransformationStep "<<ANTSTransformationStep<<")"<<std::endl;
+  file <<"set (ANTSGaussianSmoothingOff "<<ANTSGaussianSmoothingOff<<")"<<std::endl;
+  file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
 
   file <<"\n#External Tools"<<std::endl;
   std::string dtiprocessCmd = dtiprocessTool;
@@ -127,16 +135,37 @@ int main (int argc, char *argv[])
     return EXIT_FAILURE;
   else
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
+
   std::string BRAINSFitCmd = BRAINSFitTool;
   if( SetPath(BRAINSFitCmd, "BRAINSFit" , path_vec ) )
     return EXIT_FAILURE;
   else
     file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
+
   std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
   if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , path_vec ) )
     return EXIT_FAILURE;
   else
     file <<"set (BRAINSDemonWarpCmd "<<BRAINSDemonWarpCmd<<")"<<std::endl;
+
+  std::string ANTSCmd = ANTSTool;
+  if( SetPath(ANTSCmd, "ANTS" , path_vec ) )
+    return EXIT_FAILURE;
+  else
+    file <<"set (ANTSCmd "<<ANTSCmd<<")"<<std::endl; 
+  
+  std::string WarpImageMultiTransformCmd = WarpImageMultiTransformTool;
+  if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , path_vec ) )
+    return EXIT_FAILURE;
+  else
+    file <<"set (WarpImageMultiTransformCmd "<<WarpImageMultiTransformCmd<<")"<<std::endl; 
+  
+  std::string WarpTensorImageMultiTransformCmd = WarpTensorImageMultiTransformTool;
+  if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , path_vec ) )
+    return EXIT_FAILURE;
+  else
+    file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
+  
   std::string ResampleDTICmd = ResampleDTITool;
   if( SetPath(ResampleDTICmd, "ResampleDTI" , path_vec ) )
     return EXIT_FAILURE;
@@ -145,7 +174,16 @@ int main (int argc, char *argv[])
 
   // Include main BatchMake script
   file <<"\n#Include main batchMake script"<<std::endl;
-  file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar.bms)"<<std::endl;
+  if (!method.compare("useScalar-ANTS"))
+    {
+      std::cout<<"Registration via ANTS..."<<std::endl;
+      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_ANTS.bms)"<<std::endl;
+    }
+  else if (!method.compare("useScalar-BRAINS"))
+    {
+      std::cout<<"Registration via BRAINS..."<<std::endl;
+      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_BRAINS.bms)"<<std::endl;
+    }
 
   file.close();
 

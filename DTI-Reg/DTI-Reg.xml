@@ -4,7 +4,7 @@
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration via two methods: 1)Using FA map to drive the registration 2)Directly registering the tensor images with DTI-TK</description>
   <version>1.0</version>
-  <documentation-url>http://www.nitrc.org/projects/dti-reg/</documentation-url>
+  <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (NIRAL, UNC-Chapel Hill)</contributor>
   <acknowledgements>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</acknowledgements>
@@ -54,7 +54,7 @@
       <default></default>
       <channel>input</channel>
     </image>
-  </parameters> 
+  </parameters>
 
 
   <parameters>
@@ -65,71 +65,42 @@
       <name>method</name>
       <longflag>method</longflag>
       <label>Computational method</label>
-      <description>Method: 1)Use scalar (FA map) to drive the registration 2)Register directly the tensor images with DTI-TK</description>
-      <default>useScalar</default>
-      <element>useScalar</element>
+      <description>Method: 1)Use scalar (FA map) to drive the registration via ANTS or BRAINS 2)Register directly the tensor images with DTI-TK</description>
+      <default>useScalar-ANTS</default>
+      <element>useScalar-ANTS</element>
+      <element>useScalar-BRAINS</element>
       <element>useTensor</element>
     </string-enumeration>
 
     <string-enumeration>
-      <name>linearRegType</name>
-      <longflag>linearRegType</longflag>
-      <label>Linear Registration Type</label>
-      <description>Linear Registration type: None, Rigid, Affine. Each type is initialized with previous stages.</description>
-      <default>Affine</default>
+      <name>ANTSRegistrationType</name>
+      <longflag>ANTSRegistrationType</longflag>
+      <label>ANTS Registration Type</label>
+      <description>ANTS Registration type: None, Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
+      <default>GreedyDiffeo</default>
       <element>None</element>
       <element>Rigid</element>
       <element>Affine</element>
+      <element>GreedyDiffeo</element>
+      <element>SpatioTempDiffeo</element>
     </string-enumeration>
 
     <string-enumeration>
-      <name>warpingType</name>
-      <longflag>warpingType</longflag>
-      <label>Warping Type</label>
-      <description>Warping type: None,BSpline,Diffeomorphic,LogDemons,SymmetricLogDemons</description>
+      <name>BRAINSRegistrationType</name>
+      <longflag>BRAINSRegistrationType</longflag>
+      <label>BRAINS Registration Type</label>
+      <description>BRAINS Registration type: None, Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
       <default>LogDemons</default>
       <element>None</element>
-      <element>BSspline</element>
+      <element>Rigid</element>
+      <element>Affine</element>
+      <element>BSpline</element>
       <element>Diffeomorphic</element>
       <element>Demons</element>
       <element>LogDemons</element>
       <element>SymmetricLogDemons</element>
     </string-enumeration>
-  </parameters> 
-
-  <parameters>
-    <label>Registration initialization</label>
-    <description>Registration initialization</description>
-
-    <string-enumeration>
-      <name>initializeTransformMode</name>
-      <longflag>initializeTransformMode</longflag>
-      <label>Intitialize Transform Mode</label>
-      <description>Determine how to initialize the transform center. GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures.  MomentsAlign assumes that the center of mass of the images represent similar structures.  useCenterOfHeadAlign attempts to use the top of head and shape of neck to drive a center of mass estimate.  Off assumes that the physical space of the images are close, and that centering in terms of the image Origins is a good starting point.  This flag is mutually exclusive with the initialTransform flag.</description>
-      <default>useCenterOfHeadAlign</default>
-      <element>Off</element>
-      <element>useMomentsAlign</element>
-      <element>useCenterOfHeadAlign</element>
-      <element>useGeometryAlign</element>
-    </string-enumeration>  
-
-    <transform fileExtensions=".txt">
-      <name>initialTransform</name>
-      <longflag>initialTransform</longflag>
-      <label>Initial transformation file</label>
-      <description>Filename of transform used to initialize the registration.  This CAN NOT be used with initializeTransformMode option.</description>
-      <channel>input</channel>
-    </transform>
-
-    <transform fileExtensions=".nrrd" type="nonlinear">
-      <name>initialDeformationField</name>
-      <longflag>initialDeformationField</longflag>
-      <description>Initial deformation field vector image file</description>
-      <label>Initial Deformation Field Volume</label>
-      <channel>input</channel>
-    </transform>
-  </parameters> 
-
+  </parameters>
 
   <parameters>
     <label>Outputs</label>
@@ -144,10 +115,19 @@
       <channel>output</channel>
     </image>
 
+    <string type="tensor">
+      <name>ANTSOutbase</name>
+      <longflag>ANTSOutbase</longflag>
+      <label>Outbase for ANTS</label>
+      <description>Outbase for ANTS, used for transform and deformationField (default: moving FA map prefix)</description>
+      <default></default>
+      <channel>output</channel>
+    </string>
+
     <transform fileExtensions=".txt">
       <name>outputTransform</name>
       <longflag>outputTransform</longflag>
-      <description>Output Transformation File</description>
+      <description>Output Transformation File (Text file) -for BRAINS-</description>
       <label>Output Transform File</label>
       <channel>output</channel>
     </transform>
@@ -155,7 +135,7 @@
     <transform fileExtensions=".nrrd" type="nonlinear" reference="movingVolume">
       <name>outputDeformationFieldVolume</name>
       <longflag alias="output_field">outputDeformationFieldVolume</longflag>
-      <description>Output deformation field vector image (will have the same physical space as the fixedVolume).</description>
+      <description>Output deformation field vector image -for BRAINS-</description>
       <label>Output Deformation Field Volume</label>
       <channel>output</channel>
     </transform>
@@ -188,11 +168,120 @@
     </image>
   </parameters> 
 
+
   <parameters advanced="true">
-    <label>Advanced Histogram matching parameters</label>
-    <description>Advanced Histogram matching parameters</description>
+    <label>ANTS registration parameters</label>
+    <description>ANTS registration parameters</description>
+
+    <string>
+      <name>ANTSIterations</name>
+      <longflag>ANTSIterations</longflag>
+      <label>ANTS Iterations</label>
+      <description>ANTS Iterations for diffeomorphism</description>
+      <default>100x50x25</default>
+    </string>
+
+    <string-enumeration>
+      <name>ANTSSimilarityMetric</name>
+      <longflag>ANTSSimilarityMetric</longflag>
+      <label>ANTS Similarity Metric</label>
+      <description>ANTS Similarity Metric type: CC=Cross-Correlation, MI=Mutual Information, MSQ=Mean Square Difference</description>
+      <default>CC</default>
+      <element>CC</element>
+      <element>MI</element>
+      <element>MSQ</element>
+    </string-enumeration>
+
+    <float>
+      <name>ANTSSimilarityParameter</name>
+      <longflag>ANTSSimilarityParameter</longflag>
+      <label>ANTS Similarity Parameter</label>
+      <description>ANTS Similarity Parameter (e.g Region Radius for CC -default 2-, numbers of bins for MI -advised default 32-...)</description>
+      <default>2</default>
+    </float>
+
+    <string>
+      <name>ANTSTransformationStep</name>
+      <longflag>ANTSTransformationStep</longflag>
+      <label>ANTS TransformationStep</label>
+      <description>Diffeomorphic gradient descent step length. Examples: 1)Greedy Diffeomorphism: default=0.25.  2)SpatioTemporal diffeomorphism: advised default=0.25,5,0.01)</description>
+      <default>0.25</default>
+    </string>
+
+    <boolean>
+      <name>ANTSGaussianSmoothingOff</name>
+      <longflag>ANTSGaussianSmoothingOff</longflag>
+      <label>ANTS Gaussian Smoothing Off</label>
+      <description>ANTS Gaussian Smoothing Off</description>
+      <default>false</default>
+    </boolean>
+
+    <float>
+      <name>ANTSGaussianSigma</name>
+      <longflag>ANTSGaussianSigma</longflag>
+      <label>ANTS Gaussian Sigma</label>
+      <description>ANTS Gaussian Sigma</description>
+      <default>3.0</default>
+    </float>
+  </parameters> 
+
+  <parameters advanced="true">
+    <label>BRAINS registration parameters</label>
+    <description>BRAINS registration parameters</description>
+
+    <string-enumeration>
+      <name>initializeTransformMode</name>
+      <longflag>initializeTransformMode</longflag>
+      <label>Intitialize Transform Mode</label>
+      <description>Determine how to initialize the transform center. GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures.  MomentsAlign assumes that the center of mass of the images represent similar structures.  useCenterOfHeadAlign attempts to use the top of head and shape of neck to drive a center of mass estimate.  Off assumes that the physical space of the images are close, and that centering in terms of the image Origins is a good starting point.  This flag is mutually exclusive with the initialTransform flag.</description>
+      <default>useCenterOfHeadAlign</default>
+      <element>Off</element>
+      <element>useMomentsAlign</element>
+      <element>useCenterOfHeadAlign</element>
+      <element>useGeometryAlign</element>
+    </string-enumeration>  
+
+    <transform fileExtensions=".txt">
+      <name>initialTransform</name>
+      <longflag>initialTransform</longflag>
+      <label>Initial transformation file</label>
+      <description>Filename of transform used to initialize the registration.  This CAN NOT be used with initializeTransformMode option.</description>
+      <channel>input</channel>
+    </transform>
+
+    <transform fileExtensions=".nrrd" type="nonlinear">
+      <name>initialDeformationField</name>
+      <longflag>initialDeformationField</longflag>
+      <description>Initial deformation field vector image file</description>
+      <label>Initial Deformation Field Volume</label>
+      <channel>input</channel>
+    </transform>
+
+    <double>
+      <name>BRAINSsmoothDefFieldSigma</name>
+      <longflag>BRAINSSmoothDefFieldSigma</longflag>
+      <label>Deformation field smoothing sigma</label>
+      <description>A gaussian smoothing value to be applied to the deformation field at each iteration.</description>
+      <default>1.0</default>
+    </double>
 
     <integer>
+      <name>BRAINSnumberOfPyramidLevels</name>
+      <longflag>BRAINSnumberOfPyramidLevels</longflag>
+      <label>Pyramid Levels</label>
+      <description>Number of image pyramid levels to use in the multi-resolution registration.</description>
+      <default>5</default>
+    </integer>
+
+    <string>
+      <name>BRAINSarrayOfPyramidLevelIterations</name>
+      <longflag alias="number_iterations">BRAINSarrayOfPyramidLevelIterations</longflag>
+      <description>The number of iterations for each pyramid level</description>
+      <label>the iteration count for each pyramid level</label>
+      <default>300,50,30,20,15</default>
+    </string>
+
+   <integer>
       <name>numberOfHistogramLevels</name>
       <longflag>numberOfHistogramLevels</longflag>
       <description>The number of histogram levels to use</description>
@@ -208,5 +297,4 @@
       <default>50</default>
     </integer>
   </parameters> 
-
 </executable>
