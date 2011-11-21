@@ -65,11 +65,10 @@
       <name>method</name>
       <longflag>method</longflag>
       <label>Computational method</label>
-      <description>Method: 1)Use scalar (FA map) to drive the registration via ANTS or BRAINS 2)Register directly the tensor images with DTI-TK</description>
+      <description>Use scalar FA map to drive the registration via: Method 1)ANTS or Method 2)BRAINS</description>
       <default>useScalar-ANTS</default>
       <element>useScalar-ANTS</element>
       <element>useScalar-BRAINS</element>
-      <element>useTensor</element>
     </string-enumeration>
 
     <string-enumeration>
@@ -119,7 +118,7 @@
       <name>ANTSOutbase</name>
       <longflag>ANTSOutbase</longflag>
       <label>Outbase for ANTS</label>
-      <description>Outbase for ANTS, used for transform and deformationField (default: moving FA map prefix)</description>
+      <description>Outbase for ANTS, used for transform and deformationField output prefix (default: moving FA map prefix)</description>
       <default></default>
       <channel>output</channel>
     </string>
@@ -230,8 +229,8 @@
     <description>BRAINS registration parameters</description>
 
     <string-enumeration>
-      <name>initializeTransformMode</name>
-      <longflag>initializeTransformMode</longflag>
+      <name>BRAINSinitializeTransformMode</name>
+      <longflag>BRAINSinitializeTransformMode</longflag>
       <label>Intitialize Transform Mode</label>
       <description>Determine how to initialize the transform center. GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures.  MomentsAlign assumes that the center of mass of the images represent similar structures.  useCenterOfHeadAlign attempts to use the top of head and shape of neck to drive a center of mass estimate.  Off assumes that the physical space of the images are close, and that centering in terms of the image Origins is a good starting point.  This flag is mutually exclusive with the initialTransform flag.</description>
       <default>useCenterOfHeadAlign</default>
@@ -242,16 +241,16 @@
     </string-enumeration>  
 
     <transform fileExtensions=".txt">
-      <name>initialTransform</name>
-      <longflag>initialTransform</longflag>
+      <name>BRAINSinitialTransform</name>
+      <longflag>BRAINSinitialTransform</longflag>
       <label>Initial transformation file</label>
       <description>Filename of transform used to initialize the registration.  This CAN NOT be used with initializeTransformMode option.</description>
       <channel>input</channel>
     </transform>
 
     <transform fileExtensions=".nrrd" type="nonlinear">
-      <name>initialDeformationField</name>
-      <longflag>initialDeformationField</longflag>
+      <name>BRAINSinitialDeformationField</name>
+      <longflag>BRAINSinitialDeformationField</longflag>
       <description>Initial deformation field vector image file</description>
       <label>Initial Deformation Field Volume</label>
       <channel>input</channel>
@@ -282,15 +281,15 @@
     </string>
 
    <integer>
-      <name>numberOfHistogramLevels</name>
-      <longflag>numberOfHistogramLevels</longflag>
+      <name>BRAINSnumberOfHistogramLevels</name>
+      <longflag>BRAINSnumberOfHistogramLevels</longflag>
       <description>The number of histogram levels to use</description>
       <label>Number of Histogram Levels</label>
       <default>1024</default>
     </integer>
 
     <integer>
-      <name>numberOfMatchPoints</name>
+      <name>BRAINSnumberOfMatchPoints</name>
       <longflag>numberOfMatchPoints</longflag>
       <description>The number of match points to use</description>
       <label>Number of Match Points</label>

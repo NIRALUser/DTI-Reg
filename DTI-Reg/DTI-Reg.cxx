@@ -11,7 +11,7 @@
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  path_vec )
 {
-  if( pathString.empty() || !pathString.substr(pathString.size() - 10 , 9 ).compare( "-NOTFOUND" ) )
+  if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
   {
     pathString= itksys::SystemTools::FindProgram( name , path_vec ) ;
     if( !pathString.compare( "" ) )
@@ -33,15 +33,10 @@ int main (int argc, char *argv[])
 
   if( fixedVolume.empty() || movingVolume.empty() )
     {
-      std::cerr << "Error: Fixed and moving volumes must be set!" << std::endl ;
+      std::cerr << "Error: Fixed and moving volumes must be set!" << std::endl;
       std::cerr << "To display help, please type: DTI-Reg --help"<<std::endl;
       return EXIT_FAILURE ;
-    }  
-  if (!method.compare("useTensor"))
-    {
-      std::cout<<"Computational method not implemented yet..."<<std::endl;
-      return EXIT_FAILURE;
-    }
+     }
   if (!ANTSRegistrationType.compare("None") && !BRAINSRegistrationType.compare("None"))
     {
       std::cout<<"No registration to be performed..."<<std::endl;
@@ -102,69 +97,75 @@ int main (int argc, char *argv[])
   else
     file <<"set (outputResampledFAVolume \'\')"<<std::endl;
 
+   if (!method.compare("useScalar-BRAINS"))
+     {
+       file <<"\n# BRAINS Registration Parameters"<<std::endl;
+       file <<"set (BRAINSsmoothDefFieldSigma "<<BRAINSsmoothDefFieldSigma<<")"<<std::endl;
+       file <<"set (BRAINSnumberOfPyramidLevels "<<BRAINSnumberOfPyramidLevels<<")"<<std::endl;
+       file <<"set (BRAINSarrayOfPyramidLevelIterations "<<BRAINSarrayOfPyramidLevelIterations<<")"<<std::endl;
+       
+       file <<"set (BRAINSinitializeTransformMode "<<BRAINSinitializeTransformMode<<")"<<std::endl;
+       if (BRAINSinitialTransform.compare(""))
+	 file <<"set (BRAINSinitialTransform "<<BRAINSinitialTransform<<")"<<std::endl;
+       else
+	 file <<"set (BRAINSinitialTransform \'\')"<<std::endl;
+       if (BRAINSinitialDeformationField.compare(""))
+	 file <<"set (BRAINSinitialDeformationField "<<BRAINSinitialDeformationField<<")"<<std::endl;
+       else
+	 file <<"set (BRAINSinitialDeformationField \'\')"<<std::endl;  
+       file <<"# Histogram matching"<<std::endl;
+       file <<"set (BRAINSnumberOfHistogramLevels "<<BRAINSnumberOfHistogramLevels<<")"<<std::endl;
+       file <<"set (BRAINSnumberOfMatchPoints "<<BRAINSnumberOfMatchPoints<<")"<<std::endl;
+       
+       file <<"\n#External Tools"<<std::endl;
+       std::string BRAINSFitCmd = BRAINSFitTool;
+       if( SetPath(BRAINSFitCmd, "BRAINSFit" , path_vec ) )
+	 return EXIT_FAILURE;
+       else
+	 file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
+       
+       std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
+       if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , path_vec ) )
+	 return EXIT_FAILURE;
+       else
+	 file <<"set (BRAINSDemonWarpCmd "<<BRAINSDemonWarpCmd<<")"<<std::endl;  
+     }
+
+  if (!method.compare("useScalar-ANTS"))
+    {
+      file <<"\n# ANTS Registration Parameters"<<std::endl;
+      file <<"set (ANTSIterations "<<ANTSIterations<<")"<<std::endl;
+      file <<"set (ANTSSimilarityMetric "<<ANTSSimilarityMetric<<")"<<std::endl;
+      file <<"set (ANTSSimilarityParameter "<<ANTSSimilarityParameter<<")"<<std::endl;
+      file <<"set (ANTSTransformationStep "<<ANTSTransformationStep<<")"<<std::endl;
+      file <<"set (ANTSGaussianSmoothingOff "<<ANTSGaussianSmoothingOff<<")"<<std::endl;
+      file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
+      
+      file <<"\n#External Tools"<<std::endl;
+      std::string ANTSCmd = ANTSTool;
+      if( SetPath(ANTSCmd, "ANTS" , path_vec ) )
+	return EXIT_FAILURE;
+      else
+	file <<"set (ANTSCmd "<<ANTSCmd<<")"<<std::endl; 
+      
+      std::string WarpImageMultiTransformCmd = WarpImageMultiTransformTool;
+      if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , path_vec ) )
+	return EXIT_FAILURE;
+      else
+	file <<"set (WarpImageMultiTransformCmd "<<WarpImageMultiTransformCmd<<")"<<std::endl; 
+      
+      std::string WarpTensorImageMultiTransformCmd = WarpTensorImageMultiTransformTool;
+      if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , path_vec ) )
+	return EXIT_FAILURE;
+      else
+	file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
+    }
   
-  file <<"\n# BRAINS Registration Parameters"<<std::endl;
-  file <<"set (BRAINSsmoothDefFieldSigma "<<BRAINSsmoothDefFieldSigma<<")"<<std::endl;
-  file <<"set (BRAINSnumberOfPyramidLevels "<<BRAINSnumberOfPyramidLevels<<")"<<std::endl;
-  file <<"set (BRAINSarrayOfPyramidLevelIterations "<<BRAINSarrayOfPyramidLevelIterations<<")"<<std::endl;
-
-  file <<"set (initializeTransformMode "<<initializeTransformMode<<")"<<std::endl;
-  if (initialTransform.compare(""))
-    file <<"set (initialTransform "<<initialTransform<<")"<<std::endl;
-  else
-    file <<"set (initialTransform \'\')"<<std::endl;
-  if (initialDeformationField.compare(""))
-    file <<"set (initialDeformationField "<<initialDeformationField<<")"<<std::endl;
-  else
-    file <<"set (initialDeformationField \'\')"<<std::endl;  
-  file <<"# Histogram matching"<<std::endl;
-  file <<"set (numberOfHistogramLevels "<<numberOfHistogramLevels<<")"<<std::endl;
-  file <<"set (numberOfMatchPoints "<<numberOfMatchPoints<<")"<<std::endl;
-
-  file <<"\n# ANTS Registration Parameters"<<std::endl;
-  file <<"set (ANTSIterations "<<ANTSIterations<<")"<<std::endl;
-  file <<"set (ANTSSimilarityMetric "<<ANTSSimilarityMetric<<")"<<std::endl;
-  file <<"set (ANTSSimilarityParameter "<<ANTSSimilarityParameter<<")"<<std::endl;
-  file <<"set (ANTSTransformationStep "<<ANTSTransformationStep<<")"<<std::endl;
-  file <<"set (ANTSGaussianSmoothingOff "<<ANTSGaussianSmoothingOff<<")"<<std::endl;
-  file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
-
-  file <<"\n#External Tools"<<std::endl;
   std::string dtiprocessCmd = dtiprocessTool;
   if( SetPath(dtiprocessCmd, "dtiprocess" , path_vec ) )
     return EXIT_FAILURE;
   else
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
-
-  std::string BRAINSFitCmd = BRAINSFitTool;
-  if( SetPath(BRAINSFitCmd, "BRAINSFit" , path_vec ) )
-    return EXIT_FAILURE;
-  else
-    file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
-
-  std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
-  if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , path_vec ) )
-    return EXIT_FAILURE;
-  else
-    file <<"set (BRAINSDemonWarpCmd "<<BRAINSDemonWarpCmd<<")"<<std::endl;
-
-  std::string ANTSCmd = ANTSTool;
-  if( SetPath(ANTSCmd, "ANTS" , path_vec ) )
-    return EXIT_FAILURE;
-  else
-    file <<"set (ANTSCmd "<<ANTSCmd<<")"<<std::endl; 
-  
-  std::string WarpImageMultiTransformCmd = WarpImageMultiTransformTool;
-  if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , path_vec ) )
-    return EXIT_FAILURE;
-  else
-    file <<"set (WarpImageMultiTransformCmd "<<WarpImageMultiTransformCmd<<")"<<std::endl; 
-  
-  std::string WarpTensorImageMultiTransformCmd = WarpTensorImageMultiTransformTool;
-  if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , path_vec ) )
-    return EXIT_FAILURE;
-  else
-    file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
   
   std::string ResampleDTICmd = ResampleDTITool;
   if( SetPath(ResampleDTICmd, "ResampleDTI" , path_vec ) )
