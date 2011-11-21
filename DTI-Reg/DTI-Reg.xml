@@ -3,7 +3,7 @@
   <category>Diffusion.Utilities</category>
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration via two methods: 1)Using FA map to drive the registration 2)Directly registering the tensor images with DTI-TK</description>
-  <version>1.0</version>
+  <version>1.1</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (NIRAL, UNC-Chapel Hill)</contributor>
