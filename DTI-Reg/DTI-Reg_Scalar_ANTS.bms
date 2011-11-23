@@ -140,7 +140,7 @@ If (${outputTransform} != '')
   echo('Copying Transform file...')
   CopyFile(${Transform} ${outputTransform})
   DeleteFile(${Transform})
-EndIf (${outputTransform}
+EndIf (${outputTransform})
 
 If (${outputDeformationFieldVolume} != '')
   echo()
