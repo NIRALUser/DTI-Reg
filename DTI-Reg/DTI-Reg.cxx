@@ -71,19 +71,7 @@ int main (int argc, char *argv[])
     file <<"set (outputVolume "<<outputVolume<<")"<<std::endl;
   else
     file <<"set (outputVolume \'\')"<<std::endl;  
-  if (ANTSOutbase.compare(""))
-    file <<"set (ANTSOutbase "<<ANTSOutbase<<")"<<std::endl;
-  else
-    file <<"set (ANTSOutbase \'\')"<<std::endl;  
 
-  if (outputTransform.compare(""))
-    file <<"set (outputTransform "<<outputTransform<<")"<<std::endl;
-  else
-    file <<"set (outputTransform \'\')"<<std::endl;
-  if (outputDeformationFieldVolume.compare(""))
-    file <<"set (outputDeformationFieldVolume "<<outputDeformationFieldVolume<<")"<<std::endl;
-  else
-    file <<"set (outputDeformationFieldVolume \'\')"<<std::endl;
   if (outputFixedFAVolume.compare(""))
     file <<"set (outputFixedFAVolume "<<outputFixedFAVolume<<")"<<std::endl;
   else
@@ -97,6 +85,15 @@ int main (int argc, char *argv[])
   else
     file <<"set (outputResampledFAVolume \'\')"<<std::endl;
 
+  if (outputTransform.compare(""))
+    file <<"set (outputTransform "<<outputTransform<<")"<<std::endl;
+  else
+    file <<"set (outputTransform \'\')"<<std::endl;
+  if (outputDeformationFieldVolume.compare(""))
+    file <<"set (outputDeformationFieldVolume "<<outputDeformationFieldVolume<<")"<<std::endl;
+  else
+    file <<"set (outputDeformationFieldVolume \'\')"<<std::endl;
+  
    if (!method.compare("useScalar-BRAINS"))
      {
        file <<"\n# BRAINS Registration Parameters"<<std::endl;
@@ -133,6 +130,11 @@ int main (int argc, char *argv[])
 
   if (!method.compare("useScalar-ANTS"))
     {
+      if (ANTSOutbase.compare(""))
+	file <<"set (ANTSOutbase "<<ANTSOutbase<<")"<<std::endl;
+      else
+	file <<"set (ANTSOutbase \'\')"<<std::endl;  
+      
       file <<"\n# ANTS Registration Parameters"<<std::endl;
       file <<"set (ANTSIterations "<<ANTSIterations<<")"<<std::endl;
       file <<"set (ANTSSimilarityMetric "<<ANTSSimilarityMetric<<")"<<std::endl;

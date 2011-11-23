@@ -61,7 +61,7 @@ set (DeformationField '')
     set(IsWarping 0)
   EndIf()
 
-  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedFAMap},${fixedFAMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase})
+  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedFAMap},${movingFAMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase})
 
   If (${ANTSRegistrationType} == 'Affine')
     set (commandANTS ${commandANTS} -i 0)
@@ -98,6 +98,8 @@ set (DeformationField ${ANTSOutbase}Warp.nii.gz)
 
 # Applying deformation to FA map
 If (${outputResampledFAVolume} != '')
+  echo()
+  echo('FA resampling...')
   set (commandWarpImageMultiTransform ${WarpImageMultiTransformCmd} 3 ${movingFAMap} ${outputResampledFAVolume} -R ${outputFixedFAVolume})
   If(${IsWarping} == 1)
     set (commandWarpImageMultiTransform ${commandWarpImageMultiTransform} ${DeformationField} ${Transform})
@@ -118,11 +120,7 @@ echo('DTI resampling...')
 If (${outputVolume} != '')
   set (ResampledDTI ${outputVolume})
 Else(${outputVolume})
-  If (${ANTSOutbase} == '')
     set (ResampledDTI ${OutputDir}/${movingVolumeHead}_warp.nrrd)
-  Else(${ANTSOutbase})
-    set (ResampledDTI ${OutputDir}/${ANTSOutbase}warp.nrrd)
-  Endif(${ANTSOutbase})
 EndIf(${outputVolume})
 
 set (commandWarpTensorImageMultiTransform ${WarpTensorImageMultiTransformCmd} 3 ${movingVolume} ${ResampledDTI} -R ${fixedVolume})
@@ -136,6 +134,20 @@ If(${errorWarpTensorImageMultiTransform} != '')
   echo('Error WarpTensorImageMultiTransform: ' ${errorWarpTensorImageMultiTransform})
   exit()
 Endif(${errorWarpTensorImageMultiTransform})
+
+If (${outputTransform} != '')
+  echo()
+  echo('Copying Transform file...')
+  CopyFile(${Transform} ${outputTransform})
+  DeleteFile(${Transform})
+EndIf (${outputTransform}
+
+If (${outputDeformationFieldVolume} != '')
+  echo()
+  echo('Copying deformation field...')
+  CopyFile(${DeformationField} ${outputDeformationFieldVolume})
+  DeleteFile(${DeformationField})
+EndIf(${outputDeformationFieldVolume})
 
 #Delete temporary files
 If (${outputFixedFAVolume} == '')

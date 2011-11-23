@@ -2,8 +2,8 @@
 <executable>
   <category>Diffusion.Utilities</category>
   <title>DTI-Reg</title>
-  <description>DTI-Reg performs pair-wise DTI registration via two methods: 1)Using FA map to drive the registration 2)Directly registering the tensor images with DTI-TK</description>
-  <version>1.1</version>
+  <description>DTI-Reg performs pair-wise DTI registration, using FA maps to drive the registration</description>
+  <version>1.1.1</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (NIRAL, UNC-Chapel Hill)</contributor>
@@ -65,23 +65,10 @@
       <name>method</name>
       <longflag>method</longflag>
       <label>Computational method</label>
-      <description>Use scalar FA map to drive the registration via: Method 1)ANTS or Method 2)BRAINS</description>
-      <default>useScalar-ANTS</default>
-      <element>useScalar-ANTS</element>
+      <description>Use scalar FA map to drive the registration via: Method 1)BRAINS -BRAINSFit/BRAINSDemonWarp-  or Method 2)ANTS</description>
+      <default>useScalar-BRAINS</default>
       <element>useScalar-BRAINS</element>
-    </string-enumeration>
-
-    <string-enumeration>
-      <name>ANTSRegistrationType</name>
-      <longflag>ANTSRegistrationType</longflag>
-      <label>ANTS Registration Type</label>
-      <description>ANTS Registration type: None, Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
-      <default>GreedyDiffeo</default>
-      <element>None</element>
-      <element>Rigid</element>
-      <element>Affine</element>
-      <element>GreedyDiffeo</element>
-      <element>SpatioTempDiffeo</element>
+      <element>useScalar-ANTS</element>
     </string-enumeration>
 
     <string-enumeration>
@@ -99,6 +86,19 @@
       <element>LogDemons</element>
       <element>SymmetricLogDemons</element>
     </string-enumeration>
+
+    <string-enumeration>
+      <name>ANTSRegistrationType</name>
+      <longflag>ANTSRegistrationType</longflag>
+      <label>ANTS Registration Type</label>
+      <description>ANTS Registration type: None, Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
+      <default>GreedyDiffeo</default>
+      <element>None</element>
+      <element>Rigid</element>
+      <element>Affine</element>
+      <element>GreedyDiffeo</element>
+      <element>SpatioTempDiffeo</element>
+    </string-enumeration>
   </parameters>
 
   <parameters>
@@ -114,11 +114,11 @@
       <channel>output</channel>
     </image>
 
-    <string type="tensor">
+    <string>
       <name>ANTSOutbase</name>
       <longflag>ANTSOutbase</longflag>
       <label>Outbase for ANTS</label>
-      <description>Outbase for ANTS, used for transform and deformationField output prefix (default: moving FA map prefix)</description>
+      <description>Prefix for ANTS linear transformation and deformation field output files (default outbase: moving FA map prefix). Transform file is named "ANTSOutbase"Affine.txt and deformationfield is named "ANTSOutbase"Warp.nii.gz (default ANTS naming convention)</description>
       <default></default>
       <channel>output</channel>
     </string>
@@ -126,18 +126,20 @@
     <transform fileExtensions=".txt">
       <name>outputTransform</name>
       <longflag>outputTransform</longflag>
-      <description>Output Transformation File (Text file) -for BRAINS-</description>
-      <label>Output Transform File</label>
+      <description>Output Transformation File (Text file)</description>
+      <label>Output Transform File for BRAINS</label>
+      <default></default>
       <channel>output</channel>
     </transform>
 
-    <transform fileExtensions=".nrrd" type="nonlinear" reference="movingVolume">
+    <image type="vector">
       <name>outputDeformationFieldVolume</name>
       <longflag alias="output_field">outputDeformationFieldVolume</longflag>
-      <description>Output deformation field vector image -for BRAINS-</description>
+      <description>Output deformation field vector image</description>
       <label>Output Deformation Field Volume</label>
+      <default></default>
       <channel>output</channel>
-    </transform>
+    </image>
 
     <image type="scalar">
       <name>outputFixedFAVolume</name>
@@ -165,63 +167,6 @@
       <default></default>
       <channel>output</channel>
     </image>
-  </parameters> 
-
-
-  <parameters advanced="true">
-    <label>ANTS registration parameters</label>
-    <description>ANTS registration parameters</description>
-
-    <string>
-      <name>ANTSIterations</name>
-      <longflag>ANTSIterations</longflag>
-      <label>ANTS Iterations</label>
-      <description>ANTS Iterations for diffeomorphism</description>
-      <default>100x50x25</default>
-    </string>
-
-    <string-enumeration>
-      <name>ANTSSimilarityMetric</name>
-      <longflag>ANTSSimilarityMetric</longflag>
-      <label>ANTS Similarity Metric</label>
-      <description>ANTS Similarity Metric type: CC=Cross-Correlation, MI=Mutual Information, MSQ=Mean Square Difference</description>
-      <default>CC</default>
-      <element>CC</element>
-      <element>MI</element>
-      <element>MSQ</element>
-    </string-enumeration>
-
-    <float>
-      <name>ANTSSimilarityParameter</name>
-      <longflag>ANTSSimilarityParameter</longflag>
-      <label>ANTS Similarity Parameter</label>
-      <description>ANTS Similarity Parameter (e.g Region Radius for CC -default 2-, numbers of bins for MI -advised default 32-...)</description>
-      <default>2</default>
-    </float>
-
-    <string>
-      <name>ANTSTransformationStep</name>
-      <longflag>ANTSTransformationStep</longflag>
-      <label>ANTS TransformationStep</label>
-      <description>Diffeomorphic gradient descent step length. Examples: 1)Greedy Diffeomorphism: default=0.25.  2)SpatioTemporal diffeomorphism: advised default=0.25,5,0.01)</description>
-      <default>0.25</default>
-    </string>
-
-    <boolean>
-      <name>ANTSGaussianSmoothingOff</name>
-      <longflag>ANTSGaussianSmoothingOff</longflag>
-      <label>ANTS Gaussian Smoothing Off</label>
-      <description>ANTS Gaussian Smoothing Off</description>
-      <default>false</default>
-    </boolean>
-
-    <float>
-      <name>ANTSGaussianSigma</name>
-      <longflag>ANTSGaussianSigma</longflag>
-      <label>ANTS Gaussian Sigma</label>
-      <description>ANTS Gaussian Sigma</description>
-      <default>3.0</default>
-    </float>
   </parameters> 
 
   <parameters advanced="true">
@@ -296,4 +241,61 @@
       <default>50</default>
     </integer>
   </parameters> 
+
+  <parameters advanced="true">
+    <label>ANTS registration parameters</label>
+    <description>ANTS registration parameters</description>
+
+    <string>
+      <name>ANTSIterations</name>
+      <longflag>ANTSIterations</longflag>
+      <label>ANTS Iterations</label>
+      <description>ANTS Iterations for diffeomorphism</description>
+      <default>100x50x25</default>
+    </string>
+
+    <string-enumeration>
+      <name>ANTSSimilarityMetric</name>
+      <longflag>ANTSSimilarityMetric</longflag>
+      <label>ANTS Similarity Metric</label>
+      <description>ANTS Similarity Metric type: CC=Cross-Correlation, MI=Mutual Information, MSQ=Mean Square Difference</description>
+      <default>CC</default>
+      <element>CC</element>
+      <element>MI</element>
+      <element>MSQ</element>
+    </string-enumeration>
+
+    <float>
+      <name>ANTSSimilarityParameter</name>
+      <longflag>ANTSSimilarityParameter</longflag>
+      <label>ANTS Similarity Parameter</label>
+      <description>ANTS Similarity Parameter (e.g Region Radius for CC -default 2-, numbers of bins for MI -advised default 32-...)</description>
+      <default>2</default>
+    </float>
+
+    <string>
+      <name>ANTSTransformationStep</name>
+      <longflag>ANTSTransformationStep</longflag>
+      <label>ANTS TransformationStep</label>
+      <description>Diffeomorphic gradient descent step length. Examples: 1)Greedy Diffeomorphism: default=0.25.  2)SpatioTemporal diffeomorphism: advised default=0.25,5,0.01)</description>
+      <default>0.25</default>
+    </string>
+
+    <boolean>
+      <name>ANTSGaussianSmoothingOff</name>
+      <longflag>ANTSGaussianSmoothingOff</longflag>
+      <label>ANTS Gaussian Smoothing Off</label>
+      <description>ANTS Gaussian Smoothing Off</description>
+      <default>false</default>
+    </boolean>
+
+    <float>
+      <name>ANTSGaussianSigma</name>
+      <longflag>ANTSGaussianSigma</longflag>
+      <label>ANTS Gaussian Sigma</label>
+      <description>ANTS Gaussian Sigma</description>
+      <default>3.0</default>
+    </float>
+  </parameters> 
+
 </executable>
