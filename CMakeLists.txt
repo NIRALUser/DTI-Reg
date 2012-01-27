@@ -83,7 +83,8 @@ ExternalProject_Add(${proj}
     -DBRAINSFitTOOL:PATH=${BRAINSFitTOOL}
     -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
     -DResampleDTITOOL:PATH=${ResampleDTITOOL}
-    -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
+    -DDiffusionTensorMathematicsTOOL:PATH=${DiffusionTensorMathematicsTOOL}
+    -DMaskTOOL:PATH=${MaskTOOL}
     -DFIND_TOOLS:BOOL=ON
   INSTALL_COMMAND ""
 )

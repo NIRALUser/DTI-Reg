@@ -1,5 +1,6 @@
 #define ScriptDir "@EXECUTABLE_OUTPUT_PATH@"
-#define dtiprocessTool "@dtiprocessTOOL@"
+#define DiffusionTensorMathematicsTool "@DiffusionTensorMathematicsTOOL@"
+#define MaskTool "@MaskTOOL@"
 #define BRAINSFitTool "@BRAINSFitTOOL@"
 #define BRAINSDemonWarpTool "@BRAINSDemonWarpTOOL@"
 #define ANTSTool "@ANTSTOOL@"

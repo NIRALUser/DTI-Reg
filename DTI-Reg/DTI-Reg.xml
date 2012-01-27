@@ -56,7 +56,6 @@
     </image>
   </parameters>
 
-
   <parameters>
     <label>Registration type</label>
     <description>Registration type</description>
@@ -76,15 +75,14 @@
       <longflag>BRAINSRegistrationType</longflag>
       <label>BRAINS Registration Type</label>
       <description>BRAINS Registration type: None, Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
-      <default>LogDemons</default>
+      <default>Demons</default>
       <element>None</element>
       <element>Rigid</element>
       <element>Affine</element>
       <element>BSpline</element>
       <element>Diffeomorphic</element>
+      <element>FastSymmetricForces</element>
       <element>Demons</element>
-      <element>LogDemons</element>
-      <element>SymmetricLogDemons</element>
     </string-enumeration>
 
     <string-enumeration>
@@ -178,7 +176,7 @@
       <longflag>BRAINSinitializeTransformMode</longflag>
       <label>Intitialize Transform Mode</label>
       <description>Determine how to initialize the transform center. GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures.  MomentsAlign assumes that the center of mass of the images represent similar structures.  useCenterOfHeadAlign attempts to use the top of head and shape of neck to drive a center of mass estimate.  Off assumes that the physical space of the images are close, and that centering in terms of the image Origins is a good starting point.  This flag is mutually exclusive with the initialTransform flag.</description>
-      <default>useCenterOfHeadAlign</default>
+      <default>Off</default>
       <element>Off</element>
       <element>useMomentsAlign</element>
       <element>useCenterOfHeadAlign</element>

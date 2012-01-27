@@ -163,17 +163,23 @@ int main (int argc, char *argv[])
 	file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
     }
   
-  std::string dtiprocessCmd = dtiprocessTool;
-  if( SetPath(dtiprocessCmd, "dtiprocess" , path_vec ) )
+  std::string DiffusionTensorMathematicsCmd = DiffusionTensorMathematicsTool;
+  if( SetPath(DiffusionTensorMathematicsCmd, "DiffusionTensorMathematics" , path_vec ) )
     return EXIT_FAILURE;
   else
-    file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
+    file <<"set (DiffusionTensorMathematicsCmd "<<DiffusionTensorMathematicsCmd<<")"<<std::endl;
   
   std::string ResampleDTICmd = ResampleDTITool;
   if( SetPath(ResampleDTICmd, "ResampleDTI" , path_vec ) )
     return EXIT_FAILURE;
   else
     file <<"set (ResampleDTICmd "<<ResampleDTICmd<<")"<<std::endl;
+
+  std::string MaskCmd = MaskTool;
+  if( SetPath(MaskCmd, "Mask" , path_vec ) )
+    return EXIT_FAILURE;
+  else
+    file <<"set (MaskCmd "<<MaskCmd<<")"<<std::endl;
 
   // Include main BatchMake script
   file <<"\n#Include main batchMake script"<<std::endl;
