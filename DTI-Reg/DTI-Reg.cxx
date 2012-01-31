@@ -401,9 +401,9 @@ int main (int argc, char *argv[])
     file <<"  set (Transform ${OutputDir}/${movingVolumeHead}_FA_${RegSuffix}.txt)"<<std::endl;
     file <<"Endif(${outputTransform})"<<std::endl;
     file <<"If (${BRAINSinitialTransform} != '')"<<std::endl;
-    file <<"  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initialTransform ${BRAINSinitialTransform} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)"<<std::endl;
+    file <<"  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initialTransform ${BRAINSinitialTransform} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType float --transformType ${TransformType} --interpolationMode Linear)"<<std::endl;
     file <<"Else(${BRAINSinitialTransform})"<<std::endl;
-    file <<"  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initializeTransformMode ${BRAINSinitializeTransformMode} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)"<<std::endl;
+    file <<"  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initializeTransformMode ${BRAINSinitializeTransformMode} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType float --transformType ${TransformType} --interpolationMode Linear)"<<std::endl;
     file <<"Endif(${BRAINSinitialTransform})"<<std::endl;
     file <<"Run (outputBRAINSFit ${commandBRAINSFit} errorBRAINSFit)"<<std::endl;
     file <<"If(${errorBRAINSFit} != '')"<<std::endl;
@@ -428,7 +428,7 @@ int main (int argc, char *argv[])
     file <<"  Else(${outputDeformationFieldVolume})"<<std::endl;
     file <<"    set (DeformationField ${OutputDir}/${movingVolumeHead}_FA_warpfield.nrrd)"<<std::endl;
     file <<"  EndIf(${outputDeformationFieldVolume})"<<std::endl;
-    file <<"  set (commandBRAINSDemonWarp ${BRAINSDemonWarpCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --outputVolume ${ResampledFAMap} --outputDisplacementFieldVolume ${DeformationField} --outputPixelType ushort --interpolationMode Linear --registrationFilterType ${BRAINSRegistrationType} --histogramMatch --numberOfHistogramBins ${BRAINSnumberOfHistogramLevels} --numberOfMatchPoints ${BRAINSnumberOfMatchPoints} --initializeWithTransform ${Transform} --smoothDisplacementFieldSigma ${BRAINSsmoothDefFieldSigma} --numberOfPyramidLevels ${BRAINSnumberOfPyramidLevels} --arrayOfPyramidLevelIterations ${BRAINSarrayOfPyramidLevelIterations})"<<std::endl;
+    file <<"  set (commandBRAINSDemonWarp ${BRAINSDemonWarpCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --outputVolume ${ResampledFAMap} --outputDisplacementFieldVolume ${DeformationField} --outputPixelType float --interpolationMode Linear --registrationFilterType ${BRAINSRegistrationType} --histogramMatch --numberOfHistogramBins ${BRAINSnumberOfHistogramLevels} --numberOfMatchPoints ${BRAINSnumberOfMatchPoints} --initializeWithTransform ${Transform} --smoothDisplacementFieldSigma ${BRAINSsmoothDefFieldSigma} --numberOfPyramidLevels ${BRAINSnumberOfPyramidLevels} --arrayOfPyramidLevelIterations ${BRAINSarrayOfPyramidLevelIterations})"<<std::endl;
     file <<"  "<<std::endl;
     file <<"  If (${BRAINSinitialDeformationField} != '')"<<std::endl;
     file <<"    set (commandBRAINSDemonWarp ${commandBRAINSDemonWarp} --initializeWithDisplacementField ${BRAINSinitialDeformationField})"<<std::endl;
