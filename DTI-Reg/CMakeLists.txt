@@ -46,7 +46,10 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
 
 set(DTIReg_SOURCE DTI-Reg.cxx)
 GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
-link_directories(/scratch/kent/dtiprep/build/lib)
+
+if(DTIReg_ADDITIONAL_LINK_DIRS)
+link_directories(${DTIReg_ADDITIONAL_LINK_DIRS})
+endif()
 
 add_executable( DTI-Reg ${DTIReg_SOURCE} )
 target_link_libraries(DTI-Reg BatchMakeLib)
