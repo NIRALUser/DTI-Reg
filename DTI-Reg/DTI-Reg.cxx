@@ -2,23 +2,19 @@
 #include <fstream>
 
 #include <itksys/SystemTools.hxx>
-
+#include "DTI-Reg_Config.h"
 #include <bmScriptParser.h>
 
 #include "DTI-RegCLP.h"
-#include "DTI-Reg_Config.h"
 
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  path_vec )
 {
-  if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
+  pathString= itksys::SystemTools::FindProgram( name , path_vec ) ;
+  if( !pathString.compare( "" ) )
   {
-    pathString= itksys::SystemTools::FindProgram( name , path_vec ) ;
-    if( !pathString.compare( "" ) )
-    {
-      std::cerr << name << " is missing or its PATH is not set" << std::endl ;
-      return -1 ;
-    }
+    std::cerr << name << " is missing or its PATH is not set" << std::endl ;
+    return -1 ;
   }
   return 0 ;
 }
@@ -28,6 +24,17 @@ int main (int argc, char *argv[])
   PARSE_ARGS;
   
   std::vector< std::string > path_vec ;
+  path_vec.push_back( "." ) ;
+  path_vec.push_back( ScriptDir ) ;
+  std::string currentDir = itksys::SystemTools::GetCurrentWorkingDirectory( false ) ;
+  currentDir += argv[ 0 ] ;
+  itksys::SystemTools::ConvertToUnixSlashes( currentDir ) ;
+  size_t pos = currentDir.rfind('/');
+  if( pos > 0 && pos < currentDir.size() )
+  {
+    currentDir.resize( pos ) ;
+    path_vec.push_back( currentDir ) ;
+  }
 
   std::cout<<"DTI-Reg: ";
 
@@ -115,13 +122,13 @@ int main (int argc, char *argv[])
        file <<"set (BRAINSnumberOfMatchPoints "<<BRAINSnumberOfMatchPoints<<")"<<std::endl;
        
        file <<"\n#External Tools"<<std::endl;
-       std::string BRAINSFitCmd = BRAINSFitTool;
+       std::string BRAINSFitCmd ;
        if( SetPath(BRAINSFitCmd, "BRAINSFit" , path_vec ) )
 	 return EXIT_FAILURE;
        else
 	 file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
        
-       std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
+       std::string BRAINSDemonWarpCmd ;
        if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , path_vec ) )
 	 return EXIT_FAILURE;
        else
@@ -144,48 +151,59 @@ int main (int argc, char *argv[])
       file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
       
       file <<"\n#External Tools"<<std::endl;
-      std::string ANTSCmd = ANTSTool;
+      std::string ANTSCmd ;
       if( SetPath(ANTSCmd, "ANTS" , path_vec ) )
 	return EXIT_FAILURE;
       else
 	file <<"set (ANTSCmd "<<ANTSCmd<<")"<<std::endl; 
       
-      std::string WarpImageMultiTransformCmd = WarpImageMultiTransformTool;
+      std::string WarpImageMultiTransformCmd ;
       if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , path_vec ) )
 	return EXIT_FAILURE;
       else
 	file <<"set (WarpImageMultiTransformCmd "<<WarpImageMultiTransformCmd<<")"<<std::endl; 
       
-      std::string WarpTensorImageMultiTransformCmd = WarpTensorImageMultiTransformTool;
+      std::string WarpTensorImageMultiTransformCmd ;
       if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , path_vec ) )
 	return EXIT_FAILURE;
       else
 	file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
     }
   
-  std::string dtiprocessCmd = dtiprocessTool;
+  std::string dtiprocessCmd ;
   if( SetPath(dtiprocessCmd, "dtiprocess" , path_vec ) )
     return EXIT_FAILURE;
   else
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
   
-  std::string ResampleDTICmd = ResampleDTITool;
+  std::string ResampleDTICmd ;
   if( SetPath(ResampleDTICmd, "ResampleDTI" , path_vec ) )
     return EXIT_FAILURE;
   else
     file <<"set (ResampleDTICmd "<<ResampleDTICmd<<")"<<std::endl;
 
+  //find scripts paths
+  std::string DTI-Reg_Scalar_ANTSCmd ;
+  if( SetPath(DTI-Reg_Scalar_ANTSCmd, "DTI-Reg_Scalar_ANTS.bms" , path_vec ) )
+  {
+    return EXIT_FAILURE ;
+  }
+  std::string DTI-Reg_Scalar_BRAINSCmd ;
+  if( SetPath(DTI-Reg_Scalar_BRAINSCmd, "DTI-Reg_Scalar_BRAINS.bms" , path_vec ) )
+  {
+    return EXIT_FAILURE ;
+  }
   // Include main BatchMake script
   file <<"\n#Include main batchMake script"<<std::endl;
   if (!method.compare("useScalar-ANTS"))
     {
       std::cout<<"Registration via ANTS..."<<std::endl;
-      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_ANTS.bms)"<<std::endl;
+      file <<"include("<<DTI-Reg_Scalar_ANTSCmd<<")"<<std::endl;
     }
   else if (!method.compare("useScalar-BRAINS"))
     {
       std::cout<<"Registration via BRAINS..."<<std::endl;
-      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_BRAINS.bms)"<<std::endl;
+      file <<"include("<<DTI-Reg_Scalar_BRAINSCmd<<")"<<std::endl;
     }
 
   file.close();

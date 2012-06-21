@@ -1,8 +1,2 @@
 #define ScriptDir "@EXECUTABLE_OUTPUT_PATH@"
-#define dtiprocessTool "@dtiprocessTOOL@"
-#define BRAINSFitTool "@BRAINSFitTOOL@"
-#define BRAINSDemonWarpTool "@BRAINSDemonWarpTOOL@"
-#define ANTSTool "@ANTSTOOL@"
-#define WarpImageMultiTransformTool "@WARPIMAGEMULTITRANSFORMTOOL@"
-#define WarpTensorImageMultiTransformTool "@WARPTENSORIMAGEMULTITRANSFORMTOOL@"
-#define ResampleDTITool "@ResampleDTITOOL@"
+
