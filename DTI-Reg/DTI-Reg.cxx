@@ -50,6 +50,10 @@ int main (int argc, char *argv[])
   file <<"# Inputs"<<std::endl;
   file <<"set (fixedVolume "<<fixedVolume<<")"<<std::endl;
   file <<"set (movingVolume "<<movingVolume<<")"<<std::endl;
+  if (initialAffine.compare(""))
+    file <<"set (initialAffine "<<initialAffine<<")"<<std::endl;
+  else
+    file <<"set (initialAffine \'\')"<<std::endl;
 
   file <<"\n# Optional input mask volumes"<<std::endl;
   if (fixedMaskVolume.compare(""))
@@ -102,11 +106,7 @@ int main (int argc, char *argv[])
        file <<"set (BRAINSarrayOfPyramidLevelIterations "<<BRAINSarrayOfPyramidLevelIterations<<")"<<std::endl;
        
        file <<"set (BRAINSinitializeTransformMode "<<BRAINSinitializeTransformMode<<")"<<std::endl;
-       if (BRAINSinitialTransform.compare(""))
-	 file <<"set (BRAINSinitialTransform "<<BRAINSinitialTransform<<")"<<std::endl;
-       else
-	 file <<"set (BRAINSinitialTransform \'\')"<<std::endl;
-       if (BRAINSinitialDeformationField.compare(""))
+        if (BRAINSinitialDeformationField.compare(""))
 	 file <<"set (BRAINSinitialDeformationField "<<BRAINSinitialDeformationField<<")"<<std::endl;
        else
 	 file <<"set (BRAINSinitialDeformationField \'\')"<<std::endl;  

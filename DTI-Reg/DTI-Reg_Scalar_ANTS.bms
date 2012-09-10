@@ -63,6 +63,10 @@ set (DeformationField '')
 
   set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedFAMap},${movingFAMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase})
 
+  If (${initialAffine} != '')
+    set (commandANTS ${commandANTS} -a ${initialAffine})
+  EndIf(${initialAffine})
+
   If (${ANTSRegistrationType} == 'Affine')
     set (commandANTS ${commandANTS} -i 0)
   EndIf(${ANTSRegistrationType})
@@ -79,10 +83,22 @@ set (DeformationField '')
   EndIf(${ANTSRegistrationType})
 
   If (${ANTSRegistrationType} == 'SpatioTempDiffeo')
-    set (commandANTS ${commandANTS} -i ${ANTSIterations} -t SyN[${ANTSTransformationStep})
+    set (commandANTS ${commandANTS} -i ${ANTSIterations} -t SyN[${ANTSTransformationStep}])
     If (${ANTSGaussianSmoothingOff} == 0)
       set (commandANTS ${commandANTS} -r Gauss[${ANTSGaussianSigma},0.5])
     EndIf(${ANTSGaussianSmoothingOff})
+  EndIf(${ANTSRegistrationType})
+
+  If (${ANTSRegistrationType} == 'Elast')
+    set (commandANTS ${commandANTS} -i ${ANTSIterations} -t Elast)
+  EndIf(${ANTSRegistrationType})
+
+  If (${ANTSRegistrationType} == 'Exp')
+    set (commandANTS ${commandANTS} -i ${ANTSIterations} -t Exp[${ANTSTransformationStep},5])
+  EndIf(${ANTSRegistrationType})
+
+  If (${ANTSRegistrationType} == 'GreedyExp')
+    set (commandANTS ${commandANTS} -i ${ANTSIterations} -t GreedyExp)
   EndIf(${ANTSRegistrationType})
 
   Run (outputANTS ${commandANTS} errorANTS)

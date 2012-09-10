@@ -31,6 +31,14 @@
       <channel>input</channel>
     </image>
 
+    <transform fileExtensions=".txt">
+      <name>initialAffine</name>
+      <longflag>initialAffine</longflag>
+      <label>Initial transformation file</label>
+      <description>Filename of transform used to initialize the registration. If BRAINS used, this CAN NOT be used with initializeTransformMode option.</description>
+      <channel>input</channel>
+    </transform>
+
   </parameters> 
 
   <parameters>
@@ -96,6 +104,9 @@
       <element>None</element>
       <element>Rigid</element>
       <element>Affine</element>
+      <element>Elast</element>
+      <element>Exp</element>
+      <element>GreedyExp</element>
       <element>GreedyDiffeo</element>
       <element>SpatioTempDiffeo</element>
     </string-enumeration>
@@ -184,14 +195,6 @@
       <element>useCenterOfHeadAlign</element>
       <element>useGeometryAlign</element>
     </string-enumeration>  
-
-    <transform fileExtensions=".txt">
-      <name>BRAINSinitialTransform</name>
-      <longflag>BRAINSinitialTransform</longflag>
-      <label>Initial transformation file</label>
-      <description>Filename of transform used to initialize the registration.  This CAN NOT be used with initializeTransformMode option.</description>
-      <channel>input</channel>
-    </transform>
 
     <transform fileExtensions=".nrrd" type="nonlinear">
       <name>BRAINSinitialDeformationField</name>
