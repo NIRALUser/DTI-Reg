@@ -84,15 +84,14 @@
       <longflag>BRAINSRegistrationType</longflag>
       <label>BRAINS Registration Type</label>
       <description>BRAINS Registration type: None, Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
-      <default>LogDemons</default>
+      <default>Diffeomorphic</default>
       <element>None</element>
       <element>Rigid</element>
       <element>Affine</element>
       <element>BSpline</element>
       <element>Diffeomorphic</element>
       <element>Demons</element>
-      <element>LogDemons</element>
-      <element>SymmetricLogDemons</element>
+      <element>FastSymmetricForces</element>
     </string-enumeration>
 
     <string-enumeration>
