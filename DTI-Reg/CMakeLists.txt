@@ -52,5 +52,5 @@ link_directories(${DTIReg_ADDITIONAL_LINK_DIRS})
 endif()
 
 add_executable( DTI-Reg ${DTIReg_SOURCE} )
-target_link_libraries(DTI-Reg BatchMakeLib)
+target_link_libraries(DTI-Reg ${ITK_LIBRARIES} BatchMakeLib) #  /tools/ITK/ITKv4.1.0/ITKv4.1.0_v3Compatible_linux64/lib/cmake/ITK-4.1/
 
