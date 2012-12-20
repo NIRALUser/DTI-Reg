@@ -6,14 +6,15 @@
 #include <bmScriptParser.h>
 
 #include "DTI-RegCLP.h"
-#include "DTI-Reg_Config.h"
+//#include "DTI-Reg_Config.h"
+#include "DTI-Reg-bms.h"
 
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  path_vec )
 {
   if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
   {
-    pathString= itksys::SystemTools::FindProgram( name , path_vec ) ;
+    pathString= itksys::SystemTools::FindProgram( name , path_vec ) ; // will look in the PATH first AND then in the extra path "path_vec"
     if( !pathString.compare( "" ) )
     {
       std::cerr << name << " is missing or its PATH is not set" << std::endl ;
@@ -28,6 +29,12 @@ int main (int argc, char *argv[])
   PARSE_ARGS;
   
   std::vector< std::string > path_vec ;
+
+  // Added by Adrien Kaiser : the tools are either in the same directory than the DTI-Reg executable ran or in the PATH
+  // Get the directory where the DTI-Reg executable is
+  std::string RanCommandDirectory = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(argv[0]).c_str() );
+  // Add it in the path_vec
+  path_vec.push_back(RanCommandDirectory);
 
   std::cout<<"DTI-Reg: ";
 
@@ -144,7 +151,7 @@ int main (int argc, char *argv[])
       file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
       
       file <<"\n#External Tools"<<std::endl;
-      std::string ANTSCmd = ANTSTool;
+      std::string ANTSCmd ;//= ANTSTool;
       if( SetPath(ANTSCmd, "ANTS" , path_vec ) )
 	return EXIT_FAILURE;
       else
@@ -180,12 +187,14 @@ int main (int argc, char *argv[])
   if (!method.compare("useScalar-ANTS"))
     {
       std::cout<<"Registration via ANTS..."<<std::endl;
-      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_ANTS.bms)"<<std::endl;
+//      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_ANTS.bms)"<<std::endl;
+      file <<DTIReg_Scalar_ANTS<<std::endl; // Added by Adrien Kaiser : String variable defined in DTI-Reg-bms.h that contains the bms script for ANTS
     }
   else if (!method.compare("useScalar-BRAINS"))
     {
       std::cout<<"Registration via BRAINS..."<<std::endl;
-      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_BRAINS.bms)"<<std::endl;
+//      file <<"include("<<ScriptDir<<"/DTI-Reg_Scalar_BRAINS.bms)"<<std::endl;
+      file <<DTIReg_Scalar_BRAINS<<std::endl; // Added by Adrien Kaiser : String variable defined in DTI-Reg-bms.h that contains the bms script for BRAINS
     }
 
   file.close();

@@ -38,13 +38,13 @@ ELSE (Slicer3_FOUND)
   endif(GenerateCLP_FOUND)
 ENDIF (Slicer3_FOUND)
 
-FILE( GLOB list_files ${CMAKE_CURRENT_SOURCE_DIR}/*.bms )
-FILE( COPY ${list_files} DESTINATION ${EXECUTABLE_OUTPUT_PATH} )
+#FILE( GLOB list_files ${CMAKE_CURRENT_SOURCE_DIR}/*.bms ) # Included in code in DTI-Reg-bms.h
+#FILE( COPY ${list_files} DESTINATION ${EXECUTABLE_OUTPUT_PATH} )
 
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
-      "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
+#configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
+ #     "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
 
-set(DTIReg_SOURCE DTI-Reg.cxx)
+set(DTIReg_SOURCE DTI-Reg.cxx DTI-Reg-bms.h)
 GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
 
 if(DTIReg_ADDITIONAL_LINK_DIRS)
