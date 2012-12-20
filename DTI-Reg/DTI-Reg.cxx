@@ -6,7 +6,7 @@
 #include <bmScriptParser.h>
 
 #include "DTI-RegCLP.h"
-//#include "DTI-Reg_Config.h"
+#include "DTI-Reg_Config.h"
 #include "DTI-Reg-bms.h"
 
 
@@ -33,6 +33,7 @@ int main (int argc, char *argv[])
   // Added by Adrien Kaiser : the tools are either in the same directory than the DTI-Reg executable ran or in the PATH
   // Get the directory where the DTI-Reg executable is
   std::string RanCommandDirectory = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(argv[0]).c_str() );
+  if(RanCommandDirectory=="") RanCommandDirectory="."; // If called by itself = either in the PATH or in the current directory : will be found either way by find_program
   // Add it in the path_vec
   path_vec.push_back(RanCommandDirectory);
 

@@ -38,11 +38,11 @@ ELSE (Slicer3_FOUND)
   endif(GenerateCLP_FOUND)
 ENDIF (Slicer3_FOUND)
 
-#FILE( GLOB list_files ${CMAKE_CURRENT_SOURCE_DIR}/*.bms ) # Included in code in DTI-Reg-bms.h
+#FILE( GLOB list_files ${CMAKE_CURRENT_SOURCE_DIR}/*.bms )         # Included in code in DTI-Reg-bms.h
 #FILE( COPY ${list_files} DESTINATION ${EXECUTABLE_OUTPUT_PATH} )
 
-#configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
- #     "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
 
 set(DTIReg_SOURCE DTI-Reg.cxx DTI-Reg-bms.h)
 GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
@@ -52,5 +52,5 @@ link_directories(${DTIReg_ADDITIONAL_LINK_DIRS})
 endif()
 
 add_executable( DTI-Reg ${DTIReg_SOURCE} )
-target_link_libraries(DTI-Reg ${ITK_LIBRARIES} BatchMakeLib) #  /tools/ITK/ITKv4.1.0/ITKv4.1.0_v3Compatible_linux64/lib/cmake/ITK-4.1/
+target_link_libraries(DTI-Reg ${ITK_LIBRARIES} BatchMakeLib)
 
