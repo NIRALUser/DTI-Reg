@@ -10,6 +10,17 @@
   <acknowledgements>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</acknowledgements>
 
   <parameters>
+    <label>Paths</label>
+    <description>Programs Paths</description>
+    <string-vector>
+      <name>ProgramsPathsVector</name>
+      <longflag>ProgramsPathsVector</longflag>
+      <label>Programs Paths Vector</label>
+      <description>Vector containing paths where we can find needed programs</description>
+    </string-vector>
+  </parameters> 
+
+  <parameters>
     <label>Inputs</label>
     <description>Input volumes</description>
 

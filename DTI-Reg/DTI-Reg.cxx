@@ -10,11 +10,11 @@
 #include "DTI-Reg-bms.h"
 
 
-int SetPath( std::string &pathString , const char* name , std::vector< std::string >  path_vec )
+int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector )
 {
   if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
   {
-    pathString= itksys::SystemTools::FindProgram( name , path_vec ) ; // will look in the PATH first AND then in the extra path "path_vec"
+    pathString= itksys::SystemTools::FindProgram( name , ProgramsPathsVector ) ; // will look in the PATH first AND then in the extra path "ProgramsPathsVector"
     if( !pathString.compare( "" ) )
     {
       std::cerr << name << " is missing or its PATH is not set" << std::endl ;
@@ -27,15 +27,15 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
 int main (int argc, char *argv[])
 {
   PARSE_ARGS;
-  
-  std::vector< std::string > path_vec ;
+
+//  std::vector< std::string > path_vec ; // initialized by the cmd line vector ProgramsPathsVector
 
   // Added by Adrien Kaiser : the tools are either in the same directory than the DTI-Reg executable ran or in the PATH
   // Get the directory where the DTI-Reg executable is
   std::string RanCommandDirectory = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(argv[0]).c_str() );
   if(RanCommandDirectory=="") RanCommandDirectory="."; // If called by itself = either in the PATH or in the current directory : will be found either way by find_program
-  // Add it in the path_vec
-  path_vec.push_back(RanCommandDirectory);
+  // Add it in the ProgramsPathsVector
+  ProgramsPathsVector.push_back(RanCommandDirectory);
 
   std::cout<<"DTI-Reg: ";
 
@@ -124,13 +124,13 @@ int main (int argc, char *argv[])
        
        file <<"\n#External Tools"<<std::endl;
        std::string BRAINSFitCmd = BRAINSFitTool;
-       if( SetPath(BRAINSFitCmd, "BRAINSFit" , path_vec ) )
+       if( SetPath(BRAINSFitCmd, "BRAINSFit" , ProgramsPathsVector ) )
 	 return EXIT_FAILURE;
        else
 	 file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
        
        std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
-       if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , path_vec ) )
+       if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , ProgramsPathsVector ) )
 	 return EXIT_FAILURE;
        else
 	 file <<"set (BRAINSDemonWarpCmd "<<BRAINSDemonWarpCmd<<")"<<std::endl;  
@@ -153,32 +153,32 @@ int main (int argc, char *argv[])
       
       file <<"\n#External Tools"<<std::endl;
       std::string ANTSCmd ;//= ANTSTool;
-      if( SetPath(ANTSCmd, "ANTS" , path_vec ) )
+      if( SetPath(ANTSCmd, "ANTS" , ProgramsPathsVector ) )
 	return EXIT_FAILURE;
       else
 	file <<"set (ANTSCmd "<<ANTSCmd<<")"<<std::endl; 
       
       std::string WarpImageMultiTransformCmd = WarpImageMultiTransformTool;
-      if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , path_vec ) )
+      if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , ProgramsPathsVector ) )
 	return EXIT_FAILURE;
       else
 	file <<"set (WarpImageMultiTransformCmd "<<WarpImageMultiTransformCmd<<")"<<std::endl; 
       
       std::string WarpTensorImageMultiTransformCmd = WarpTensorImageMultiTransformTool;
-      if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , path_vec ) )
+      if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , ProgramsPathsVector ) )
 	return EXIT_FAILURE;
       else
 	file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
     }
   
   std::string dtiprocessCmd = dtiprocessTool;
-  if( SetPath(dtiprocessCmd, "dtiprocess" , path_vec ) )
+  if( SetPath(dtiprocessCmd, "dtiprocess" , ProgramsPathsVector ) )
     return EXIT_FAILURE;
   else
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
   
   std::string ResampleDTICmd = ResampleDTITool;
-  if( SetPath(ResampleDTICmd, "ResampleDTI" , path_vec ) )
+  if( SetPath(ResampleDTICmd, "ResampleDTI" , ProgramsPathsVector ) )
     return EXIT_FAILURE;
   else
     file <<"set (ResampleDTICmd "<<ResampleDTICmd<<")"<<std::endl;
