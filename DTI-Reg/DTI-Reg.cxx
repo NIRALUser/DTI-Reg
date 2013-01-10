@@ -10,7 +10,7 @@
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  path_vec )
 {
-  pathString= itksys::SystemTools::FindProgram( name , path_vec ) ;
+  pathString= itksys::SystemTools::FindProgram( name , path_vec ) ; // will look in the PATH AND in the extra path "path_vec"
   if( !pathString.compare( "" ) )
   {
     std::cerr << name << " is missing or its PATH is not set" << std::endl ;
