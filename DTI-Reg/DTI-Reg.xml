@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
-  <category>Diffusion.Utilities</category>
+  <category>Diffusion.Diffusion Tensor Images</category>
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration, using FA maps to drive the registration</description>
   <version>1.1.2</version>
@@ -213,14 +213,6 @@
       <label>Initial Deformation Field Volume</label>
       <channel>input</channel>
     </transform>
-
-    <double>
-      <name>BRAINSsmoothDefFieldSigma</name>
-      <longflag>BRAINSSmoothDefFieldSigma</longflag>
-      <label>Deformation field smoothing sigma</label>
-      <description>A gaussian smoothing value to be applied to the deformation field at each iteration.</description>
-      <default>1.0</default>
-    </double>
 
     <integer>
       <name>BRAINSnumberOfPyramidLevels</name>

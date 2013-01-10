@@ -290,7 +290,7 @@ If (${IsDemonsWarping} == 1)\n\
   Else(${outputDeformationFieldVolume})\n\
     set (DeformationField ${OutputDir}/${movingVolumeHead}_FA_warpfield.nrrd)\n\
   EndIf(${outputDeformationFieldVolume})\n\
-  set (commandBRAINSDemonWarp ${BRAINSDemonWarpCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --outputVolume ${ResampledFAMap} --outputDeformationFieldVolume ${DeformationField} --outputPixelType ushort --interpolationMode Linear --registrationFilterType ${BRAINSRegistrationType} --histogramMatch --numberOfHistogramBins ${BRAINSnumberOfHistogramLevels} --numberOfMatchPoints ${BRAINSnumberOfMatchPoints} --initializeWithTransform ${Transform} --smoothDeformationFieldSigma ${BRAINSsmoothDefFieldSigma} --numberOfPyramidLevels ${BRAINSnumberOfPyramidLevels} --arrayOfPyramidLevelIterations ${BRAINSarrayOfPyramidLevelIterations})\n\
+  set (commandBRAINSDemonWarp ${BRAINSDemonWarpCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --outputVolume ${ResampledFAMap} --outputDeformationFieldVolume ${DeformationField} --outputPixelType ushort --interpolationMode Linear --registrationFilterType ${BRAINSRegistrationType} --histogramMatch --numberOfHistogramBins ${BRAINSnumberOfHistogramLevels} --numberOfMatchPoints ${BRAINSnumberOfMatchPoints} --initializeWithTransform ${Transform} --numberOfPyramidLevels ${BRAINSnumberOfPyramidLevels} --arrayOfPyramidLevelIterations ${BRAINSarrayOfPyramidLevelIterations})\n\
   \n\
   If (${BRAINSinitialDeformationField} != '')\n\
     set (commandBRAINSDemonWarp ${commandBRAINSDemonWarp} --initializeWithDeformationField ${BRAINSinitialDeformationField})\n\

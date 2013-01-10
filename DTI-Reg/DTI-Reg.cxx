@@ -12,6 +12,11 @@
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector )
 {
+  if(!pathString.empty()) // has been set to the value in the cmake cache -< check that it exists
+  {
+    if(access(pathString.c_str(), X_OK)!=0 ) pathString = ""; // if not executable, empty it so it can be found by FindProgram()
+  }
+
   if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
   {
     pathString= itksys::SystemTools::FindProgram( name , ProgramsPathsVector ) ; // will look in the PATH first AND then in the extra path "ProgramsPathsVector"
@@ -21,6 +26,7 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
       return -1 ;
     }
   }
+
   return 0 ;
 }
 
@@ -109,7 +115,6 @@ int main (int argc, char *argv[])
    if (!method.compare("useScalar-BRAINS"))
      {
        file <<"\n# BRAINS Registration Parameters"<<std::endl;
-       file <<"set (BRAINSsmoothDefFieldSigma "<<BRAINSsmoothDefFieldSigma<<")"<<std::endl;
        file <<"set (BRAINSnumberOfPyramidLevels "<<BRAINSnumberOfPyramidLevels<<")"<<std::endl;
        file <<"set (BRAINSarrayOfPyramidLevelIterations "<<BRAINSarrayOfPyramidLevelIterations<<")"<<std::endl;
        
@@ -152,7 +157,7 @@ int main (int argc, char *argv[])
       file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
       
       file <<"\n#External Tools"<<std::endl;
-      std::string ANTSCmd ;//= ANTSTool;
+      std::string ANTSCmd = ANTSTool;
       if( SetPath(ANTSCmd, "ANTS" , ProgramsPathsVector ) )
 	return EXIT_FAILURE;
       else
@@ -199,7 +204,6 @@ int main (int argc, char *argv[])
     }
 
   file.close();
-
 
   // Execute BatchMake
   bm::ScriptParser m_Parser;
