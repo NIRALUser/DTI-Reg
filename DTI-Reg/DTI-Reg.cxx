@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdlib.h> // for access()
 
 #include <itksys/SystemTools.hxx>
 
@@ -183,7 +184,7 @@ int main (int argc, char *argv[])
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
   
   std::string ResampleDTICmd = ResampleDTITool;
-  if( SetPath(ResampleDTICmd, "ResampleDTI" , ProgramsPathsVector ) )
+  if( SetPath(ResampleDTICmd, "ResampleDTIlogEuclidean" , ProgramsPathsVector ) )
     return EXIT_FAILURE;
   else
     file <<"set (ResampleDTICmd "<<ResampleDTICmd<<")"<<std::endl;
