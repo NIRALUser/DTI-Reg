@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <stdlib.h> // for access()
+#include <stdlib.h>
 
 #include <itksys/SystemTools.hxx>
 
@@ -15,7 +15,8 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
 {
   if(!pathString.empty()) // has been set to the value in the cmake cache -< check that it exists
   {
-    if(access(pathString.c_str(), X_OK)!=0 ) pathString = ""; // if not executable, empty it so it can be found by FindProgram()
+    mode_t ITKmode_X_OK = 1;
+    if(! itksys::SystemTools::GetPermissions(pathString.c_str(), ITKmode_X_OK)) pathString = ""; // if not executable, empty it so it can be found by FindProgram()
   }
 
   if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
