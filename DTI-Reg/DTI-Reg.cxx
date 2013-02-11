@@ -45,6 +45,15 @@ int main (int argc, char *argv[])
   // Add it in the ProgramsPathsVector
   ProgramsPathsVector.push_back(RanCommandDirectory);
 
+  // If DTI-Reg is a Slicer Extension in the DTIAtlasBuilder package, give the path to the folder containing external non cli tools
+  // If no SicerExtension, find_program will just search there and find nothing -> not an issue
+  std::string LinuxWindowsExternalBinDir = RanCommandDirectory + "/../../../ExternalBin"; // On linux or windows, the executable will be in Ext/lib/Slicer4.2/cli_modules and the tools will be in Ext/ExternalBin
+  std::string MacExternalBinDir = RanCommandDirectory + "/../ExternalBin"; // On mac, the executable will be in Ext/cli_modules and the tools will be in Ext/ExternalBin
+  ProgramsPathsVector.push_back(LinuxWindowsExternalBinDir);
+  ProgramsPathsVector.push_back(MacExternalBinDir);
+
+// for(int i=0;i<ProgramsPathsVector.size();i++) std::cout<<ProgramsPathsVector[i]<<std::endl;
+
   std::cout<<"DTI-Reg: ";
 
   if( fixedVolume.empty() || movingVolume.empty() )
