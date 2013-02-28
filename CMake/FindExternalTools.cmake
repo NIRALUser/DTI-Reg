@@ -19,7 +19,6 @@ endmacro( FindSlicerToolsMacro )
 
 FindSlicerToolsMacro( BRAINSFitTOOL BRAINSFit )
 FindSlicerToolsMacro( BRAINSDemonWarpTOOL BRAINSDemonWarp )
-FindSlicerToolsMacro( ResampleDTITOOL ResampleDTI )
 
 macro( FindDtiExecutableMacro path name extra)
   find_program( ${path} ${name} )
@@ -82,6 +81,8 @@ macro( FindToolMacro path name )
         message( WARNING "${name} not found. Its path is not set" )
   endif(NOT ${path} )
 endmacro( FindToolMacro )
+
 FindToolMacro(ANTSTOOL ANTS)
 FindToolMacro(WARPIMAGEMULTITRANSFORMTOOL WarpImageMultiTransform)
 FindToolMacro(WARPTENSORIMAGEMULTITRANSFORMTOOL WarpTensorImageMultiTransform)
+FindToolMacro(ResampleDTIlogEuclideanTOOL ResampleDTIlogEuclidean)
