@@ -170,8 +170,10 @@ macro(PACKAGE_NEEDS_BatchMake gen)
   else(OPT_USE_SYSTEM_BatchMake)
     set(proj BatchMake)
     ExternalProject_Add(${proj}
-    CVS_REPOSITORY ":pserver:anoncvs:@batchmake.org:/cvsroot/BatchMake"
-    CVS_MODULE "BatchMake"
+    GIT_REPOSITORY git://batchmake.org/BatchMake.git
+    GIT_TAG "8addbdb62f0135ba01ffe12ddfc32121b6d66ef5"
+#    CVS_REPOSITORY ":pserver:anoncvs:@batchmake.org:/cvsroot/BatchMake"
+#    CVS_MODULE "BatchMake"
     SOURCE_DIR BatchMake
     BINARY_DIR BatchMake-build
     CMAKE_GENERATOR ${gen}
