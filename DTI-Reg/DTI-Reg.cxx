@@ -107,9 +107,9 @@ int main (int argc, char *argv[])
   if ( outputVolume.compare("") ) // outputVolume NON empty
     outputDir = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(outputVolume).c_str() );
   else
-    outputDir = "";
+    outputDir = ".";
 
-  std::string BatchMakeScriptFile = outputDir + "/DTI-Reg.bms";
+  std::string BatchMakeScriptFile = outputDir + "/" + itksys::SystemTools::GetFilenameWithoutExtension(outputVolume) + "_DTI-Reg.bms";
   std::ofstream file( BatchMakeScriptFile.c_str());
 
   file <<"# Inputs"<<std::endl;
@@ -236,7 +236,7 @@ int main (int argc, char *argv[])
       else
         file <<"set (PythonExecutable "<<PythonExecutable<<")"<<std::endl;
 
-      std::string PythonScriptPath = outputDir + "/ReplaceTransformName.py";
+      std::string PythonScriptPath = outputDir + "/" + itksys::SystemTools::GetFilenameWithoutExtension(outputVolume) + "_ReplaceTransformName.py";
       WriteReplaceTransformNamePythonScript(PythonScriptPath); // will be deleted in the bms file
       file <<"set (PythonScriptPath "<<PythonScriptPath<<")"<<std::endl; 
 
