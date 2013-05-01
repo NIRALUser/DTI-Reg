@@ -32,40 +32,6 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
   return 0 ;
 }
 
-void WriteReplaceTransformNamePythonScript (std::string PythonScriptPath)
-{
-  std::string PythonScriptText="#!/usr/bin/python\n\
-\n\
-import os\n\
-import sys # to get the cmd line arguments\n\
-\n\
-NewTransformFile = sys.argv[1] + \"/TempName.txt\"\n\
-OldTransformFile = sys.argv[1] + \"/\" + sys.argv[2]\n\
-\n\
-if os.path.isfile(NewTransformFile) : os.remove(NewTransformFile) # If for any reason it was already here\n\
-NewFile = open(NewTransformFile,\"a\") #open for append\n\
-\n\
-# Search all lines for the text\n\
-for line in open(OldTransformFile):\n\
-  line = line.replace(\"MatrixOffsetTransformBase\",\"AffineTransform\")\n\
-  NewFile.write(line)\n\
-\n\
-NewFile.close()\n\
-\n\
-# Replace the old wrong file by the new corrected file by removing and renaming\n\
-os.remove(OldTransformFile) # Remove \"CaseX_FA_Affine.txt\"\n\
-os.rename(NewTransformFile,OldTransformFile) # Rename \"TempName.txt\" to \"CaseX_FA_Affine.txt\"";
-
-  // Create File
-  std::ofstream PythonScriptfile( PythonScriptPath.c_str());
-  PythonScriptfile << PythonScriptText <<std::endl;
-  PythonScriptfile.close();
-
-//  Script executed with python executable so no need to make the script executable
-//  mode_t ITKmode_X_OK = 1;
-//  itksys::SystemTools::SetPermissions(PythonScriptPath.c_str(), ITKmode_X_OK);
-}
-
 int main (int argc, char *argv[])
 {
   PARSE_ARGS;
@@ -103,13 +69,19 @@ int main (int argc, char *argv[])
     }
 
   // Write BatchMake script
-  std::string outputDir;
+  std::string outputDir, bmsScriptPrefix;
   if ( outputVolume.compare("") ) // outputVolume NON empty
+  {
     outputDir = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(outputVolume).c_str() );
-  else
+    bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(outputVolume);
+  }
+  else  // No outputVolume given
+  {
     outputDir = ".";
+    bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(movingVolume);
+  }
 
-  std::string BatchMakeScriptFile = outputDir + "/" + itksys::SystemTools::GetFilenameWithoutExtension(outputVolume) + "_DTI-Reg.bms";
+  std::string BatchMakeScriptFile = outputDir + "/" + bmsScriptPrefix + "_DTI-Reg.bms";
   std::ofstream file( BatchMakeScriptFile.c_str());
 
   file <<"# Inputs"<<std::endl;
@@ -226,21 +198,7 @@ int main (int argc, char *argv[])
       else
 	file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
 
-      // Create Python Script and set path
-      std::string PythonExecutable;
-      if( SetPath(PythonExecutable, "python" , ProgramsPathsVector ) )
-      {
-        std::cout<<"Python not found. Abort."<<std::endl;
-        return EXIT_FAILURE;
-      }
-      else
-        file <<"set (PythonExecutable "<<PythonExecutable<<")"<<std::endl;
-
-      std::string PythonScriptPath = outputDir + "/" + itksys::SystemTools::GetFilenameWithoutExtension(outputVolume) + "_ReplaceTransformName.py";
-      WriteReplaceTransformNamePythonScript(PythonScriptPath); // will be deleted in the bms file
-      file <<"set (PythonScriptPath "<<PythonScriptPath<<")"<<std::endl; 
-
-    } // if (!method.compare("useScalar-ANTS"))
+   } // if (!method.compare("useScalar-ANTS"))
   
   std::string dtiprocessCmd = dtiprocessTool;
   if( SetPath(dtiprocessCmd, "dtiprocess" , ProgramsPathsVector ) )

@@ -111,14 +111,6 @@ set (DeformationField '')\n\
     exit()\n\
   Endif(${errorANTS})\n\
 \n\
-# Correcting Affine transform file using python script\n\
-GetFilename(ANTSOutbasePath ${ANTSOutbase} PATH)\n\
-GetFilename(ANTSOutbaseName ${ANTSOutbase} NAME)\n\
-set (PythonScriptCommand ${PythonExecutable} ${PythonScriptPath} ${ANTSOutbasePath} ${ANTSOutbaseName}Affine.txt)\n\
-echo('Correcting Affine transform file using python script...')\n\
-Run (outputPythonScript ${PythonScriptCommand} errorPythonScript)\n\
-DeleteFile(${PythonScriptPath})\n\
-\n\
 # Define deformation files\n\
 set(Transform ${ANTSOutbase}Affine.txt)\n\
 set (DeformationField ${ANTSOutbase}Warp.nii.gz)\n\
@@ -173,7 +165,7 @@ If (${outputDeformationFieldVolume} != '')\n\
   echo()\n\
   echo('Computing deformation field...')\n\
   # the ${fixedVolume} and ${movingVolume} are not actually used, but ResampleDTI needs real files given to work\n\
-  set(ResampleDTIConcatenationCmd ${ResampleDTICmd} -f ${Transform} -H ${DeformationField} --hfieldtype displacement ${fixedVolume} ${movingVolume} --concatenationOnly --outputDisplacementField ${outputDeformationFieldVolume})\n\
+  set(ResampleDTIConcatenationCmd ${ResampleDTICmd} -f ${Transform} -H ${DeformationField} --hfieldtype displacement ${fixedVolume} ${movingVolume} -R ${fixedVolume} --concatenationOnly --outputDisplacementField ${outputDeformationFieldVolume})\n\
   Run(outputResampleDTIConcatenationCmd ${ResampleDTIConcatenationCmd} errorResampleDTIConcatenationCmd)\n\
   If(${errorResampleDTIConcatenationCmd} != '')\n\
     echo('Error ResampleDTIlogEuclidean: ' ${errorResampleDTIConcatenationCmd})\n\
