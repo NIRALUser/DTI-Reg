@@ -108,7 +108,7 @@ set (DeformationField '')\n\
   echo('ANTS: ' ${outputANTS})\n\
   If(${errorANTS} != '')\n\
     echo('Error ANTS: ' ${errorANTS})\n\
-    exit()\n\
+#    exit()\n\
   Endif(${errorANTS})\n\
 \n\
 # Define deformation files\n\
