@@ -33,10 +33,8 @@ ELSE (Slicer3_FOUND)
   find_package(BatchMake REQUIRED PATHS ${BatchMake_DIR} )
   include(${BatchMake_USE_FILE})
 #-----------------------------------------------------------------------------
-  find_package(GenerateCLP REQUIRED)
+  find_package(SlicerExecutionModel REQUIRED GenerateCLP)
   include(${GenerateCLP_USE_FILE})
-#  include(${SlicerExecutionModel_USE_FILE})
-#  include(${SlicerExecutionModel_CMAKE_DIR}/SEMMacroBuildCLI.cmake)
 ENDIF (Slicer3_FOUND)
 
 #FILE( GLOB list_files ${CMAKE_CURRENT_SOURCE_DIR}/*.bms )         # Included in code in DTI-Reg-bms.h
