@@ -2,7 +2,6 @@
 
 #define DTIReg_Scalar_ANTS "GetFilename(fixedVolumeHead ${fixedVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
-#GetFilename(OutputDir ${fixedVolume} PATH)\n\
 GetFilename(OutputDir ${outputVolume} PATH)\n\
 If (${OutputDir} == '')\n\
   set (OutputDir '.')\n\
@@ -11,26 +10,27 @@ EndIf(${OutputDir})\n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
 \n\
-# FA map creation\n\
-echo()\n\
-echo('FA map creation...')\n\
-echo('fixed FA map creation...')\n\
-If (${outputFixedFAVolume} == '')\n\
-  set (fixedFAMap ${OutputDir}/${fixedVolumeHead}_FA.nrrd)\n\
-Else(${outputFixedFAVolume})\n\
-  set (fixedFAMap ${outputFixedFAVolume})\n\
-EndIf(${outputFixedFAVolume})\n\
-If (${fixedMaskVolume} != '')\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume})\n\
-Else(${fixedMaskVolume})\n\
- set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap}) \n\
-EndIf (${fixedMaskVolume})\n\
-Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
-If(${errordtiprocess} != '')\n\
-  echo('Error dtiprocess: ' ${errordtiprocess})\n\
-  exit()\n\
-Endif(${errordtiprocess})\n\
-\n\
+If(${useScalar} == FALSE )\n\
+  # FA map creation\n\
+  echo()\n\
+  echo('FA map creation...')\n\
+  echo('fixed FA map creation...')\n\
+  If (${outputFixedFAVolume} == '')\n\
+    set (fixedFAMap ${OutputDir}/${fixedVolumeHead}_FA.nrrd)\n\
+  Else(${outputFixedFAVolume})\n\
+    set (fixedFAMap ${outputFixedFAVolume})\n\
+  EndIf(${outputFixedFAVolume})\n\
+  If (${fixedMaskVolume} != '')\n\
+    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume})\n\
+  Else(${fixedMaskVolume})\n\
+   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap}) \n\
+  EndIf (${fixedMaskVolume})\n\
+  Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
+  If(${errordtiprocess} != '')\n\
+    echo('Error dtiprocess: ' ${errordtiprocess})\n\
+    exit()\n\
+  Endif(${errordtiprocess})\n\
+Endif(${useScalar} == FALSE )\n\
 echo('moving FA map creation...')\n\
 If (${outputMovingFAVolume} == '')\n\
   set (movingFAMap ${OutputDir}/${movingVolumeHead}_FA.nrrd)\n\
@@ -164,13 +164,12 @@ EndIf (${outputTransform})\n\
 If (${outputDeformationFieldVolume} != '')\n\
   echo()\n\
   echo('Computing deformation field...')\n\
-  # the ${fixedVolume} and ${movingVolume} are not actually used, but ResampleDTI needs real files given to work\n\
-  set(ResampleDTIConcatenationCmd ${ResampleDTICmd} -f ${Transform} -H ${DeformationField} --hfieldtype displacement ${fixedVolume} ${movingVolume} -R ${fixedVolume} --concatenationOnly --outputDisplacementField ${outputDeformationFieldVolume})\n\
-  Run(outputResampleDTIConcatenationCmd ${ResampleDTIConcatenationCmd} errorResampleDTIConcatenationCmd)\n\
-  If(${errorResampleDTIConcatenationCmd} != '')\n\
-    echo('Error ResampleDTIlogEuclidean: ' ${errorResampleDTIConcatenationCmd})\n\
+  set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputDeformationFieldVolume} -r ${fixedVolume} ${DeformationField} displacement ${Transform})\n\
+  Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
+  If(${errorConcatenationCmd} != '')\n\
+    echo('Error ResampleDTIlogEuclidean: ' ${errorConcatenationCmd})\n\
     exit()\n\
-  Endif(${errorResampleDTIConcatenationCmd})\n\
+  Endif(${errorConcatenationCmd})\n\
 #  echo('Copying deformation field...')\n\
 #  CopyFile(${DeformationField} ${outputDeformationFieldVolume})\n\
 #  DeleteFile(${DeformationField})\n\
@@ -198,25 +197,27 @@ EndIf(${OutputDir})\n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
 \n\
-# FA map creation\n\
-echo()\n\
-echo('FA map creation...')\n\
-echo('fixed FA map creation...')\n\
-If (${outputFixedFAVolume} == '')\n\
-  set (fixedFAMap ${OutputDir}/${fixedVolumeHead}_FA.nrrd)\n\
-Else(${outputFixedFAVolume})\n\
-  set (fixedFAMap ${outputFixedFAVolume})\n\
-EndIf(${outputFixedFAVolume})\n\
-If (${fixedMaskVolume} != '')\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume})\n\
-Else(${fixedMaskVolume})\n\
- set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap})\n\
-EndIf (${fixedMaskVolume})\n\
-Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
-If(${errordtiprocess} != '')\n\
-  echo('Error dtiprocess: ' ${errordtiprocess})\n\
-  exit()\n\
-Endif(${errordtiprocess})\n\
+If(${useScalar} == FALSE )\n\
+  # FA map creation\n\
+  echo()\n\
+  echo('FA map creation...')\n\
+  echo('fixed FA map creation...')\n\
+  If (${outputFixedFAVolume} == '')\n\
+    set (fixedFAMap ${OutputDir}/${fixedVolumeHead}_FA.nrrd)\n\
+  Else(${outputFixedFAVolume})\n\
+    set (fixedFAMap ${outputFixedFAVolume})\n\
+  EndIf(${outputFixedFAVolume})\n\
+  If (${fixedMaskVolume} != '')\n\
+    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume})\n\
+  Else(${fixedMaskVolume})\n\
+   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap})\n\
+  EndIf (${fixedMaskVolume})\n\
+  Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
+  If(${errordtiprocess} != '')\n\
+    echo('Error dtiprocess: ' ${errordtiprocess})\n\
+    exit()\n\
+  Endif(${errordtiprocess})\n\
+EndIf(${useScalar} == FALSE )\n\
 \n\
 echo('moving FA map creation...')\n\
 If (${outputMovingFAVolume} == '')\n\
@@ -349,3 +350,23 @@ EndIf(${outputMovingFAVolume})\n\
 If (${outputResampledFAVolume} == '')\n\
 #  DeleteFile(${ResampledFAMap})\n\
 EndIf(${outputResampledFAVolume})"
+
+
+////////////////////////////////////////////////////////////////////////
+// if using DTITK
+
+#define DTIReg_DTITK "GetFilename(fixedVolumeHead ${fixedVolume} NAME_WITHOUT_EXTENSION)\n\
+GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
+GetFilename(OutputDir ${outputVolume} PATH)\n\
+If (${OutputDir} == '')\n\
+  set (OutputDir '.')\n\
+EndIf(${OutputDir})\n\
+\n\
+GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
+GetFilename(movingVolumeTail ${movingVolume} NAME)"
+
+//Convert format: from nrrd to nii - Using DTIConvert (included in DTITK)
+//Convert units (by default x1000)
+//Affine transform (use default parameters)
+//Diffeomorphic transform (use default parameters)
+

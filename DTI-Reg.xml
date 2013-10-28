@@ -3,19 +3,19 @@
   <category>Diffusion.Diffusion Tensor Images</category>
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration, using FA maps to drive the registration</description>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
-  <contributor>Clement Vachet (NIRAL, UNC-Chapel Hill)</contributor>
+  <contributor>Clement Vachet (SCI, University of Utah), Adrien Kaiser (NIRAL, UNC-Chapel Hill), Francois Budin (NIRAL, UNC-Chapel Hill)</contributor>
   <acknowledgements>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</acknowledgements>
 
   <parameters>
     <label>Paths</label>
-    <description>Programs Paths</description>
+    <description>Program Paths</description>
     <string-vector>
       <name>ProgramsPathsVector</name>
-      <longflag>ProgramsPathsVector</longflag>
-      <label>Programs Paths Vector</label>
+      <longflag>ProgramPathsVector</longflag>
+      <label>Program Paths Vector</label>
       <description>Vector containing paths where we can find needed programs</description>
     </string-vector>
   </parameters> 
@@ -28,11 +28,18 @@
       <name>fixedVolume</name>
       <longflag>fixedVolume</longflag>
       <label>Fixed DTI Volume</label>
-      <description>Fixed DTI image</description>
+      <description>Fixed DTI image (or leave this empty and give a scalar image with --scalarFixedVolume)</description>
       <channel>input</channel>
       <default></default>
     </image>
-
+    <image type="scalar">
+      <name>scalarFixedVolume</name>
+      <longflag>scalarFixedVolume</longflag>
+      <label>Scalar Fixed Volume</label>
+      <description>Optional: Give a scalar fixed image instead of a fixed DTI volume</description>
+      <default></default>
+      <channel>input</channel>
+    </image>
     <image type="tensor">
       <name>movingVolume</name>
       <longflag>movingVolume</longflag>
@@ -41,7 +48,6 @@
       <default></default>
       <channel>input</channel>
     </image>
-
     <transform fileExtensions=".txt">
       <name>initialAffine</name>
       <longflag>initialAffine</longflag>
@@ -60,7 +66,7 @@
       <name>fixedMaskVolume</name>
       <longflag>fixedMaskVolume</longflag>
       <label>Fixed Mask Volume</label>
-      <description>Optional: Fixed binary mask image</description>
+      <description>Optional: Fixed binary mask image - used when computing the fixed DTI</description>
       <channel>input</channel>
       <default></default>
     </image>
@@ -69,7 +75,7 @@
       <name>movingMaskVolume</name>
       <longflag>movingMaskVolume</longflag>
       <label>Moving Mask Volume</label>
-      <description>Optional: Moving binary mask image</description>
+      <description>Optional: Moving binary mask image - used when computing the moving DTI</description>
       <default></default>
       <channel>input</channel>
     </image>
@@ -88,40 +94,9 @@
       <default>useScalar-BRAINS</default>
       <element>useScalar-BRAINS</element>
       <element>useScalar-ANTS</element>
-    </string-enumeration>
-
-    <string-enumeration>
-      <name>BRAINSRegistrationType</name>
-      <longflag>BRAINSRegistrationType</longflag>
-      <label>BRAINS Registration Type</label>
-      <description>BRAINS Registration type: None, Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
-      <default>Diffeomorphic</default>
-      <element>None</element>
-      <element>Rigid</element>
-      <element>Affine</element>
-      <element>BSpline</element>
-      <element>Diffeomorphic</element>
-      <element>Demons</element>
-      <element>FastSymmetricForces</element>
-    </string-enumeration>
-
-    <string-enumeration>
-      <name>ANTSRegistrationType</name>
-      <longflag>ANTSRegistrationType</longflag>
-      <label>ANTS Registration Type</label>
-      <description>ANTS Registration type: None, Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
-      <default>GreedyDiffeo</default>
-      <element>None</element>
-      <element>Rigid</element>
-      <element>Affine</element>
-      <element>Elast</element>
-      <element>Exp</element>
-      <element>GreedyExp</element>
-      <element>GreedyDiffeo</element>
-      <element>SpatioTempDiffeo</element>
+      <element>useDTITK</element>
     </string-enumeration>
   </parameters>
-
   <parameters>
     <label>Outputs</label>
     <description>Outputs</description>
@@ -195,6 +170,21 @@
     <description>BRAINS registration parameters</description>
 
     <string-enumeration>
+      <name>BRAINSRegistrationType</name>
+      <longflag>BRAINSRegistrationType</longflag>
+      <label>BRAINS Registration Type</label>
+      <description>BRAINS Registration type: None, Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
+      <default>Diffeomorphic</default>
+      <element>None</element>
+      <element>Rigid</element>
+      <element>Affine</element>
+      <element>BSpline</element>
+      <element>Diffeomorphic</element>
+      <element>Demons</element>
+      <element>FastSymmetricForces</element>
+    </string-enumeration>
+
+    <string-enumeration>
       <name>BRAINSinitializeTransformMode</name>
       <longflag>BRAINSinitializeTransformMode</longflag>
       <label>Intitialize Transform Mode</label>
@@ -247,10 +237,40 @@
     </integer>
   </parameters> 
 
+<!--To add DTITK registration>
+  <parameters advanced="true">
+    <label>DTI-TK registration parameters</label>
+    <description>DTI-TK registration parameters</description>
+    <integer>
+      <name>conversionFactor</name>
+      <longflag>conversionFactor</longflag>
+      <label>Conversion Factor</label>
+      <description>Conversion factor (DTI-TK uses 10-3mm2.s-1)</description>
+      <default>1000</default>
+    </integer>
+  </parameters>
+</To add DTITK-->
+
   <parameters advanced="true">
     <label>ANTS registration parameters</label>
     <description>ANTS registration parameters</description>
 
+    <string-enumeration>
+      <name>ANTSRegistrationType</name>
+      <longflag>ANTSRegistrationType</longflag>
+      <label>ANTS Registration Type</label>
+      <description>ANTS Registration type: None, Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
+      <default>GreedyDiffeo</default>
+      <element>None</element>
+      <element>Rigid</element>
+      <element>Affine</element>
+      <element>Elast</element>
+      <element>Exp</element>
+      <element>GreedyExp</element>
+      <element>GreedyDiffeo</element>
+      <element>SpatioTempDiffeo</element>
+    </string-enumeration>
+ 
     <string>
       <name>ANTSIterations</name>
       <longflag>ANTSIterations</longflag>
