@@ -245,7 +245,7 @@ int main (int argc, char *argv[])
     file <<"set (ANTSTransformationStep "<<ANTSTransformationStep<<")"<<std::endl;
     file <<"set (ANTSGaussianSmoothingOff "<<ANTSGaussianSmoothingOff<<")"<<std::endl;
     file <<"set (ANTSGaussianSigma "<<ANTSGaussianSigma<<")"<<std::endl;
-      
+    file <<"set (ANTSUseHistogramMatching "<<ANTSUseHistogramMatching<<")"<<std::endl;
     file <<"\n#External Tools"<<std::endl;
     std::string ANTSCmd = ANTSTool;
     if( SetPath(ANTSCmd, "ANTS" , ProgramsPathsVector ) )

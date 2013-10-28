@@ -94,7 +94,7 @@
       <default>useScalar-BRAINS</default>
       <element>useScalar-BRAINS</element>
       <element>useScalar-ANTS</element>
-      <element>useDTITK</element>
+<!--      <element>useDTITK</element>-->
     </string-enumeration>
   </parameters>
   <parameters>
@@ -321,6 +321,13 @@
       <description>ANTS Gaussian Sigma</description>
       <default>3.0</default>
     </float>
+    <boolean>
+      <name>ANTSUseHistogramMatching</name>
+      <longflag>ANTSUseHistogramMatching</longflag>
+      <label>ANTS Use Histogram Matching</label>
+      <description>ANTS Use Histogram Matching</description>
+      <default>false</default>
+    </boolean>
   </parameters> 
 
 </executable>

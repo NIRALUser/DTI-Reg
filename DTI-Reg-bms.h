@@ -91,6 +91,9 @@ set (DeformationField '')\n\
       set (commandANTS ${commandANTS} -r Gauss[${ANTSGaussianSigma},0.5])\n\
     EndIf(${ANTSGaussianSmoothingOff})\n\
   EndIf(${ANTSRegistrationType})\n\
+  If (${ANTSUseHistogramMatching} == 1)\n\
+    set (commandANTS ${commandANTS} --use-Histogram-Matching )\n\
+  EndIf(${ANTSUseHistogramMatching})\n\
 \n\
   If (${ANTSRegistrationType} == 'Elast')\n\
     set (commandANTS ${commandANTS} -i ${ANTSIterations} -t Elast)\n\
@@ -354,7 +357,7 @@ EndIf(${outputResampledFAVolume})"
 
 ////////////////////////////////////////////////////////////////////////
 // if using DTITK
-
+/*
 #define DTIReg_DTITK "GetFilename(fixedVolumeHead ${fixedVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
 GetFilename(OutputDir ${outputVolume} PATH)\n\
@@ -364,7 +367,7 @@ EndIf(${OutputDir})\n\
 \n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)"
-
+*/
 //Convert format: from nrrd to nii - Using DTIConvert (included in DTITK)
 //Convert units (by default x1000)
 //Affine transform (use default parameters)
