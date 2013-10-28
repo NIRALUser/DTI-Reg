@@ -1,19 +1,9 @@
 #Find external tools
 
-set( Slicer3_Manual_bin "" CACHE PATH "Path to Slicer3 (binary directory)" )
-
 macro( FindSlicerToolsMacro path name )
   find_program(${path} ${name} )
   if(NOT ${path} )
-    IF(Slicer3_Manual_bin)
-      set( ${path} ${Slicer3_Manual_bin}/lib/Slicer3/Plugins/${name} )
-    ELSE(Slicer3_Manual_bin)
-      IF(Slicer3_FOUND)
-        set( ${path} ${Slicer3_HOME}/${Slicer3_INSTALL_PLUGINS_BIN_DIR}/${name} )
-      else(Slicer3_FOUND)
-        message( WARNING "${name} not found. Its path is not set" )
-      endIF (Slicer3_FOUND)
-    ENDIF(Slicer3_Manual_bin)
+    message( WARNING "${name} not found. Its path is not set" )
   endif(NOT ${path} )
 endmacro( FindSlicerToolsMacro )
 
@@ -86,3 +76,13 @@ FindToolMacro(ANTSTOOL ANTS)
 FindToolMacro(WARPIMAGEMULTITRANSFORMTOOL WarpImageMultiTransform)
 FindToolMacro(WARPTENSORIMAGEMULTITRANSFORMTOOL WarpTensorImageMultiTransform)
 FindToolMacro(ResampleDTIlogEuclideanTOOL ResampleDTIlogEuclidean)
+FindToolMacro(ITKTransformToolsTOOL ITKTransformTools)
+
+######################################################################
+##To add DTITK registration##
+######################################################################
+#FindToolMacro(TVtoolTOOL TVtool)#DTI-TK - scaling tensor unit
+#FindToolMacro(DTIConvertTOOL DTIConvert)#DTI-TK - convert from NRRD to NIFTI
+#FindToolMacro(dti_affine_reg_TOOL dti_affine_reg)#DTI_TK - Affine registration
+#FindToolMacro(dti_diffeomorphic_reg_TOOL dti_diffeomorphic_reg)#DTI_TK - diffeomorphic registration
+######################################################################
