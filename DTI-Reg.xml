@@ -14,7 +14,7 @@
     <description>Program Paths</description>
     <string-vector>
       <name>ProgramsPathsVector</name>
-      <longflag>ProgramPathsVector</longflag>
+      <longflag>ProgramsPathsVector</longflag>
       <label>Program Paths Vector</label>
       <description>Vector containing paths where we can find needed programs</description>
     </string-vector>
