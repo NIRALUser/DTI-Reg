@@ -46,7 +46,8 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
         -DITK_DIR:PATH=${ITK_DIR}
         ${BatchMakeCURLCmakeArg}
       INSTALL_COMMAND ""
-      PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/BatchMakePatchedZip.c ${CMAKE_CURRENT_BINARY_DIR}/BatchMake/Utilities/Zip/zip.c # No "" # Patch for windows compilation error (declaration of variable after beginning of block - "uLong year")
+      PATCH_COMMAND ${CMAKE_COMMAND} -DCMAKE_COMMAND:STRING=${CMAKE_COMMAND} -DINPUT_CURRENT_SOURCE_DIR:PATH=${CMAKE_CURRENT_SOURCE_DIR} -DINPUT_CURRENT_BINARY_DIR:FILE=${CMAKE_CURRENT_BINARY_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/BatchMake-patch-cmd.cmake
+#      PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/BatchMake-patch-cmd.cmake
       DEPENDS  ${${proj}_DEPENDENCIES}
     )
     set(BatchMake_DIR ${CMAKE_CURRENT_BINARY_DIR}/BatchMake-build)
