@@ -63,3 +63,5 @@ GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
 add_executable( DTI-Reg ${DTIReg_SOURCE} )
 target_link_libraries(DTI-Reg ${ITK_LIBRARIES} BatchMakeLib)
 
+install(TARGETS DTI-Reg RUNTIME DESTINATION bin )
+
