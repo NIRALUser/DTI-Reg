@@ -22,11 +22,14 @@ endif(NOT SETIFEMPTY)
 option(${LOCAL_PROJECT_NAME}_INSTALL_DEVELOPMENT "Install development support include and libraries for external packages." OFF)
 mark_as_advanced(${LOCAL_PROJECT_NAME}_INSTALL_DEVELOPMENT)
 
-set(ITK_VERSION_MAJOR 4 CACHE STRING "Choose the expected ITK major version to build DTIReg (3 or 4).")
 # Set the possible values of ITK major version for cmake-gui
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+set(ITK_VERSION_MAJOR 4 CACHE STRING "Choose the expected ITK major version to build DTIReg (3 or 4).")
 if(NOT ${ITK_VERSION_MAJOR} STREQUAL "3" AND NOT ${ITK_VERSION_MAJOR} STREQUAL "4")
   message(FATAL_ERROR "ITK_VERSION_MAJOR should be either 3 or 4")
+endif()
+# CMAKE_BUILD_TYPE is not defined on some platforms
+if( CMAKE_BUILD_TYPE )
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
 set(USE_ITKv3 OFF)

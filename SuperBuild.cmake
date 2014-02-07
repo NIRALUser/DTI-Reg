@@ -285,7 +285,11 @@ ExternalProject_Add_Step(${proj} forcebuild
     DEPENDERS build
     ALWAYS 1
   )
-
+if(WIN32)
+  set(fileextension .exe)
+endif()
 foreach( VAR ${LIST_TOOLS} )
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${VAR}-install/${INSTALL_RUNTIME_DESTINATION}/${VAR} DESTINATION ${INSTALL_RUNTIME_DESTINATION} )
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${VAR}-install/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
+            DESTINATION ${INSTALL_RUNTIME_DESTINATION}
+         )
 endforeach()
