@@ -1,3 +1,6 @@
+if( NOT EXTERNAL_SOURCE_DIRECTORY )
+  set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
+endif()
 
 # Make sure this file is included only once
 get_filename_component(CMAKE_CURRENT_LIST_FILENAME ${CMAKE_CURRENT_LIST_FILE} NAME_WE)
@@ -26,7 +29,7 @@ if(NOT DEFINED Cppcheck_EXE AND NOT ${USE_SYSTEM_Cppcheck})
   ExternalProject_add(${proj}
     GIT_REPOSITORY ${Cppcheck_REPOSITORY}
     GIT_TAG ${Cppcheck_GIT_TAG}
-    SOURCE_DIR ${proj}
+    SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
     LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards
     LOG_BUILD     0  # Wrap build in script to to ignore log output from dashboards
     LOG_TEST      0  # Wrap test in script to to ignore log output from dashboards

@@ -1,3 +1,7 @@
+if( NOT EXTERNAL_SOURCE_DIRECTORY )
+  set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
+endif()
+
 # Make sure this file is included only once
 get_filename_component(CMAKE_CURRENT_LIST_FILENAME ${CMAKE_CURRENT_LIST_FILE} NAME_WE)
 if(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED)
@@ -28,7 +32,7 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
   ExternalProject_Add(${proj}
       GIT_REPOSITORY ${git_protocol}://batchmake.org/BatchMake.git
       GIT_TAG "8addbdb62f0135ba01ffe12ddfc32121b6d66ef5" # 01-30-2013 # "0abb2faca1251f808ab3d0b820cc27b570a994f1" # 08-26-2012 updated for ITKv4 # "43d21fcccd09e5a12497bc1fb924bc6d5718f98c" # used in DTI-Reg 12-21-2012
-      SOURCE_DIR BatchMake
+      SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/BatchMake
       BINARY_DIR BatchMake-build
       CMAKE_GENERATOR ${gen}
       CMAKE_ARGS

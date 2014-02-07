@@ -1,3 +1,6 @@
+if( NOT EXTERNAL_SOURCE_DIRECTORY )
+  set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
+endif()
 
 # Make sure this file is included only once
 get_filename_component(CMAKE_CURRENT_LIST_FILENAME ${CMAKE_CURRENT_LIST_FILE} NAME_WE)
@@ -31,7 +34,8 @@ if(NOT DEFINED Uncrustify_EXE AND NOT ${USE_SYSTEM_Uncrustify})
     LOG_TEST      0  # Wrap test in script to to ignore log output from dashboards
     LOG_INSTALL   0  # Wrap install in script to to ignore log output from dashboards
     ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
-    SOURCE_DIR ${proj}
+    SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
+
     BINARY_DIR ${proj}-build
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_BINARY_DIR}/Utils
     DEPENDS

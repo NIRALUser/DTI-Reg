@@ -1,25 +1,10 @@
 
-macro(INSTALL_EXECUTABLE)
-  set(options )
-  set( oneValueArgs OUTPUT_DIR )
-  set(multiValueArgs LIST_EXEC )
-  CMAKE_PARSE_ARGUMENTS(LOCAL
-    "${options}"
-    "${oneValueArgs}"
-    "${multiValueArgs}"
-    ${ARGN}
-    )
-  foreach( tool ${LOCAL_LIST_EXEC})
-    install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${tool} DESTINATION ${LOCAL_OUTPUT_DIR} )
-  endforeach()
-endmacro()
-
-
 include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
 
 set(MODULE_NAME ${EXTENSION_NAME}) # Do not use 'project()'
 set(MODULE_TITLE ${MODULE_NAME})
 
+SETIFEMPTY(INSTALL_RUNTIME_DESTINATION bin)
 
 #-----------------------------------------------------------------------------
 # Update CMake module path
@@ -63,5 +48,5 @@ GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
 add_executable( DTI-Reg ${DTIReg_SOURCE} )
 target_link_libraries(DTI-Reg ${ITK_LIBRARIES} BatchMakeLib)
 
-install(TARGETS DTI-Reg RUNTIME DESTINATION bin )
+install(TARGETS DTI-Reg DESTINATION ${INSTALL_RUNTIME_DESTINATION} )
 

@@ -1,6 +1,20 @@
 
 include(CMakeDependentOption)
 
+## A simple macro to set variables ONLY if it has not been set
+## This is needed when stand-alone packages are combined into
+## a larger package, and the desired behavior is that all the
+## binary results end up in the combined directory.
+if(NOT SETIFEMPTY)
+macro(SETIFEMPTY)
+  set(KEY ${ARGV0})
+  set(VALUE ${ARGV1})
+  if(NOT ${KEY})
+    set(${KEY} ${VALUE})
+  endif(NOT ${KEY})
+endmacro(SETIFEMPTY KEY VALUE)
+endif(NOT SETIFEMPTY)
+###
 
 #-----------------------------------------------------------------------------
 # Build option(s)
@@ -69,37 +83,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   # Set the possible values of build type for cmake-gui
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-
-#-----------------------------------------------------------------------------
-if(NOT COMMAND SETIFEMPTY)
-  macro(SETIFEMPTY)
-    set(KEY ${ARGV0})
-    set(VALUE ${ARGV1})
-    if(NOT ${KEY})
-      set(${ARGV})
-    endif()
-  endmacro()
-endif()
-
-#-----------------------------------------------------------------------------
-SETIFEMPTY(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-SETIFEMPTY(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-SETIFEMPTY(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
-
-#-----------------------------------------------------------------------------
-SETIFEMPTY(CMAKE_INSTALL_LIBRARY_DESTINATION lib)
-SETIFEMPTY(CMAKE_INSTALL_ARCHIVE_DESTINATION lib)
-SETIFEMPTY(CMAKE_INSTALL_RUNTIME_DESTINATION bin)
-
-#-------------------------------------------------------------------------
-SETIFEMPTY(DTIReg_CLI_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-SETIFEMPTY(DTIReg_CLI_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
-SETIFEMPTY(DTIReg_CLI_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-
-#-------------------------------------------------------------------------
-SETIFEMPTY(DTIReg_CLI_INSTALL_LIBRARY_DESTINATION ${CMAKE_INSTALL_LIBRARY_DESTINATION})
-SETIFEMPTY(DTIReg_CLI_INSTALL_ARCHIVE_DESTINATION ${CMAKE_INSTALL_ARCHIVE_DESTINATION})
-SETIFEMPTY(DTIReg_CLI_INSTALL_RUNTIME_DESTINATION ${CMAKE_INSTALL_RUNTIME_DESTINATION})
 
 #-------------------------------------------------------------------------
 # Augment compiler flags

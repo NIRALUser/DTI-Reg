@@ -13,22 +13,37 @@
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector )
 {
+  std::string cmakePathString = pathString ;
+  if( !ProgramsPathsVector.empty() )
+  {
+    pathString= itksys::SystemTools::FindProgram( name , ProgramsPathsVector, true ) ; // Does not look in PATH, only in "ProgramsPathsVector"
+    if( !pathString.empty() )
+    {
+      return 0 ;
+    }
+  }
+  pathString = cmakePathString ;
+  if( !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
+  {
+    pathString = "" ;
+  }
   if(!pathString.empty()) // has been set to the value in the cmake cache -< check that it exists
   {
     mode_t ITKmode_X_OK = 1;
-    if(! itksys::SystemTools::GetPermissions(pathString.c_str(), ITKmode_X_OK)) pathString = ""; // if not executable, empty it so it can be found by FindProgram()
+    if( !itksys::SystemTools::GetPermissions(pathString.c_str(), ITKmode_X_OK) )
+    {
+       pathString = ""; // if not executable, empty it so it can be found by FindProgram()
+    }
   }
-
-  if( pathString.empty() || !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
+  if( pathString.empty() )
   {
-    pathString= itksys::SystemTools::FindProgram( name , ProgramsPathsVector ) ; // will look in the PATH first AND then in the extra path "ProgramsPathsVector"
-    if( !pathString.compare( "" ) )
+    pathString= itksys::SystemTools::FindProgram( name ) ;
+    if( pathString.empty() )
     {
       std::cerr << name << " is missing or its PATH is not set" << std::endl ;
       return 1 ;
     }
   }
-
   return 0 ;
 }
 

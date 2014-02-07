@@ -1,3 +1,6 @@
+if( NOT EXTERNAL_SOURCE_DIRECTORY )
+  set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
+endif()
 
 # Make sure this file is included only once by creating globally unique varibles
 # based on the name of this included file.
@@ -127,13 +130,13 @@ if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}
     )
   ### --- End Project specific additions
   set(${proj}_REPOSITORY ${git_protocol}://itk.org/ITK.git)
-  set(${proj}_GIT_TAG ec61e6e2b09aed85c758c173ba0de0a18587c82c)
-  set(ITK_VERSION_ID ITK-4.5)
+  set(${proj}_GIT_TAG 668714cf39f3287e7e08ee53bdc6ae057122b05c)
+  set(ITK_VERSION_ID ITK-4.3)
 
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
-    SOURCE_DIR ${proj}
+    SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
     BINARY_DIR ${proj}-build
 #LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards
 #LOG_BUILD     0  # Wrap build in script to to ignore log output from dashboards

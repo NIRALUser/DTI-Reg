@@ -92,11 +92,14 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_STYLE_UTILS" OFF
   )
 
-
+option(COMPILE_EXTERNAL_dtiprocess "Compile External dtiprocessToolkit" OFF )
+option(COMPILE_EXTERNAL_ITKTransformTools "Compile External ITKTransformTools" OFF )
 option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchMake" OFF)
 
+SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
+SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 #------------------------------------------------------------------------------
 # ${LOCAL_PROJECT_NAME} dependency list
 #------------------------------------------------------------------------------
@@ -105,8 +108,27 @@ set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 SlicerExecutionModel BatchMake )
 
 if(BUILD_STYLE_UTILS)
   list(APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES Cppcheck KWStyle Uncrustify)
+else()
+    list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES Cppcheck KWStyle Uncrustify )
 endif()
-
+if( COMPILE_EXTERNAL_dtiprocess )
+  option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
+  list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
+  list( APPEND LIST_TOOLS dtiprocess )
+  set( DTIProcess_INSTALL_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dtiprocess-install )
+  set( DTIProcessTOOL ${DTIProcess_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/dtiprocess CACHE PATH "Path to a program." FORCE )
+else()
+  unset( USE_SYSTEM_VTK CACHE )
+  list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
+endif()
+if( COMPILE_EXTERNAL_ITKTransformTools )
+  list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
+  list(APPEND LIST_TOOLS ITKTransformTools )
+  set( ITKTransformTools_INSTALL_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ITKTransformTools-install )
+  set( ITKTransformToolsTOOL ${ITKTransformTools_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/ITKTransformTools CACHE PATH "Path to a program." FORCE )
+else()
+  list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
+endif()
 
 #-----------------------------------------------------------------------------
 # Define Superbuild global variables
@@ -161,10 +183,6 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   CMAKE_MODULE_LINKER_FLAGS:STRING
   CMAKE_GENERATOR:STRING
   CMAKE_EXTRA_GENERATOR:STRING
-  CMAKE_INSTALL_PREFIX:PATH
-  CMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH
-  CMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH
-  CMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH
   CMAKE_BUNDLE_OUTPUT_DIRECTORY:PATH
   CTEST_NEW_FORMAT:BOOL
   MEMORYCHECK_COMMAND_OPTIONS:STRING
@@ -172,6 +190,7 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   SITE:STRING
   BUILDNAME:STRING
   ${PROJECT_NAME}_BUILD_DICOM_SUPPORT:BOOL
+  INSTALL_RUNTIME_DESTINATION:STRING
   )
 
 _expand_external_project_vars()
@@ -191,13 +210,6 @@ if(APPLE)
     -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
 endif()
 
-set(${LOCAL_PROJECT_NAME}_CLI_RUNTIME_DESTINATION  bin)
-set(${LOCAL_PROJECT_NAME}_CLI_LIBRARY_DESTINATION  lib)
-set(${LOCAL_PROJECT_NAME}_CLI_ARCHIVE_DESTINATION  lib)
-set(${LOCAL_PROJECT_NAME}_CLI_INSTALL_RUNTIME_DESTINATION  bin)
-set(${LOCAL_PROJECT_NAME}_CLI_INSTALL_LIBRARY_DESTINATION  lib)
-set(${LOCAL_PROJECT_NAME}_CLI_INSTALL_ARCHIVE_DESTINATION  lib)
-
 #-----------------------------------------------------------------------------
 # Add external project CMake args
 #-----------------------------------------------------------------------------
@@ -207,19 +219,11 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   ITK_VERSION_MAJOR:STRING
   ITK_DIR:PATH
 
-  ${LOCAL_PROJECT_NAME}_CLI_LIBRARY_DESTINATION:PATH
-  ${LOCAL_PROJECT_NAME}_CLI_ARCHIVE_DESTINATION:PATH
-  ${LOCAL_PROJECT_NAME}_CLI_RUNTIME_DESTINATION:PATH
-  ${LOCAL_PROJECT_NAME}_CLI_INSTALL_LIBRARY_DESTINATION:PATH
-  ${LOCAL_PROJECT_NAME}_CLI_INSTALL_ARCHIVE_DESTINATION:PATH
-  ${LOCAL_PROJECT_NAME}_CLI_INSTALL_RUNTIME_DESTINATION:PATH
-
   BatchMake_DIR:PATH
   GenerateCLP_DIR:PATH
   SlicerExecutionModel_DIR:PATH
-  INSTALL_RUNTIME_DESTINATION:STRING
-  INSTALL_LIBRARY_DESTINATION:STRING
-  INSTALL_ARCHIVE_DESTINATION:STRING
+  COMPILE_EXTERNAL_dtiprocess:BOOL
+  COMPILE_EXTERNAL_ITKTransformTools:BOOL
   )
 
 
@@ -241,8 +245,6 @@ if(verbose)
     message("  ${argname}")
   endforeach()
 endif()
-
-
 
 #------------------------------------------------------------------------------
 # Configure and build
@@ -266,9 +268,9 @@ ExternalProject_Add(${proj}
     -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
     -DResampleDTITOOL:PATH=${ResampleDTITOOL}
     -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
-  INSTALL_COMMAND ""
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg-install
   )
-
+list(APPEND LIST_TOOLS DTI-Reg )
 ## Force rebuilding of the main subproject every time building from super structure
 ExternalProject_Add_Step(${proj} forcebuild
     COMMAND ${CMAKE_COMMAND} -E remove
@@ -278,4 +280,6 @@ ExternalProject_Add_Step(${proj} forcebuild
     ALWAYS 1
   )
 
-
+foreach( VAR ${LIST_TOOLS} )
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${VAR}-install/${INSTALL_RUNTIME_DESTINATION}/${VAR} DESTINATION ${INSTALL_RUNTIME_DESTINATION} )
+endforeach()
