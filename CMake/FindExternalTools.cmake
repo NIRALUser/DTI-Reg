@@ -1,9 +1,13 @@
 #Find external tools
 
+macro( PrintNotFound name )
+  message( STATUS "${name} not found. Searching for it at runtime" )
+endmacro()
+
 macro( FindSlicerToolsMacro path name )
   find_program(${path} ${name} )
   if(NOT ${path} )
-    message( WARNING "${name} not found. Its path is not set" )
+    PrintNotFound( ${name} )
   endif(NOT ${path} )
 endmacro( FindSlicerToolsMacro )
 
@@ -13,7 +17,7 @@ FindSlicerToolsMacro( BRAINSDemonWarpTOOL BRAINSDemonWarp )
 macro( FindToolMacro path name )
   find_program(${path} ${name} )
   if(NOT ${path} )
-        message( WARNING "${name} not found. Its path is not set" )
+    PrintNotFound( ${name} )
   endif(NOT ${path} )
 endmacro( FindToolMacro )
 
