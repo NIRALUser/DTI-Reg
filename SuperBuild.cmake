@@ -35,7 +35,6 @@ find_package(Git REQUIRED)
 include(ExternalProject)
 include(SlicerMacroEmptyExternalProject)
 include(SlicerMacroCheckExternalProjectDependency)
-include(FindExternalTools)
 
 # Compute -G arg for configuring external projects with the same CMake generator:
 if(CMAKE_EXTRA_GENERATOR)
@@ -98,6 +97,7 @@ option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchMake" OFF)
 
+list(APPEND LIST_TOOLS DTI-Reg )
 SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
 SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 #------------------------------------------------------------------------------
@@ -120,6 +120,8 @@ if( COMPILE_EXTERNAL_dtiprocess )
 else()
   unset( USE_SYSTEM_VTK CACHE )
   list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
+  list( REMOVE_ITEM LIST_TOOLS dtiprocess )
+  unset( DTIProcessTOOL CACHE )
 endif()
 if( COMPILE_EXTERNAL_ITKTransformTools )
   list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
@@ -127,8 +129,12 @@ if( COMPILE_EXTERNAL_ITKTransformTools )
   set( ITKTransformTools_INSTALL_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ITKTransformTools-install )
   set( ITKTransformToolsTOOL ${ITKTransformTools_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/ITKTransformTools CACHE PATH "Path to a program." FORCE )
 else()
+  unset( ITKTransformToolsTOOL CACHE )
   list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
+  list( REMOVE_ITEM LIST_TOOLS ITKTransformTools )
 endif()
+
+include(FindExternalTools)
 
 #-----------------------------------------------------------------------------
 # Define Superbuild global variables
@@ -270,7 +276,7 @@ ExternalProject_Add(${proj}
     -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
     -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg-install
   )
-list(APPEND LIST_TOOLS DTI-Reg )
+
 ## Force rebuilding of the main subproject every time building from super structure
 ExternalProject_Add_Step(${proj} forcebuild
     COMMAND ${CMAKE_COMMAND} -E remove
