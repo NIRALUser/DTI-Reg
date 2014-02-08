@@ -10,6 +10,7 @@
 #include "DTI-Reg_Config.h"
 #include "DTI-Reg-bms.h"
 
+#define SlicerVersion "4.3"
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector )
 {
@@ -65,6 +66,10 @@ int main (int argc, char *argv[])
 #ifdef SLICER_EXTENSION
   //We add "ExternalBin" to the directory that have to be looked in for the other software
   ProgramsPathsVector.push_back( RanCommandDirectory + "/../ExternalBin" ) ;
+#ifdef __APPLE__
+  std::string BRAINSPath=std::string("/../../../../../lib/Slicer-")+std::string(SlicerVersion)+std::string("/cli-modules");
+  ProgramsPathsVector.push_back( RanCommandDirectory + BRAINSPath ) ;
+#endif
 #endif
   // If DTI-Reg is a Slicer Extension in the DTIAtlasBuilder package, give the path to the folder containing external non cli tools
   // If no SicerExtension, find_program will just search there and find nothing -> not an issue
