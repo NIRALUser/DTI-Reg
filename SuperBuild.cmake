@@ -255,6 +255,9 @@ endif()
 #------------------------------------------------------------------------------
 # Configure and build
 #------------------------------------------------------------------------------
+if(SLICER_EXTENSION)
+  set( SLICER_EXTENSION_PARAM -DSLICER_EXTENSION:BOOL=ON )
+endif()
 set(proj ${LOCAL_PROJECT_NAME})
 ExternalProject_Add(${proj}
   DEPENDS ${${LOCAL_PROJECT_NAME}_DEPENDENCIES}
@@ -267,6 +270,7 @@ ExternalProject_Add(${proj}
     ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
     ${COMMON_EXTERNAL_PROJECT_ARGS}
     -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
+    ${SLICER_EXTENSION_PARAM}
     -DANTSTOOL:PATH=${ANTSTOOL}
     -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WARPIMAGEMULTITRANSFORMTOOL}
     -DWARPTENSORIMAGEMULTITRANSFORMTOOL:PATH=${WARPTENSORIMAGEMULTITRANSFORMTOOL}

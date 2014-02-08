@@ -41,7 +41,9 @@ include(${SlicerExecutionModel_USE_FILE})
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
-
+if( SLICER_EXTENSION )
+  ADD_DEFINITIONS( -DSLICER_EXTENSION=1 )
+endif()
 set(DTIReg_SOURCE DTI-Reg.cxx DTI-Reg-bms.h)
 GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
 
