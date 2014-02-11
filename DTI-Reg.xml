@@ -10,17 +10,6 @@
   <acknowledgements>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</acknowledgements>
 
   <parameters>
-    <label>Paths</label>
-    <description>Program Paths</description>
-    <string-vector>
-      <name>ProgramsPathsVector</name>
-      <longflag>ProgramsPathsVector</longflag>
-      <label>Program Paths Vector</label>
-      <description>Vector containing paths where we can find needed programs</description>
-    </string-vector>
-  </parameters> 
-
-  <parameters>
     <label>Inputs</label>
     <description>Input volumes</description>
 
@@ -110,20 +99,11 @@
       <channel>output</channel>
     </image>
 
-    <string>
-      <name>ANTSOutbase</name>
-      <longflag>ANTSOutbase</longflag>
-      <label>Outbase for ANTS</label>
-      <description>Prefix for ANTS linear transformation and deformation field output files (default outbase: moving FA map prefix). Transform file is named "ANTSOutbase"Affine.txt and deformationfield is named "ANTSOutbase"Warp.nii.gz (default ANTS naming convention)</description>
-      <default></default>
-      <channel>output</channel>
-    </string>
-
     <transform fileExtensions=".txt">
       <name>outputTransform</name>
       <longflag>outputTransform</longflag>
-      <description>Output Transformation File (Text file)</description>
-      <label>Output Transform File for BRAINS</label>
+      <description>With ANTS, this is the affine part of the transform. With BRAINS, this is the initialization transform in case of warping, or a rigid/affine/BSpline transform otherwise. If The initialization is set to Off, it will return the identity transform</description>
+      <label>Output Transform File</label>
       <default></default>
       <channel>output</channel>
     </transform>
@@ -173,9 +153,8 @@
       <name>BRAINSRegistrationType</name>
       <longflag>BRAINSRegistrationType</longflag>
       <label>BRAINS Registration Type</label>
-      <description>BRAINS Registration type: None, Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
+      <description>BRAINS Registration type: Rigid, Affine, BSpline, Diffeomorphic, LogDemons, SymmetricLogDemons</description>
       <default>Diffeomorphic</default>
-      <element>None</element>
       <element>Rigid</element>
       <element>Affine</element>
       <element>BSpline</element>
@@ -259,9 +238,8 @@
       <name>ANTSRegistrationType</name>
       <longflag>ANTSRegistrationType</longflag>
       <label>ANTS Registration Type</label>
-      <description>ANTS Registration type: None, Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
+      <description>ANTS Registration type: Rigid, Affine, GreedyDiffeo, SpatioTempDiffeo</description>
       <default>GreedyDiffeo</default>
-      <element>None</element>
       <element>Rigid</element>
       <element>Affine</element>
       <element>Elast</element>
@@ -328,6 +306,24 @@
       <description>ANTS Use Histogram Matching</description>
       <default>false</default>
     </boolean>
+    <string>
+      <name>ANTSOutbase</name>
+      <longflag>ANTSOutbase</longflag>
+      <label>Outbase for ANTS</label>
+      <description>Prefix for ANTS linear transformation and deformation field output files (default outbase: moving FA map prefix). Transform file is named "ANTSOutbase"Affine.txt and deformationfield is named "ANTSOutbase"Warp.nii.gz (default ANTS naming convention)</description>
+      <default></default>
+      <channel>output</channel>
+    </string>
+  </parameters>
+  
+  <parameters advanced="true">
+    <label>Paths</label>
+    <description>Program Paths</description>
+    <string-vector>
+      <name>ProgramsPathsVector</name>
+      <longflag>ProgramsPathsVector</longflag>
+      <label>Program Paths Vector</label>
+      <description>Vector containing paths where we can find needed programs</description>
+    </string-vector>
   </parameters> 
-
 </executable>

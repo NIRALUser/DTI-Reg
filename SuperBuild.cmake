@@ -255,8 +255,8 @@ endif()
 #------------------------------------------------------------------------------
 # Configure and build
 #------------------------------------------------------------------------------
-if(SLICER_EXTENSION)
-  set( SLICER_EXTENSION_PARAM -DSLICER_EXTENSION:BOOL=ON )
+if( Slicer_CLIMODULES_BIN_DIR )
+  set( Slicer_CLIMODULES_BIN_DIR_OPTION -DSlicer_CLIMODULES_BIN_DIR:STRING=${Slicer_CLIMODULES_BIN_DIR} )
 endif()
 set(proj ${LOCAL_PROJECT_NAME})
 ExternalProject_Add(${proj}
@@ -270,7 +270,7 @@ ExternalProject_Add(${proj}
     ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
     ${COMMON_EXTERNAL_PROJECT_ARGS}
     -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
-    ${SLICER_EXTENSION_PARAM}
+    ${Slicer_CLIMODULES_BIN_DIR_OPTION}
     -DANTSTOOL:PATH=${ANTSTOOL}
     -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WARPIMAGEMULTITRANSFORMTOOL}
     -DWARPTENSORIMAGEMULTITRANSFORMTOOL:PATH=${WARPTENSORIMAGEMULTITRANSFORMTOOL}

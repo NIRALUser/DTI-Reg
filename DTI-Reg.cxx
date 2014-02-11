@@ -5,12 +5,12 @@
 #include <itksys/SystemTools.hxx>
 
 #include <bmScriptParser.h>
-
+#include <algorithm>
+#include "vcl_complex.h"
 #include "DTI-RegCLP.h"
 #include "DTI-Reg_Config.h"
 #include "DTI-Reg-bms.h"
 
-#define SlicerVersion "4.3"
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector )
 {
@@ -63,11 +63,11 @@ int main (int argc, char *argv[])
   }
   // Add it in the ProgramsPathsVector
   ProgramsPathsVector.push_back(RanCommandDirectory);
-#ifdef SLICER_EXTENSION
+#ifdef Slicer_CLIMODULES_BIN_DIR
   //We add "ExternalBin" to the directory that have to be looked in for the other software
   ProgramsPathsVector.push_back( RanCommandDirectory + "/../ExternalBin" ) ;
 #ifdef __APPLE__
-  std::string BRAINSPath=std::string("/../../../../../lib/Slicer-")+std::string(SlicerVersion)+std::string("/cli-modules");
+  std::string BRAINSPath = std::string( "/../../../../../" ) + std::string( Slicer_CLIMODULES_BIN_DIR ) ;
   ProgramsPathsVector.push_back( RanCommandDirectory + BRAINSPath ) ;
 #endif
 #endif
@@ -94,12 +94,48 @@ int main (int argc, char *argv[])
     std::cerr << "To display help, please type: DTI-Reg --help"<<std::endl;
     return EXIT_FAILURE ;    
   }
-  if (!ANTSRegistrationType.compare("None") && !BRAINSRegistrationType.compare("None"))
+#ifdef Slicer_CLIMODULES_BIN_DIR
+  //If it is an extension, than we want to have access to either the transformed DTI or
+  //to a transform
+  //We verify that either are defined
+  bool transformDefined = false ;
+  if( !outputVolume.empty() || !outputResampledFAVolume.empty() )
   {
-    std::cout<<"No registration to be performed..."<<std::endl;
+    transformDefined = true ;
+  }
+  bool warping = true ;
+  if( !method.compare("useScalar-BRAINS" )
+       && ( !BRAINSRegistrationType.compare("Rigid")
+            || !BRAINSRegistrationType.compare("Affine")
+          )
+    )
+  {
+    warping = false ;
+  }
+  else if( !method.compare("useScalar-ANTS" )
+              && ( !ANTSRegistrationType.compare("Affine")
+                   || !ANTSRegistrationType.compare("Rigid")
+                 )
+           )
+  {
+    warping = false ;
+  }
+  if( !warping && !outputTransform.empty() )
+  {
+    transformDefined = true ;
+  }
+  else if( warping && !outputDeformationFieldVolume.empty() )
+  {
+    transformDefined = true ;
+  }
+  if( !transformDefined )
+  {
+      std::cout<<"No output specified. Either define an output image (DTI or resampled FA),\
+ or an output transform ('output transform file' for Rigid and Affine\
+ registration ordeformation field otherwise)"<<std::endl;
     return EXIT_FAILURE;
   }
-
+#endif
   // Write BatchMake script
   std::string outputDir, bmsScriptPrefix;
   if ( outputVolume.compare("") ) // outputVolume NON empty
@@ -112,7 +148,6 @@ int main (int argc, char *argv[])
     outputDir = ".";
     bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(movingVolume);
   }
-
   std::string BatchMakeScriptFile = outputDir + "/" + bmsScriptPrefix + "_DTI-Reg.bms";
   std::ofstream file( BatchMakeScriptFile.c_str());
 
@@ -137,6 +172,31 @@ int main (int argc, char *argv[])
   {
     file <<"set (initialAffine \'\')"<<std::endl;
   }
+#ifdef Slicer_CLIMODULES_BIN_DIR
+  //if it is an extension, and if no output volume is given, we want to use the input
+  // directory (ie: Slicer temp directory) as our output directory
+  if( outputVolume.empty() )
+  {
+    outputDir = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(movingVolume).c_str() );
+    bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(outputVolume);
+  }
+#endif
+  //To avoid printing an error message, we have to set --gaussian-smoothing-sigmas
+  //It has to have the same number of values then the levels of downsampling
+  //We first find how many 'x' are in the iteration number (ANTSIterations)
+  size_t levels = std::count(ANTSIterations.begin(), ANTSIterations.end(), 'x') + 1 ;
+  std::string gaussianSmoothingSigmas ;
+  for( size_t i = 0 ; i < levels - 1 ; i++ )
+  {
+    double val = vcl_pow( 2.0, static_cast<int>( levels - i - 1 ) ) ;
+    ostringstream convert ;
+    convert << val ;
+    gaussianSmoothingSigmas += convert.str() ;
+    gaussianSmoothingSigmas += "x" ;
+  }
+  gaussianSmoothingSigmas += "1" ;
+  file <<"set (gaussianSmoothingSigmas "<<gaussianSmoothingSigmas<<")"<<std::endl;
+  file <<"set (OutputDir "<<outputDir<<")"<<std::endl;
   file <<"\n# Optional input mask volumes"<<std::endl;
   if (fixedMaskVolume.compare(""))
   {
@@ -348,8 +408,14 @@ int main (int argc, char *argv[])
 
   // Execute BatchMake
   bm::ScriptParser m_Parser;
-  m_Parser.Execute(BatchMakeScriptFile);
-
+  bool val = m_Parser.Execute(BatchMakeScriptFile);
   std::cout<<"DTI-Reg: Done!"<<std::endl;
-  return EXIT_SUCCESS;
+  if( val )
+  {
+    return EXIT_SUCCESS ;
+  }
+  else
+  {
+    return EXIT_FAILURE ;
+  }
 }

@@ -2,10 +2,6 @@
 
 #define DTIReg_Scalar_ANTS "GetFilename(fixedVolumeHead ${fixedVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
-GetFilename(OutputDir ${outputVolume} PATH)\n\
-If (${OutputDir} == '')\n\
-  set (OutputDir '.')\n\
-EndIf(${OutputDir})\n\
 \n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
@@ -64,7 +60,7 @@ set (DeformationField '')\n\
     set(IsWarping 0)\n\
   EndIf()\n\
 \n\
-  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedFAMap},${movingFAMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase})\n\
+  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedFAMap},${movingFAMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase} --gaussian-smoothing-sigmas ${gaussianSmoothingSigmas})\n\
 \n\
   If (${initialAffine} != '')\n\
     set (commandANTS ${commandANTS} -a ${initialAffine})\n\
@@ -157,26 +153,34 @@ If(${errorWarpTensorImageMultiTransform} != '')\n\
   exit()\n\
 Endif(${errorWarpTensorImageMultiTransform})\n\
 \n\
-If (${outputTransform} != '')\n\
-  echo()\n\
-  echo('Copying Transform file...')\n\
-  CopyFile(${Transform} ${outputTransform})\n\
-  DeleteFile(${Transform})\n\
-EndIf (${outputTransform})\n\
-\n\
 If (${outputDeformationFieldVolume} != '')\n\
   echo()\n\
   echo('Computing deformation field...')\n\
   set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputDeformationFieldVolume} -r ${fixedVolume} ${DeformationField} displacement ${Transform})\n\
   Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
+  echo(${outputConcatenationCmd})\n\
   If(${errorConcatenationCmd} != '')\n\
-    echo('Error ResampleDTIlogEuclidean: ' ${errorConcatenationCmd})\n\
+    echo('Error ITKTransformTools: ' ${errorConcatenationCmd})\n\
     exit()\n\
   Endif(${errorConcatenationCmd})\n\
-#  echo('Copying deformation field...')\n\
-#  CopyFile(${DeformationField} ${outputDeformationFieldVolume})\n\
-#  DeleteFile(${DeformationField})\n\
 EndIf(${outputDeformationFieldVolume})\n\
+\n\
+If (${outputTransform} != '')\n\
+  echo()\n\
+  echo('Copying Transform file...')\n\
+#  set( Cmd /Applications/Slicer.app/Contents/Extensions-22599/DTIAtlasBuilder/lib/Slicer-4.3/ExternalBin/MO2Aff ${Transform} ${outputTransform} )\n\
+  set( Cmd ${ITKTransformToolsCmd} MO2Aff ${Transform} ${outputTransform} )\n\
+  echo(${Cmd})\n\
+  Run(outputCmd ${Cmd} errorCmd)\n\
+  If(${errorCmd} != '')\n\
+    echo('Error ITKTransformTools: ' ${errorCmd})\n\
+    exit()\n\
+  Endif(${errorCmd})\n\
+  GetFilename(name_no_ext ${outputTransform} NAME_WITHOUT_EXTENSION)\n\
+  GetFilename(path ${outputTransform} PATH)\n\
+  CopyFile(${outputTransform} ${path}/${name_no_ext}_copy.txt)\n\
+#  DeleteFile(${Transform})\n\
+EndIf (${outputTransform})\n\
 \n\
 #Delete temporary files\n\
 If (${outputFixedFAVolume} == '')\n\
@@ -191,11 +195,6 @@ EndIf(${outputMovingFAVolume})"
 
 #define DTIReg_Scalar_BRAINS "GetFilename(fixedVolumeHead ${fixedVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
-#GetFilename(OutputDir ${fixedVolume} PATH)\n\
-GetFilename(OutputDir ${outputVolume} PATH)\n\
-If (${OutputDir} == '')\n\
-  set (OutputDir '.')\n\
-EndIf(${OutputDir})\n\
 \n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
@@ -280,10 +279,21 @@ Else(${initialAffine})\n\
   set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initializeTransformMode ${BRAINSinitializeTransformMode} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\
 Endif(${initialAffine})\n\
 Run (outputBRAINSFit ${commandBRAINSFit} errorBRAINSFit)\n\
-#If(${errorBRAINSFit} != '')\n\
-#  echo('Error BRAINSFit: ' ${errorBRAINSFit})\n\
+If(${errorBRAINSFit} != '')\n\
+  echo('Error BRAINSFit: ' ${errorBRAINSFit})\n\
 #  exit()\n\
-#Endif(${errorBRAINSFit})\n\
+Endif(${errorBRAINSFit})\n\
+If (${BRAINSRegistrationType} == 'BSpline' && outputDeformationFieldVolume != '' )\n\
+  echo()\n\
+  echo('Saving BSpline transform as deformation field...')\n\
+  set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputDeformationFieldVolume} -r ${fixedVolume} ${Transform})\n\
+  Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
+  echo(${outputConcatenationCmd})\n\
+  If(${errorConcatenationCmd} != '')\n\
+    echo('Error ITKTransformTools: ' ${errorConcatenationCmd})\n\
+    exit()\n\
+  Endif(${errorConcatenationCmd})\n\
+Endif (${BRAINSRegistrationType} == 'BSpline' && outputDeformationFieldVolume != '' )\n\
 If (${IsDemonsWarping} == 1)\n\
   DeleteFile(${ResampledFAMap})\n\
 EndIf(${IsDemonsWarping})\n\
