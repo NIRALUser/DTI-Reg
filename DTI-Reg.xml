@@ -103,16 +103,24 @@
       <name>outputTransform</name>
       <longflag>outputTransform</longflag>
       <description>With ANTS, this is the affine part of the transform. With BRAINS, this is the initialization transform in case of warping, or a rigid/affine/BSpline transform otherwise. If The initialization is set to Off, it will return the identity transform</description>
-      <label>Output Transform File</label>
+      <label>Output Linear Transform</label>
       <default></default>
+      <channel>output</channel>
+    </transform>
+
+    <transform fileExtensions=".tfm" type="bspline">
+      <name>outputBSplineTransform</name>
+      <longflag>BRAINSBSplineTransform</longflag>
+      <description>BSpline output transform (BRAINS)</description>
+      <label>Output BSpline Transform</label>
       <channel>output</channel>
     </transform>
 
     <image type="vector">
       <name>outputDeformationFieldVolume</name>
-      <longflag alias="output_field">outputDeformationFieldVolume</longflag>
-      <description>Output deformation field vector image</description>
-      <label>Output Deformation Field Volume</label>
+      <longflag alias="output_field" deprecatedalias="outputDeformationFieldVolume">outputDisplacementField</longflag>
+      <description>Output displacement field vector image</description>
+      <label>Output Displacement Field Volume</label>
       <default></default>
       <channel>output</channel>
     </image>
@@ -120,7 +128,7 @@
     <image type="scalar">
       <name>outputFixedFAVolume</name>
       <longflag>outputFixedFAVolume</longflag>
-      <label>fixed FA Volume</label>
+      <label>Fixed FA Volume</label>
       <description>fixed FA Volume</description>
       <default></default>
       <channel>output</channel>
@@ -129,7 +137,7 @@
     <image type="scalar">
       <name>outputMovingFAVolume</name>
       <longflag>outputMovingFAVolume</longflag>
-      <label>moving FA Volume</label>
+      <label>Moving FA Volume</label>
       <description>moving FA Volume</description>
       <default></default>
       <channel>output</channel>

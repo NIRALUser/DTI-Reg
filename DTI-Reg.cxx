@@ -103,36 +103,51 @@ int main (int argc, char *argv[])
   {
     transformDefined = true ;
   }
-  bool warping = true ;
-  if( !method.compare("useScalar-BRAINS" )
-       && ( !BRAINSRegistrationType.compare("Rigid")
-            || !BRAINSRegistrationType.compare("Affine")
-          )
+  bool linear = false ;
+  bool bspline = false ;
+  bool nonlinear = false ;
+  if( !method.compare("useScalar-BRAINS" ) )
+  {
+    if( !BRAINSRegistrationType.compare("Rigid")
+          || !BRAINSRegistrationType.compare("Affine")
+      )
+    {
+      linear = true ;
+    }
+    else if( !BRAINSRegistrationType.compare("BSpline") )
+    {
+      bspline = true ;
+    }
+    else
+    {
+      nonlinear = true ;
+    }
+  }
+  else if( !method.compare("useScalar-ANTS" ) )
+  {
+    if( !ANTSRegistrationType.compare("Affine")
+        || !ANTSRegistrationType.compare("Rigid")
+      )
+    {
+      linear = true ;
+    }
+    else
+    {
+      nonlinear = true ;
+    }
+  }
+  if( ( linear && !outputTransform.empty() )
+   || ( nonlinear && !outputDeformationFieldVolume.empty() )
+   || ( bspline && !outputBSplineTransform.empty() )
     )
-  {
-    warping = false ;
-  }
-  else if( !method.compare("useScalar-ANTS" )
-              && ( !ANTSRegistrationType.compare("Affine")
-                   || !ANTSRegistrationType.compare("Rigid")
-                 )
-           )
-  {
-    warping = false ;
-  }
-  if( !warping && !outputTransform.empty() )
-  {
-    transformDefined = true ;
-  }
-  else if( warping && !outputDeformationFieldVolume.empty() )
   {
     transformDefined = true ;
   }
   if( !transformDefined )
   {
-      std::cout<<"No output specified. Either define an output image (DTI or resampled FA),\
- or an output transform ('output transform file' for Rigid and Affine\
- registration ordeformation field otherwise)"<<std::endl;
+      std::cout<<"No output specified. Either define an output image ('Output DTI Volume' or 'Resampled FA Volume'),\
+ or 'Linear Output Transform' for rigid or affine registration, 'BSpline Output Transform' for BSpline registration, or\
+ or 'Output Displacement Field Volume' for any non-linear registration"<<std::endl;
     return EXIT_FAILURE;
   }
 #endif
@@ -184,18 +199,30 @@ int main (int argc, char *argv[])
   //To avoid printing an error message, we have to set --gaussian-smoothing-sigmas
   //It has to have the same number of values then the levels of downsampling
   //We first find how many 'x' are in the iteration number (ANTSIterations)
-  size_t levels = std::count(ANTSIterations.begin(), ANTSIterations.end(), 'x') + 1 ;
   std::string gaussianSmoothingSigmas ;
-  for( size_t i = 0 ; i < levels - 1 ; i++ )
+  if( nonlinear )
   {
-    double val = vcl_pow( 2.0, static_cast<int>( levels - i - 1 ) ) ;
-    ostringstream convert ;
-    convert << val ;
-    gaussianSmoothingSigmas += convert.str() ;
-    gaussianSmoothingSigmas += "x" ;
+    size_t levels = std::count(ANTSIterations.begin(), ANTSIterations.end(), 'x') + 1 ;
+    for( size_t i = 0 ; i < levels - 1 ; i++ )
+    {
+      double val = vcl_pow( 2.0, static_cast<int>( levels - i - 1 ) ) ;
+      ostringstream convert ;
+      convert << val ;
+      gaussianSmoothingSigmas += convert.str() ;
+      gaussianSmoothingSigmas += "x" ;
+    }
+    gaussianSmoothingSigmas += "1" ;
   }
-  gaussianSmoothingSigmas += "1" ;
+  else
+  {
+    gaussianSmoothingSigmas = "\'\'" ;
+  }
+  if( outputBSplineTransform.empty() )
+  {
+      outputBSplineTransform = "\'\'" ;
+  }
   file <<"set (gaussianSmoothingSigmas "<<gaussianSmoothingSigmas<<")"<<std::endl;
+  file <<"set (outputBSplineTransform "<<outputBSplineTransform<<")"<<std::endl;
   file <<"set (OutputDir "<<outputDir<<")"<<std::endl;
   file <<"\n# Optional input mask volumes"<<std::endl;
   if (fixedMaskVolume.compare(""))

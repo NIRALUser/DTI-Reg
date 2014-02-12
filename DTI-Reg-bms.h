@@ -176,9 +176,6 @@ If (${outputTransform} != '')\n\
     echo('Error ITKTransformTools: ' ${errorCmd})\n\
     exit()\n\
   Endif(${errorCmd})\n\
-  GetFilename(name_no_ext ${outputTransform} NAME_WITHOUT_EXTENSION)\n\
-  GetFilename(path ${outputTransform} PATH)\n\
-  CopyFile(${outputTransform} ${path}/${name_no_ext}_copy.txt)\n\
 #  DeleteFile(${Transform})\n\
 EndIf (${outputTransform})\n\
 \n\
@@ -255,6 +252,7 @@ Else(${BRAINSRegistrationType})\n\
   If (${BRAINSRegistrationType} == 'BSpline')\n\
     set (TransformType 'Rigid,Affine,BSpline')\n\
     set (RegSuffix 'BSpline')\n\
+    set (outputTransform ${outputBSplineTransform} )\n\
   Else()\n\
      set (TransformType 'Rigid,Affine')\n\
      set (RegSuffix 'AffReg')\n\
@@ -283,17 +281,6 @@ If(${errorBRAINSFit} != '')\n\
   echo('Error BRAINSFit: ' ${errorBRAINSFit})\n\
 #  exit()\n\
 Endif(${errorBRAINSFit})\n\
-If (${BRAINSRegistrationType} == 'BSpline' && outputDeformationFieldVolume != '' )\n\
-  echo()\n\
-  echo('Saving BSpline transform as deformation field...')\n\
-  set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputDeformationFieldVolume} -r ${fixedVolume} ${Transform})\n\
-  Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
-  echo(${outputConcatenationCmd})\n\
-  If(${errorConcatenationCmd} != '')\n\
-    echo('Error ITKTransformTools: ' ${errorConcatenationCmd})\n\
-    exit()\n\
-  Endif(${errorConcatenationCmd})\n\
-Endif (${BRAINSRegistrationType} == 'BSpline' && outputDeformationFieldVolume != '' )\n\
 If (${IsDemonsWarping} == 1)\n\
   DeleteFile(${ResampledFAMap})\n\
 EndIf(${IsDemonsWarping})\n\
