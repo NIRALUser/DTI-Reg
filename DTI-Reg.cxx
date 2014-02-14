@@ -6,7 +6,7 @@
 
 #include <bmScriptParser.h>
 #include <algorithm>
-#include "vcl_complex.h"
+#include <math.h>
 #include "DTI-RegCLP.h"
 #include "DTI-Reg_Config.h"
 #include "DTI-Reg-bms.h"
@@ -205,7 +205,7 @@ int main (int argc, char *argv[])
     size_t levels = std::count(ANTSIterations.begin(), ANTSIterations.end(), 'x') + 1 ;
     for( size_t i = 0 ; i < levels - 1 ; i++ )
     {
-      double val = vcl_pow( 2.0, static_cast<int>( levels - i - 1 ) ) ;
+      double val = pow( 2.0, static_cast<int>( levels - i - 1 ) ) ;
       ostringstream convert ;
       convert << val ;
       gaussianSmoothingSigmas += convert.str() ;
