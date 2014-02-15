@@ -1,6 +1,9 @@
 if( NOT EXTERNAL_SOURCE_DIRECTORY )
   set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
 endif()
+if( NOT EXTERNAL_BINARY_DIRECTORY )
+  set( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+endif()
 
 
 # Make sure this file is included only once by creating globally unique varibles
@@ -30,7 +33,7 @@ if( NOT ${proj}_INSTALL_DIRECTORY )
   if( INSTALL_DIRECTORY )
     set( ${proj}_INSTALL_DIRECTORY ${INSTALL_DIRECTORY} )
   else()
-    set( ${proj}_INSTALL_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${proj}-install )
+    set( ${proj}_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install )
   endif()
 endif()
 
@@ -78,7 +81,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
-    BINARY_DIR ${proj}-build
+    BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
     LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards
     LOG_BUILD     0  # Wrap build in script to to ignore log output from dashboards
     LOG_TEST      0  # Wrap test in script to to ignore log output from dashboards

@@ -1,6 +1,9 @@
 if( NOT EXTERNAL_SOURCE_DIRECTORY )
   set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
 endif()
+if( NOT EXTERNAL_BINARY_DIRECTORY )
+  set( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+endif()
 
 # Make sure this file is included only once
 get_filename_component(CMAKE_CURRENT_LIST_FILENAME ${CMAKE_CURRENT_LIST_FILE} NAME_WE)
@@ -36,13 +39,13 @@ if(NOT DEFINED Uncrustify_EXE AND NOT ${USE_SYSTEM_Uncrustify})
     ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
 
-    BINARY_DIR ${proj}-build
-    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_BINARY_DIR}/Utils
+    BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${EXTERNAL_BINARY_DIRECTORY}/Utils
     DEPENDS
       ${Uncrustify_DEPENDENCIES}
     )
 
-  set(Uncrustify_EXE ${CMAKE_BINARY_DIR}/Utils/bin/uncrustify)
+  set(Uncrustify_EXE ${EXTERNAL_BINARY_DIRECTORY}/Utils/bin/uncrustify)
 
 else()
   if(${USE_SYSTEM_Uncrustify})

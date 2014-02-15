@@ -1,7 +1,9 @@
 if( NOT EXTERNAL_SOURCE_DIRECTORY )
   set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
 endif()
-
+if( NOT EXTERNAL_BINARY_DIRECTORY )
+  set( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+endif()
 # Make sure this file is included only once
 get_filename_component(CMAKE_CURRENT_LIST_FILENAME ${CMAKE_CURRENT_LIST_FILE} NAME_WE)
 if(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED)
@@ -32,15 +34,15 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
   ExternalProject_Add(${proj}
       GIT_REPOSITORY ${git_protocol}://batchmake.org/BatchMake.git
       GIT_TAG "8addbdb62f0135ba01ffe12ddfc32121b6d66ef5" # 01-30-2013 # "0abb2faca1251f808ab3d0b820cc27b570a994f1" # 08-26-2012 updated for ITKv4 # "43d21fcccd09e5a12497bc1fb924bc6d5718f98c" # used in DTI-Reg 12-21-2012
-      SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/BatchMake
-      BINARY_DIR BatchMake-build
+      SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
+      BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
       CMAKE_GENERATOR ${gen}
       CMAKE_ARGS
         ${COMMON_BUILD_OPTIONS_FOR_EXTERNALPACKAGES}
-        -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_CURRENT_BINARY_DIR}/BatchMake-build/bin
-        -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_CURRENT_BINARY_DIR}/BatchMake-build/bin
-        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_CURRENT_BINARY_DIR}/BatchMake-build/bin
-        -DCMAKE_BUNDLE_OUTPUT_DIRECTORY:PATH=${CMAKE_CURRENT_BINARY_DIR}/BatchMake-build/bin
+        -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-build/bin
+        -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-build/bin
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-build/bin
+        -DCMAKE_BUNDLE_OUTPUT_DIRECTORY:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-build/bin
         -DBUILD_SHARED_LIBS:BOOL=OFF
         -DBUILD_TESTING:BOOL=OFF
         -DUSE_FLTK:BOOL=OFF
@@ -50,11 +52,10 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
         -DITK_DIR:PATH=${ITK_DIR}
         ${BatchMakeCURLCmakeArg}
       INSTALL_COMMAND ""
-      PATCH_COMMAND ${CMAKE_COMMAND} -DCMAKE_COMMAND:STRING=${CMAKE_COMMAND} -DINPUT_CURRENT_SOURCE_DIR:PATH=${CMAKE_CURRENT_SOURCE_DIR} -DINPUT_CURRENT_BINARY_DIR:FILE=${CMAKE_CURRENT_BINARY_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/BatchMake-patch-cmd.cmake
-#      PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/BatchMake-patch-cmd.cmake
+      PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/BatchMakePatchedZip.c ${EXTERNAL_SOURCE_DIRECTORY}/${proj}/Utilities/Zip/zip.c
       DEPENDS  ${${proj}_DEPENDENCIES}
     )
-    set(BatchMake_DIR ${CMAKE_CURRENT_BINARY_DIR}/BatchMake-build)
+    set(BatchMake_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build)
     mark_as_advanced(CLEAR BatchMake_DIR)
     set(BatchMake_ITK_DIR ${ITK_DIR}) # If batchmake recompiled, no include(${BatchMake_USE_FILE}) has been done so BatchMake_ITK_DIR does not exist, and we used ${ITK_DIR} to compile it.
     set(BatchMake_DEPEND BatchMake)
