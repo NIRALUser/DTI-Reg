@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
   //It has to have the same number of values then the levels of downsampling
   //We first find how many 'x' are in the iteration number (ANTSIterations)
   std::string gaussianSmoothingSigmas ;
-  if( nonlinear )
+  if( !method.compare("useScalar-ANTS" ) && ANTSRegistrationType.compare("Affine") && ANTSRegistrationType.compare("Rigid") )
   {
     size_t levels = std::count(ANTSIterations.begin(), ANTSIterations.end(), 'x') + 1 ;
     for( size_t i = 0 ; i < levels - 1 ; i++ )
