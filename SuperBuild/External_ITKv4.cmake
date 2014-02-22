@@ -25,27 +25,37 @@ ProjectDependancyPush(CACHED_proj ${proj})
 # SlicerMacroCheckExternalProjectDependency
 set(extProjName ITK) #The find_package known name
 set(proj      ITKv4) #This local name
+set(${extProjName}_REQUIRED_VERSION ${${extProjName}_VERSION_MAJOR})  #If a required version is necessary, then set this, else leave blank
 
 #if(${USE_SYSTEM_${extProjName}})
 #  unset(${extProjName}_DIR CACHE)
 #endif()
 
 # Sanity checks
-if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
-  message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
-endif()
-
-# Set dependency list
+#if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
+#  message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
+#endif()
 set(${proj}_DEPENDENCIES "")
-if(${PROJECT_NAME}_BUILD_DICOM_SUPPORT)
-  list(APPEND ${proj}_DEPENDENCIES DCMTK)
-endif()
 
-# Include dependent projects if any
-SlicerMacroCheckExternalProjectDependency(${proj})
-
-if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}" AND NOT "${USE_SYSTEM_${extProjName}}" ) ) )
+if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
   #message(STATUS "${__indent}Adding project ${proj}")
+  # Set dependency list
+  if(${PRIMARY_PROJECT_NAME}_BUILD_DICOM_SUPPORT)
+    list(APPEND ${proj}_DEPENDENCIES DCMTK)
+  endif()
+  if( ${PRIMARY_PROJECT_NAME}_BUILD_TIFF_SUPPORT )
+    list(APPEND ${proj}_DEPENDENCIES TIFF)
+  endif()
+  if( ${PRIMARY_PROJECT_NAME}_BUILD_JPEG_SUPPORT )
+    list(APPEND ${proj}_DEPENDENCIES JPEG)
+  endif()
+  if( ${PRIMARY_PROJECT_NAME}_BUILD_ZLIB_SUPPORT )
+    list(APPEND ${proj}_DEPENDENCIES zlib)
+  endif()
+
+
+  # Include dependent projects if any
+  SlicerMacroCheckExternalProjectDependency(${proj})
 
   # Set CMake OSX variable to pass down the external project
   set(CMAKE_OSX_EXTERNAL_PROJECT_ARGS)
@@ -55,25 +65,44 @@ if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}
       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
       -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
   endif()
-
   ### --- Project specific additions here
-  set(${proj}_DCMTK_ARGS)
-  if(${PROJECT_NAME}_BUILD_DICOM_SUPPORT)
+  if(${PRIMARY_PROJECT_NAME}_BUILD_DICOM_SUPPORT)
     set(${proj}_DCMTK_ARGS
-      -DITK_USE_SYSTEM_DCMTK:BOOL=ON
       -DDCMTK_DIR:PATH=${DCMTK_DIR}
+      -DModule_ITKDCMTK:BOOL=ON
       -DModule_ITKIODCMTK:BOOL=ON
       )
   endif()
 
-  if(${PROJECT_NAME}_BUILD_FFTWF_SUPPORT)
+  if(${PRIMARY_PROJECT_NAME}_BUILD_FFTWF_SUPPORT)
     set(${proj}_FFTWF_ARGS
       -DITK_USE_FFTWF:BOOL=ON
       )
   endif()
-  if(${PROJECT_NAME}_BUILD_FFTWD_SUPPORT)
+  if(${PRIMARY_PROJECT_NAME}_BUILD_FFTWD_SUPPORT)
     set(${proj}_FFTWD_ARGS
       -DITK_USE_FFTWD:BOOL=ON
+      )
+  endif()
+  if( ${PRIMARY_PROJECT_NAME}_BUILD_TIFF_SUPPORT )
+    set(${proj}_TIFF_ARGS
+      -DITK_USE_SYSTEM_TIFF:BOOL=ON
+      -DTIFF_LIBRARY:FILEPATH=${TIFF_LIBRARY}
+      -DTIFF_INCLUDE_DIR:PATH=${TIFF_INCLUDE_DIR}
+       )
+  endif()
+  if( ${PRIMARY_PROJECT_NAME}_BUILD_JPEG_SUPPORT )
+    set(${proj}_JPEG_ARGS
+      -DITK_USE_SYSTEM_JPEG:BOOL=ON
+      -DJPEG_LIBRARY:FILEPATH=${JPEG_LIBRARY}
+      -DJPEG_INCLUDE_DIR:PATH=${JPEG_INCLUDE_DIR}
+      )
+  endif()
+  if( ${PRIMARY_PROJECT_NAME}_BUILD_ZLIB_SUPPORT )
+    set(${proj}_ZLIB_ARGS
+      -DITK_USE_SYSTEM_ZLIB:BOOL=ON
+      -DZLIB_INCLUDE_DIRS:STRING=${ZLIB_INCLUDE_DIRS}
+      -DZLIB_LIBRARIES:STRING=${ZLIB_LIBRARIES}
       )
   endif()
 
@@ -105,26 +134,27 @@ if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}
   string(REPLACE "-fopenmp" "" ITK_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   string(REPLACE "-fopenmp" "" ITK_CMAKE_CXX_FLAGS "${CMAKE_CX_FLAGS}")
 
-  if(NOT DEFINED git_protocol)
-      set(git_protocol "git")
-  endif()
+  find_package(ZLIB REQUIRED)
+
+  set(${proj}_INSTALL_PATH "${EXTERNAL_BINARY_DIRECTORY}/${proj}-install")
 
   set(${proj}_CMAKE_OPTIONS
       -DBUILD_TESTING:BOOL=OFF
       -DBUILD_EXAMPLES:BOOL=OFF
       -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
       -DITK_LEGACY_REMOVE:BOOL=OFF
+      -DITK_FUTURE_LEGACY_REMOVE:=BOOL=ON
       -DITKV3_COMPATIBILITY:BOOL=ON
-      -DITK_BUILD_ALL_MODULES:BOOL=ON
-      -DITK_USE_REVIEW:BOOL=ON
+      -DITK_BUILD_DEFAULT_MODULES:BOOL=ON
+      -DModule_ITKReview:BOOL=ON
       #-DITK_INSTALL_NO_DEVELOPMENT:BOOL=ON
-      -DITK_BUILD_ALL_MODULES:BOOL=ON
       -DKWSYS_USE_MD5:BOOL=ON # Required by SlicerExecutionModel
       -DITK_WRAPPING:BOOL=OFF #${BUILD_SHARED_LIBS} ## HACK:  QUICK CHANGE
-      -DITK_USE_SYSTEM_DCMTK:BOOL=${${PROJECT_NAME}_BUILD_DICOM_SUPPORT}
-
-      -DFetch_MGHIO:BOOL=ON  # Allow building of the MGHIO classes
-
+      -DModule_MGHIO:BOOL=ON  # Allow building of the MGHIO classes
+      -DITK_USE_SYSTEM_DCMTK:BOOL=${${PRIMARY_PROJECT_NAME}_BUILD_DICOM_SUPPORT}
+      ${${proj}_TIFF_ARGS}
+      ${${proj}_JPEG_ARGS}
+      ${${proj}_ZLIB_ARGS}
       ${${proj}_DCMTK_ARGS}
       ${${proj}_WRAP_ARGS}
       ${${proj}_FFTWF_ARGS}
@@ -132,8 +162,8 @@ if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}
     )
   ### --- End Project specific additions
   set(${proj}_REPOSITORY ${git_protocol}://itk.org/ITK.git)
-  set(${proj}_GIT_TAG 668714cf39f3287e7e08ee53bdc6ae057122b05c)
-  set(ITK_VERSION_ID ITK-4.3)
+  set(${proj}_GIT_TAG a316296e1ef188ce89b7a07dc61313afdad3cf30)
+  set(ITK_VERSION_ID ITK-4.6)
 
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
@@ -147,8 +177,6 @@ if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}
     ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     CMAKE_GENERATOR ${gen}
     CMAKE_ARGS
-      -Wno-dev
-      --no-warn-unused-cli
       ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
       ${COMMON_EXTERNAL_PROJECT_ARGS}
       ${${proj}_CMAKE_OPTIONS}
@@ -157,12 +185,17 @@ if(NOT ( DEFINED "${extProjName}_DIR" OR ( DEFINED "${USE_SYSTEM_${extProjName}}
       ${${proj}_DEPENDENCIES}
   )
   set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install/lib/cmake/${ITK_VERSION_ID})
+  if(${PRIMARY_PROJECT_NAME}_BUILD_FFTWF_SPPORT)
+    set(FFTWF_LIB ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install/lib/${ITK_VERSION}/libfftw3f.a)
+    set(FFTW_INCLUDE_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install/include/${ITK_VERSION}/Algorithms)
+  endif()
+  if(${PRIMARY_PROJECT_NAME}_BUILD_FFTWD_SPPORT)
+    set(FFTWD_LIB ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install/lib/${ITK_VERSION}/libfftw3.a)
+    set(FFTW_INCLUDE_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install/include/${ITK_VERSION}/Algorithms)
+  endif()
 else()
   if(${USE_SYSTEM_${extProjName}})
     find_package(${extProjName} ${ITK_VERSION_MAJOR} REQUIRED)
-    if(NOT ${extProjName}_DIR)
-      message(FATAL_ERROR "To use the system ${extProjName}, set ${extProjName}_DIR")
-    endif()
     message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
   endif()
   # The project is provided using ${extProjName}_DIR, nevertheless since other
@@ -171,6 +204,8 @@ else()
 endif()
 
 list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH)
+_expand_external_project_vars()
+set(COMMON_EXTERNAL_PROJECT_ARGS ${${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_ARGS})
 
 ProjectDependancyPop(CACHED_extProjName extProjName)
 ProjectDependancyPop(CACHED_proj proj)
