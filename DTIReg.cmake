@@ -30,7 +30,7 @@ endif()
 include(${ITK_USE_FILE})
 
 #-----------------------------------------------------------------------------
-find_package(BatchMake )
+find_package(BatchMake REQUIRED)
 include(${BatchMake_USE_FILE})
 
 #-----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ set(DTIReg_SOURCE DTI-Reg.cxx DTI-Reg-bms.h)
 GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
 
 add_executable( DTI-Reg ${DTIReg_SOURCE} )
-target_link_libraries(DTI-Reg ${ITK_LIBRARIES} BatchMakeLib)
+target_link_libraries(DTI-Reg ${ITK_LIBRARIES} ${BatchMak_LIBRARIES})
 
 install(TARGETS DTI-Reg DESTINATION ${INSTALL_RUNTIME_DESTINATION} )
 
