@@ -66,6 +66,9 @@ int main (int argc, char *argv[])
 #ifdef Slicer_CLIMODULES_BIN_DIR
   //We add "ExternalBin" to the directory that have to be looked in for the other software
   ProgramsPathsVector.push_back( RanCommandDirectory + "/../ExternalBin" ) ;
+  //Since Slicer r23212, dependent extensions can be downloaded automatically. DTIProcess will therefore not be installed in ExternalBin
+  // but it will be in the DTIProcess extension directory. We add this path to where DTIReg looks for other software
+  ProgramsPathsVector.push_back( RanCommandDirectory + "/../../../../DTIProcess/lib/Slicer4.3/cli-modules" ) ;
 #ifdef __APPLE__
   std::string BRAINSPath = std::string( "/../../../../../" ) + std::string( Slicer_CLIMODULES_BIN_DIR ) ;
   ProgramsPathsVector.push_back( RanCommandDirectory + BRAINSPath ) ;
