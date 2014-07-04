@@ -1,16 +1,5 @@
-
-
 set(MODULE_NAME ${EXTENSION_NAME}) # Do not use 'project()'
 set(MODULE_TITLE ${MODULE_NAME})
-
-#-----------------------------------------------------------------------------
-find_package(SlicerExecutionModel NO_MODULE REQUIRED GenerateCLP)
-include(${GenerateCLP_USE_FILE})
-include(${SlicerExecutionModel_USE_FILE})
-
-include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
-
-SETIFEMPTY(INSTALL_RUNTIME_DESTINATION bin)
 
 #-----------------------------------------------------------------------------
 # Update CMake module path
@@ -36,8 +25,17 @@ endif()
 include(${ITK_USE_FILE})
 
 #-----------------------------------------------------------------------------
+find_package(SlicerExecutionModel NO_MODULE REQUIRED GenerateCLP)
+include(${GenerateCLP_USE_FILE})
+include(${SlicerExecutionModel_USE_FILE})
+
+
+#-----------------------------------------------------------------------------
 find_package(BatchMake REQUIRED)
 include(${BatchMake_USE_FILE})
+
+include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
+SETIFEMPTY(INSTALL_RUNTIME_DESTINATION bin)
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
