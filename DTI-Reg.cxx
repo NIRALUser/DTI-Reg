@@ -24,7 +24,7 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
     }
   }
   pathString = cmakePathString ;
-  if( !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
+  if( pathString.size() >= 9 && !pathString.substr(pathString.size() - 9 , 9 ).compare( "-NOTFOUND" ) )
   {
     pathString = "" ;
   }
@@ -51,7 +51,6 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
 int main (int argc, char *argv[])
 {
   PARSE_ARGS;
-
 //  std::vector< std::string > path_vec ; // initialized by the cmd line vector ProgramsPathsVector
 
   // Added by Adrien Kaiser : the tools are either in the same directory than the DTI-Reg executable ran or in the PATH
@@ -75,12 +74,12 @@ int main (int argc, char *argv[])
 #endif
 #endif
   // If DTI-Reg is a Slicer Extension in the DTIAtlasBuilder package, give the path to the folder containing external non cli tools
-  // If no SicerExtension, find_program will just search there and find nothing -> not an issue
+  #ifdef Slicer_CLIMODULES_BIN_DIR  
   std::string LinuxWindowsExternalBinDir = RanCommandDirectory + "/../../../ExternalBin"; // On linux or windows, the executable will be in Ext/lib/Slicer4.2/cli_modules and the tools will be in Ext/ExternalBin
   std::string MacExternalBinDir = RanCommandDirectory + "/../ExternalBin"; // On mac, the executable will be in Ext/cli_modules and the tools will be in Ext/ExternalBin
   ProgramsPathsVector.push_back(LinuxWindowsExternalBinDir);
   ProgramsPathsVector.push_back(MacExternalBinDir);
-
+  #endif
 // for(int i=0;i<ProgramsPathsVector.size();i++) std::cout<<ProgramsPathsVector[i]<<std::endl;
 
   std::cout<<"DTI-Reg: ";
@@ -244,7 +243,6 @@ int main (int argc, char *argv[])
   {
     file <<"set (movingMaskVolume \'\')"<<std::endl;
   }
-
   file <<"\n# Registration type"<<std::endl;
   file <<"set (Method "<<method<<")"<<std::endl;
   file <<"set (ANTSRegistrationType "<<ANTSRegistrationType<<")"<<std::endl;
@@ -259,7 +257,6 @@ int main (int argc, char *argv[])
   {
     file <<"set (outputVolume \'\')"<<std::endl;
   }
-
   if (outputFixedFAVolume.compare(""))
   {
     file <<"set (outputFixedFAVolume "<<outputFixedFAVolume<<")"<<std::endl;
@@ -329,7 +326,6 @@ int main (int argc, char *argv[])
     {
       file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
     }
-       
     std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
     if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , ProgramsPathsVector ) )
     {
@@ -390,7 +386,6 @@ int main (int argc, char *argv[])
       file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
     }   
   } // if (!method.compare("useScalar-ANTS"))
-  
   std::string dtiprocessCmd = dtiprocessTool;
   if( SetPath(dtiprocessCmd, "dtiprocess" , ProgramsPathsVector ) )
   {
@@ -400,7 +395,6 @@ int main (int argc, char *argv[])
   {
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
   }
-  
   std::string ResampleDTICmd = ResampleDTITool;
   if( SetPath(ResampleDTICmd, "ResampleDTIlogEuclidean" , ProgramsPathsVector ) )
   {
@@ -410,7 +404,6 @@ int main (int argc, char *argv[])
   {
     file <<"set (ResampleDTICmd "<<ResampleDTICmd<<")"<<std::endl;
   }
-
   std::string ITKTransformToolsCmd = ITKTransformToolsTool;
   if( SetPath(ITKTransformToolsCmd, "ITKTransformTools" , ProgramsPathsVector ) )
   {
@@ -420,7 +413,6 @@ int main (int argc, char *argv[])
   {
     file <<"set (ITKTransformToolsCmd "<<ITKTransformToolsCmd<<")"<<std::endl;
   }
-
   // Include main BatchMake script
   file <<"\n#Include main batchMake script"<<std::endl;
   if (!method.compare("useScalar-ANTS"))
@@ -433,9 +425,7 @@ int main (int argc, char *argv[])
     std::cout<<"Registration via BRAINS..."<<std::endl;
     file <<DTIReg_Scalar_BRAINS<<std::endl; // Added by Adrien Kaiser : String variable defined in DTI-Reg-bms.h that contains the bms script for BRAINS
   }
-
   file.close();
-
   // Execute BatchMake
   bm::ScriptParser m_Parser;
   bool val = m_Parser.Execute(BatchMakeScriptFile);
