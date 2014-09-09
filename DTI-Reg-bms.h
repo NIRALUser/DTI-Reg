@@ -52,7 +52,7 @@ set(Transform '')\n\
 set (DeformationField '')\n\
 \n\
   If (${ANTSOutbase} == '')\n\
-    set (ANTSOutbase ${OutputDir}/${movingVolumeHead}_FA_)\n\
+    set (ANTSOutbase ${OutputDir}/${movingVolumeHead}_ANTS_)\n\
   EndIf (${ANTSOutbase})\n\
 \n\
   set(IsWarping 1)\n\
@@ -153,17 +153,21 @@ If(${errorWarpTensorImageMultiTransform} != '')\n\
   exit()\n\
 Endif(${errorWarpTensorImageMultiTransform})\n\
 \n\
-If (${outputDeformationFieldVolume} != '')\n\
-  echo()\n\
-  echo('Computing deformation field...')\n\
-  set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputDeformationFieldVolume} -r ${fixedVolume} ${DeformationField} displacement ${Transform})\n\
-  Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
-  echo(${outputConcatenationCmd})\n\
-  If(${errorConcatenationCmd} != '')\n\
-    echo('Error ITKTransformTools: ' ${errorConcatenationCmd})\n\
-    exit()\n\
-  Endif(${errorConcatenationCmd})\n\
-EndIf(${outputDeformationFieldVolume})\n\
+If(${IsWarping} == 1)\n\
+  If (${outputDeformationFieldVolume} != '')\n\
+    echo()\n\
+    echo('Computing deformation field...')\n\
+    set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputDeformationFieldVolume} -r ${fixedVolume} ${DeformationField} displacement ${Transform})\n\
+    Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
+    echo(${outputConcatenationCmd})\n\
+    If(${errorConcatenationCmd} != '')\n\
+      echo('Error ITKTransformTools: ' ${errorConcatenationCmd})\n\
+      exit()\n\
+    Endif(${errorConcatenationCmd})\n\
+  EndIf(${outputDeformationFieldVolume})\n\
+Else(${IsWarping} == 1)\n\
+  echo('Warning: '${outputDeformationFieldVolume}' is specified but registration is only rigid or affine. This value will not be used.')\n\
+EndIf(${IsWarping})\n\
 \n\
 If (${outputTransform} != '')\n\
   echo()\n\
@@ -269,7 +273,7 @@ Endif(${outputResampledFAVolume})\n\
 If (${outputTransform} != '')\n\
   set (Transform ${outputTransform})\n\
 Else(${outputTransform})\n\
-  set (Transform ${OutputDir}/${movingVolumeHead}_FA_${RegSuffix}.txt)\n\
+  set (Transform ${OutputDir}/${movingVolumeHead}_BRAINSFit_${RegSuffix}.txt)\n\
 Endif(${outputTransform})\n\
 If (${initialAffine} != '')\n\
   set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initialTransform ${initialAffine} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\
