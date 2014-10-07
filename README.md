@@ -1,3 +1,7 @@
+#DTIReg
+
+##What is it?
+
 DTI-Reg is an open-source C++ application that performs pair-wise DTI registration either by: 
  - Method 1: Using scalar FA map to drive the registration.
  - Method 2: Directly registering the tensor images with DTI-TK (currently not implemented)
@@ -13,4 +17,10 @@ Method 1:
 Method 2:  (currently not implemented)
  - Registration/warping via DTI-TK
 
+##License
 
+See License.txt
+
+##More information
+
+https://www.nitrc.org/projects/dtireg/
