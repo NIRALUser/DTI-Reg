@@ -5,7 +5,6 @@ if( NOT EXTERNAL_BINARY_DIRECTORY )
   set( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 endif()
 
-
 # Make sure this file is included only once by creating globally unique varibles
 # based on the name of this included file.
 get_filename_component(CMAKE_CURRENT_LIST_FILENAME ${CMAKE_CURRENT_LIST_FILE} NAME_WE)
@@ -29,14 +28,6 @@ set(extProjName ITKTransformTools ) #The find_package known name
 set(proj        ${extProjName} ) #This local name
 set(${extProjName}_REQUIRED_VERSION "")  #If a required version is necessary, then set this, else leave blank
 
-if( NOT ${proj}_INSTALL_DIRECTORY )
-  if( INSTALL_DIRECTORY )
-    set( ${proj}_INSTALL_DIRECTORY ${INSTALL_DIRECTORY} )
-  else()
-    set( ${proj}_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install )
-  endif()
-endif()
-
 #if(${USE_SYSTEM_${extProjName}})
 #  unset(${extProjName}_DIR CACHE)
 #endif()
@@ -46,14 +37,14 @@ if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
   message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
 endif()
 
-# Set dependency list
-set(${proj}_DEPENDENCIES ITKv4 )
-
-# Include dependent projects if any
-SlicerMacroCheckExternalProjectDependency(${proj})
-
 if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
   #message(STATUS "${__indent}Adding project ${proj}")
+
+  # Set dependency list
+  set(${proj}_DEPENDENCIES ITKv4 )
+
+  # Include dependent projects if any
+  SlicerMacroCheckExternalProjectDependency(${proj})
 
   # Set CMake OSX variable to pass down the external project
   set(CMAKE_OSX_EXTERNAL_PROJECT_ARGS)
@@ -63,20 +54,14 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
       -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
   endif()
-
   ### --- Project specific additions here
   set(${proj}_CMAKE_OPTIONS
-    -DITK_DIR:PATH=${ITK_DIR}
-    -DCMAKE_INSTALL_PREFIX:PATH=${${proj}_INSTALL_DIRECTORY}
+    -DUSE_SYSTEM_ITK:BOOL=ON
     )
 
-  if(NOT DEFINED git_protocol)
-      set(git_protocol "git")
-  endif()
-
   ### --- End Project specific additions
-  set(${proj}_REPOSITORY ${git_protocol}://github.com/fbudin69500/ITKTransformTools.git)
-  set(${proj}_GIT_TAG e222cb139b86bb287be3d16e8ced7fd80ecb9460 )
+  set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/ITKTransformTools.git )
+  set( ${proj}_GIT_TAG 44bd9c45e809ddb8c665498b6d7e856e1ee3c27d )
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
@@ -92,11 +77,14 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
       ${COMMON_EXTERNAL_PROJECT_ARGS}
       ${${proj}_CMAKE_OPTIONS}
-## We really do want to install in order to limit # of include paths INSTALL_COMMAND ""
+      ## We really do want to install to remove uncertainty about where the tools are
+      ## (on Windows, tools might be in subfolders, like "Release", "Debug",...)
+      -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
     DEPENDS
       ${${proj}_DEPENDENCIES}
+    INSTALL_COMMAND ""
   )
-  set( ${extProjName}_DIR ${${proj}_INSTALL_DIRECTORY} )
+  set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build)
 else()
   if(${USE_SYSTEM_${extProjName}})
     find_package(${extProjName} ${${extProjName}_REQUIRED_VERSION} REQUIRED)
