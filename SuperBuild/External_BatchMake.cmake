@@ -32,8 +32,8 @@ SlicerMacroCheckExternalProjectDependency(${proj})
 if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
   #message(STATUS "${__indent}Adding project ${proj}")
   ExternalProject_Add(${proj}
-      GIT_REPOSITORY ${git_protocol}://batchmake.org/BatchMake.git
-      GIT_TAG "8addbdb62f0135ba01ffe12ddfc32121b6d66ef5" # 01-30-2013 # "0abb2faca1251f808ab3d0b820cc27b570a994f1" # 08-26-2012 updated for ITKv4 # "43d21fcccd09e5a12497bc1fb924bc6d5718f98c" # used in DTI-Reg 12-21-2012
+      GIT_REPOSITORY ${git_protocol}://github.com/NIRALUser/BatchMake.git
+      GIT_TAG 5e1c185b564ac2acef35ba68fbde370c19ba33de
       SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
       BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
       CMAKE_GENERATOR ${gen}
@@ -52,7 +52,6 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
         -DITK_DIR:PATH=${ITK_DIR}
         ${BatchMakeCURLCmakeArg}
       INSTALL_COMMAND ""
-      PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/BatchMakePatchedZip.c ${EXTERNAL_SOURCE_DIRECTORY}/${proj}/Utilities/Zip/zip.c
       DEPENDS  ${${proj}_DEPENDENCIES}
     )
     set(BatchMake_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build)
