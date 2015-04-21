@@ -56,11 +56,7 @@ include(PreventInBuildInstalls)
 #-----------------------------------------------------------------------------
 # CMake Function(s) and Macro(s)
 #-----------------------------------------------------------------------------
-if(CMAKE_PATCH_VERSION LESS 3)
-  include(Pre283CMakeParseArguments)
-else()
-  include(CMakeParseArguments)
-endif()
+include(CMakeParseArguments)
 
 #-----------------------------------------------------------------------------
 # Platform check
