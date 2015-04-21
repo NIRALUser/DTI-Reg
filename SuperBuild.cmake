@@ -100,6 +100,7 @@ option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchM
 list(APPEND LIST_TOOLS DTI-Reg )
 SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
 SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+SETIFEMPTY( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 #------------------------------------------------------------------------------
 # ${LOCAL_PROJECT_NAME} dependency list
 #------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ if( COMPILE_EXTERNAL_dtiprocess )
   option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
   list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
   list( APPEND LIST_TOOLS dtiprocess )
-  set( DTIProcess_INSTALL_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dtiprocess-install )
+  set( DTIProcess_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/dtiprocess-install )
   set( DTIProcessTOOL ${DTIProcess_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/dtiprocess CACHE PATH "Path to a program." FORCE )
 else()
   unset( USE_SYSTEM_VTK CACHE )
@@ -126,7 +127,7 @@ endif()
 if( COMPILE_EXTERNAL_ITKTransformTools )
   list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
   list(APPEND LIST_TOOLS ITKTransformTools )
-  set( ITKTransformTools_INSTALL_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ITKTransformTools-install )
+  set( ITKTransformTools_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/ITKTransformTools-install )
   set( ITKTransformToolsTOOL ${ITKTransformTools_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/ITKTransformTools CACHE PATH "Path to a program." FORCE )
 else()
   unset( ITKTransformToolsTOOL CACHE )
@@ -278,7 +279,7 @@ ExternalProject_Add(${proj}
     -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
     -DResampleDTITOOL:PATH=${ResampleDTITOOL}
     -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg-install
+    -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install
   )
 
 ## Force rebuilding of the main subproject every time building from super structure
@@ -293,7 +294,7 @@ if(WIN32)
   set(fileextension .exe)
 endif()
 foreach( VAR ${LIST_TOOLS} )
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${VAR}-install/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
+  install(PROGRAMS ${EXTERNAL_BINARY_DIRECTORY}/${VAR}-install/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
             DESTINATION ${INSTALL_RUNTIME_DESTINATION}
          )
 endforeach()
