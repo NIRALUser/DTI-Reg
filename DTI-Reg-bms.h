@@ -141,11 +141,11 @@ Else(${outputVolume})\n\
     set (ResampledDTI ${OutputDir}/${movingVolumeHead}_warp.nrrd)\n\
 EndIf(${outputVolume})\n\
 \n\
-set (commandWarpTensorImageMultiTransform ${WarpTensorImageMultiTransformCmd} 3 ${movingVolume} ${ResampledDTI} -R ${fixedVolume})\n\
+set (commandWarpTensorImageMultiTransform ${ResampleDTICmd} ${movingVolume} ${ResampledDTI} -R ${fixedVolume})\n\
 If(${IsWarping} == 1)\n\
-  set (commandWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} ${DeformationField} ${Transform})\n\
+  set (commandWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} --defField ${DeformationField} --hfieldtype displacement -f ${Transform})\n\
 Else(${IsWarping})\n\
-  set (commandWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} ${Transform})\n\
+  set (commandWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} -f ${Transform})\n\
 EndIf(${IsWarping})\n\
 Run (outputWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} errorWarpTensorImageMultiTransform)\n\
 If(${errorWarpTensorImageMultiTransform} != '')\n\

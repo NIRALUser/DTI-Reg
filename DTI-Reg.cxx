@@ -158,6 +158,10 @@ int main (int argc, char *argv[])
   if ( outputVolume.compare("") ) // outputVolume NON empty
   {
     outputDir = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(outputVolume).c_str() );
+    if( outputDir.empty() )
+    {
+        outputDir = "." ;
+    }
     bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(outputVolume);
   }
   else  // No outputVolume given
