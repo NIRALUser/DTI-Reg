@@ -140,11 +140,10 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DBUILD_TESTING:BOOL=OFF
       -DBUILD_EXAMPLES:BOOL=OFF
       -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
-      -DITK_LEGACY_REMOVE:BOOL=OFF
-      -DITK_FUTURE_LEGACY_REMOVE:=BOOL=ON
-      -DITKV3_COMPATIBILITY:BOOL=ON
+      -DITK_LEGACY_REMOVE:BOOL=ON
+      -DITKV3_COMPATIBILITY:BOOL=OFF
       -DITK_BUILD_DEFAULT_MODULES:BOOL=ON
-      -DModule_ITKReview:BOOL=ON
+      -DModule_ITKReview:BOOL=OFF
       #-DITK_INSTALL_NO_DEVELOPMENT:BOOL=ON
       -DKWSYS_USE_MD5:BOOL=ON # Required by SlicerExecutionModel
       -DITK_WRAPPING:BOOL=OFF #${BUILD_SHARED_LIBS} ## HACK:  QUICK CHANGE
@@ -160,8 +159,8 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     )
   ### --- End Project specific additions
   set(${proj}_REPOSITORY ${git_protocol}://itk.org/ITK.git)
-  set(${proj}_GIT_TAG a316296e1ef188ce89b7a07dc61313afdad3cf30)
-  set(ITK_VERSION_ID ITK-4.6)
+  set(${proj}_GIT_TAG 20c05927f51d88b25429c6bd270e19c4b365b7e4)
+  set(ITK_VERSION_ID ITK-4.7)
 
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
