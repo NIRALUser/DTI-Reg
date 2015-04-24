@@ -72,11 +72,14 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     -DUSE_SYSTEM_SlicerExecutionModel:BOOL=ON
     -DDTIProcess_SUPERBUILD:BOOL=OFF
     -DEXECUTABLES_ONLY:BOOL=ON
+    -DBUILD_CropDTI:BOOL=OFF
+    -DBUILD_PolyDataMerge:BOOL=OFF
+    -DBUILD_PolyDataTransform:BOOL=OFF
     )
 
   ### --- End Project specific additions
   set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/DTIProcessToolkit.git)
-  set( ${proj}_GIT_TAG a7c39e485e492bc6b72f72348939d47835cd56cc )
+  set( ${proj}_GIT_TAG c5b0e7ac9c062858fdcd2118dc5114fc19984a76 )
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
@@ -97,7 +100,6 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
     DEPENDS
       ${${proj}_DEPENDENCIES}
-    INSTALL_COMMAND ""
   )
   set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build)
 else()

@@ -16,6 +16,14 @@ set(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED 1)
 set(extProjName SlicerExecutionModel) #The find_package known name
 set(proj ${extProjName})              #This local name
 
+## External_${extProjName}.cmake files can be recurisvely included,
+## and cmake variables are global, so when including sub projects it
+## is important make the extProjName and proj variables
+## appear to stay constant in one of these files.
+## Store global variables before overwriting (then restore at end of this file.)
+ProjectDependancyPush(CACHED_extProjName ${extProjName})
+ProjectDependancyPush(CACHED_proj ${proj})
+
 #if(${USE_SYSTEM_${extProjName}})
 #  unset(${extProjName}_DIR CACHE)
 #endif()
@@ -44,21 +52,10 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
   ### --- Project specific additions here
   set(${proj}_CMAKE_OPTIONS
       -DITK_DIR:PATH=${ITK_DIR}
-      -DSlicerExecutionModel_DEFAULT_CLI_RUNTIME_OUTPUT_DIRECTORY:PATH=${BRAINSTools_CLI_RUNTIME_OUTPUT_DIRECTORY}
-      -DSlicerExecutionModel_DEFAULT_CLI_LIBRARY_OUTPUT_DIRECTORY:PATH=${BRAINSTools_CLI_LIBRARY_OUTPUT_DIRECTORY}
-      -DSlicerExecutionModel_DEFAULT_CLI_ARCHIVE_OUTPUT_DIRECTORY:PATH=${BRAINSTools_CLI_ARCHIVE_OUTPUT_DIRECTORY}
-      -DSlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION:STRING=${BRAINSTools_CLI_INSTALL_RUNTIME_DESTINATION}
-      -DSlicerExecutionModel_DEFAULT_CLI_INSTALL_LIBRARY_DESTINATION:STRING=${BRAINSTools_CLI_INSTALL_LIBRARY_DESTINATION}
-      -DSlicerExecutionModel_DEFAULT_CLI_INSTALL_ARCHIVE_DESTINATION:STRING=${BRAINSTools_CLI_INSTALL_ARCHIVE_DESTINATION}
-      #-DSlicerExecutionModel_LIBRARY_PROPERTIES:STRING=${Slicer_LIBRARY_PROPERTIES}
-      #-DSlicerExecutionModel_INSTALL_BIN_DIR:PATH=bin
-      #-DSlicerExecutionModel_INSTALL_LIB_DIR:PATH=lib
-      #-DSlicerExecutionModel_INSTALL_SHARE_DIR:PATH=${Slicer_INSTALL_ROOT}share/${SlicerExecutionModel}
-      #-DSlicerExecutionModel_INSTALL_NO_DEVELOPMENT:BOOL=${Slicer_INSTALL_NO_DEVELOPMENT}
     )
   ### --- End Project specific additions
   set(${proj}_REPOSITORY "${git_protocol}://github.com/Slicer/SlicerExecutionModel.git")
-  set(${proj}_GIT_TAG "9202673b809fb7df0890a2b01c288dae0b02c598")
+  set(${proj}_GIT_TAG "e00851314ab17d4f1e8eba097e47947df13c100f")
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
@@ -97,4 +94,9 @@ else()
 endif()
 
 list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH)
+_expand_external_project_vars()
+set(COMMON_EXTERNAL_PROJECT_ARGS ${${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_ARGS})
+
+ProjectDependancyPop(CACHED_extProjName extProjName)
+ProjectDependancyPop(CACHED_proj proj)
 

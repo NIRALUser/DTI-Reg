@@ -11,6 +11,14 @@ if(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED)
 endif()
 set(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED 1)
 
+## External_${extProjName}.cmake files can be recurisvely included,
+## and cmake variables are global, so when including sub projects it
+## is important make the extProjName and proj variables
+## appear to stay constant in one of these files.
+## Store global variables before overwriting (then restore at end of this file.)
+ProjectDependancyPush(CACHED_extProjName ${extProjName})
+ProjectDependancyPush(CACHED_proj ${proj})
+
 # Include dependent projects if any
 set(extProjName BatchMake) #The find_package known name
 set(proj ${extProjName})              #This local name
@@ -73,3 +81,9 @@ else()
 endif()
 
 list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH)
+_expand_external_project_vars()
+set(COMMON_EXTERNAL_PROJECT_ARGS ${${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_ARGS})
+
+ProjectDependancyPop(CACHED_extProjName extProjName)
+ProjectDependancyPop(CACHED_proj proj)
+

@@ -97,7 +97,6 @@ option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchMake" OFF)
 
-list(APPEND LIST_TOOLS DTI-Reg )
 SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
 SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 SETIFEMPTY( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
@@ -116,13 +115,13 @@ if( COMPILE_EXTERNAL_dtiprocess )
   option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
   list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
   list( APPEND LIST_TOOLS dtiprocess )
-  set( DTIProcess_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/dtiprocess-install )
-  set( DTIProcessTOOL ${DTIProcess_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/dtiprocess CACHE PATH "Path to a program." FORCE )
+  set( dtiprocess_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTIProcess-install )
+  set( dtiprocessTOOL ${dtiprocess_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/dtiprocess CACHE PATH "Path to a program." FORCE )
 else()
   unset( USE_SYSTEM_VTK CACHE )
   list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
   list( REMOVE_ITEM LIST_TOOLS dtiprocess )
-  unset( DTIProcessTOOL CACHE )
+  unset( dtiprocessTOOL CACHE )
 endif()
 if( COMPILE_EXTERNAL_ITKTransformTools )
   list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
@@ -259,7 +258,11 @@ endif()
 if( Slicer_CLIMODULES_BIN_DIR )
   set( Slicer_CLIMODULES_BIN_DIR_OPTION -DSlicer_CLIMODULES_BIN_DIR:STRING=${Slicer_CLIMODULES_BIN_DIR} )
 endif()
+
 set(proj ${LOCAL_PROJECT_NAME})
+list(APPEND LIST_TOOLS DTI-Reg )
+set( DTI-RegTOOL DTI-Reg )
+set( DTI-Reg_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install )
 ExternalProject_Add(${proj}
   DEPENDS ${${LOCAL_PROJECT_NAME}_DEPENDENCIES}
   DOWNLOAD_COMMAND ""
@@ -279,7 +282,7 @@ ExternalProject_Add(${proj}
     -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
     -DResampleDTITOOL:PATH=${ResampleDTITOOL}
     -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
-    -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install
+    -DCMAKE_INSTALL_PREFIX:PATH=${DTI-Reg_INSTALL_DIRECTORY}
   )
 
 ## Force rebuilding of the main subproject every time building from super structure
@@ -294,7 +297,7 @@ if(WIN32)
   set(fileextension .exe)
 endif()
 foreach( VAR ${LIST_TOOLS} )
-  install(PROGRAMS ${EXTERNAL_BINARY_DIRECTORY}/${VAR}-install/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
+  install(PROGRAMS ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
             DESTINATION ${INSTALL_RUNTIME_DESTINATION}
          )
 endforeach()
