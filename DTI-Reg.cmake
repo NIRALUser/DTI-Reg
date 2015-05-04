@@ -33,10 +33,10 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
 if( Slicer_CLIMODULES_BIN_DIR )
   ADD_DEFINITIONS( -DSlicer_CLIMODULES_BIN_DIR="${Slicer_CLIMODULES_BIN_DIR}" )
 endif()
-set(DTIReg_SOURCE DTI-Reg.cxx DTI-Reg-bms.h)
-GenerateCLP(DTIReg_SOURCE DTI-Reg.xml)
+set(DTI-Reg_SOURCE DTI-Reg.cxx DTI-Reg-bms.h)
+GenerateCLP(DTI-Reg_SOURCE DTI-Reg.xml)
 
-add_executable( DTI-Reg ${DTIReg_SOURCE} )
+add_executable( DTI-Reg ${DTI-Reg_SOURCE} )
 target_link_libraries(DTI-Reg ${ITK_LIBRARIES} ${BatchMake_LIBRARIES})
 
 install(TARGETS DTI-Reg DESTINATION ${INSTALL_RUNTIME_DESTINATION} )

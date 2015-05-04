@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 cmake_policy(VERSION 2.8.9)
 
-set(LOCAL_PROJECT_NAME DTIReg)
+set(LOCAL_PROJECT_NAME DTI-Reg)
 
 ## NOTE THERE SHOULD BE NO PROJECT STATEMENT HERE!
 ## This file acts as a simple switch to initiate
