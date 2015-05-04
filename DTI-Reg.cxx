@@ -417,6 +417,7 @@ int main (int argc, char *argv[])
   {
     file <<"set (ITKTransformToolsCmd "<<ITKTransformToolsCmd<<")"<<std::endl;
   }
+  file <<"set (TensorCorrection "<<correction<<")"<<std::endl;
   // Include main BatchMake script
   file <<"\n#Include main batchMake script"<<std::endl;
   if (!method.compare("useScalar-ANTS"))

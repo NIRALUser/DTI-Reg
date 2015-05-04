@@ -17,9 +17,9 @@ If(${useScalar} == FALSE )\n\
     set (fixedFAMap ${outputFixedFAVolume})\n\
   EndIf(${outputFixedFAVolume})\n\
   If (${fixedMaskVolume} != '')\n\
-    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume})\n\
+    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume} --correction ${TensorCorrection})\n\
   Else(${fixedMaskVolume})\n\
-   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap}) \n\
+   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --correction ${TensorCorrection})\n\
   EndIf (${fixedMaskVolume})\n\
   Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
   If(${errordtiprocess} != '')\n\
@@ -34,9 +34,9 @@ Else(${outputMovingFAVolume})\n\
   set (movingFAMap ${outputMovingFAVolume})\n\
 EndIf(${outputMovingFAVolume})\n\
 If (${movingMaskVolume} != '')\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --mask ${movingMaskVolume})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --mask ${movingMaskVolume} --correction ${TensorCorrection})\n\
 Else(${movingMaskVolume})\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --correction ${TensorCorrection})\n\
 EndIf(${movingMaskVolume})\n\
 Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
 If(${errordtiprocess} != '')\n\
@@ -141,7 +141,7 @@ Else(${outputVolume})\n\
     set (ResampledDTI ${OutputDir}/${movingVolumeHead}_warp.nrrd)\n\
 EndIf(${outputVolume})\n\
 \n\
-set (commandWarpTensorImageMultiTransform ${ResampleDTICmd} ${movingVolume} ${ResampledDTI} -R ${fixedVolume})\n\
+set (commandWarpTensorImageMultiTransform ${ResampleDTICmd} ${movingVolume} ${ResampledDTI} -R ${fixedVolume} --correction ${TensorCorrection})\n\
 If(${IsWarping} == 1)\n\
   set (commandWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} --defField ${DeformationField} --hfieldtype displacement -f ${Transform})\n\
 Else(${IsWarping})\n\
@@ -211,9 +211,9 @@ If(${useScalar} == FALSE )\n\
     set (fixedFAMap ${outputFixedFAVolume})\n\
   EndIf(${outputFixedFAVolume})\n\
   If (${fixedMaskVolume} != '')\n\
-    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume})\n\
+    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume} --correction ${TensorCorrection})\n\
   Else(${fixedMaskVolume})\n\
-   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap})\n\
+   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --correction ${TensorCorrection})\n\
   EndIf (${fixedMaskVolume})\n\
   Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
   If(${errordtiprocess} != '')\n\
@@ -229,9 +229,9 @@ Else(${outputMovingFAVolume})\n\
   set (movingFAMap ${outputMovingFAVolume})\n\
 EndIf(${outputMovingFAVolume})\n\
 If (${movingMaskVolume} != '')\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --mask ${movingMaskVolume})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --mask ${movingMaskVolume} --correction ${TensorCorrection})\n\
 Else(${movingMaskVolume})\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --correction ${TensorCorrection})\n\
 EndIf(${movingMaskVolume})\n\
 Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
 If(${errordtiprocess} != '')\n\
@@ -323,7 +323,7 @@ If (${outputVolume} != '')\n\
 Else(${outputVolume})\n\
   set (ResampledDTI ${OutputDir}/${movingVolumeHead}_warp.nrrd)\n\
 EndIf(${outputVolume})\n\
-set (commandResampleDTI ${ResampleDTICmd} ${movingVolume} ${ResampledDTI} --Reference ${fixedVolume})\n\
+set (commandResampleDTI ${ResampleDTICmd} ${movingVolume} ${ResampledDTI} --Reference ${fixedVolume} --correction ${TensorCorrection})\n\
 If (${IsDemonsWarping} == 1)\n\
   set (commandResampleDTI ${commandResampleDTI} --defField ${DeformationField} --hfieldtype displacement)\n\
 Else(${IsDemonsWarping})\n\

@@ -3,7 +3,7 @@
   <category>Diffusion.Diffusion Tensor Images</category>
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration, using FA maps to drive the registration</description>
-  <version>1.1.6</version>
+  <version>1.1.7</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (SCI, University of Utah), Adrien Kaiser (NIRAL, UNC-Chapel Hill), Francois Budin (NIRAL, UNC-Chapel Hill)</contributor>
@@ -325,7 +325,7 @@
   </parameters>
   
   <parameters advanced="true">
-    <label>Paths</label>
+    <label>Additional options</label>
     <description>Program Paths</description>
     <string-vector>
       <name>ProgramsPathsVector</name>
@@ -333,5 +333,16 @@
       <label>Program Paths Vector</label>
       <description>Vector containing paths where we can find needed programs</description>
     </string-vector>
+    <string-enumeration>
+      <name>correction</name>
+      <longflag>--correction</longflag>
+      <description>Use correction options when the tensors are computed if not semi-definite positive (both with ResampleDTIlogEuclidean and dtiprocess).</description>
+      <label>Tensors Correction</label>
+      <element>zero</element>
+      <element>none</element>
+      <element>abs</element>
+      <element>nearest</element>
+      <default>none</default>
+   </string-enumeration>
   </parameters> 
 </executable>
