@@ -101,7 +101,7 @@ int main (int argc, char *argv[])
   //to a transform
   //We verify that either are defined
   bool transformDefined = false ;
-  if( !outputVolume.empty() || !outputResampledFAVolume.empty() )
+  if( !outputVolume.empty() || !outputResampledScalarVolume.empty() )
   {
     transformDefined = true ;
   }
@@ -147,7 +147,7 @@ int main (int argc, char *argv[])
   }
   if( !transformDefined )
   {
-      std::cout<<"No output specified. Either define an output image ('Output DTI Volume' or 'Resampled FA Volume'),\
+      std::cout<<"No output specified. Either define an output image ('Output DTI Volume' or 'Resampled Scalar Measurement Volume'),\
  or 'Linear Output Transform' for rigid or affine registration, 'BSpline Output Transform' for BSpline registration, or\
  or 'Output Displacement Field Volume' for any non-linear registration"<<std::endl;
     return EXIT_FAILURE;
@@ -181,7 +181,7 @@ int main (int argc, char *argv[])
   else
   {
     file <<"set (useScalar TRUE)"<<std::endl;
-    file <<"set (fixedFAMap "<<scalarFixedVolume<<")"<<std::endl;
+    file <<"set (fixedScalarMap "<<scalarFixedVolume<<")"<<std::endl;
     file <<"set (fixedVolume "<<scalarFixedVolume<<")"<<std::endl;
   }
   file <<"set (movingVolume "<<movingVolume<<")"<<std::endl;
@@ -261,29 +261,29 @@ int main (int argc, char *argv[])
   {
     file <<"set (outputVolume \'\')"<<std::endl;
   }
-  if (outputFixedFAVolume.compare(""))
+  if (outputFixedScalarVolume.compare(""))
   {
-    file <<"set (outputFixedFAVolume "<<outputFixedFAVolume<<")"<<std::endl;
+    file <<"set (outputFixedScalarVolume "<<outputFixedScalarVolume<<")"<<std::endl;
   }
   else
   {
-    file <<"set (outputFixedFAVolume \'\')"<<std::endl;
+    file <<"set (outputFixedScalarVolume \'\')"<<std::endl;
   }
-  if (outputMovingFAVolume.compare(""))
+  if (outputMovingScalarVolume.compare(""))
   {
-    file <<"set (outputMovingFAVolume "<<outputMovingFAVolume<<")"<<std::endl;
-  }
-  else
-  {
-    file <<"set (outputMovingFAVolume \'\')"<<std::endl;
-  }
-  if (outputResampledFAVolume.compare(""))
-  {
-    file <<"set (outputResampledFAVolume "<<outputResampledFAVolume<<")"<<std::endl;
+    file <<"set (outputMovingScalarVolume "<<outputMovingScalarVolume<<")"<<std::endl;
   }
   else
   {
-    file <<"set (outputResampledFAVolume \'\')"<<std::endl;
+    file <<"set (outputMovingScalarVolume \'\')"<<std::endl;
+  }
+  if (outputResampledScalarVolume.compare(""))
+  {
+    file <<"set (outputResampledScalarVolume "<<outputResampledScalarVolume<<")"<<std::endl;
+  }
+  else
+  {
+    file <<"set (outputResampledScalarVolume \'\')"<<std::endl;
   }
   if (outputTransform.compare(""))
   {
@@ -418,6 +418,7 @@ int main (int argc, char *argv[])
     file <<"set (ITKTransformToolsCmd "<<ITKTransformToolsCmd<<")"<<std::endl;
   }
   file <<"set (TensorCorrection "<<correction<<")"<<std::endl;
+  file <<"set (ScalarMeasurement "<<scalarMeasurement<<")"<<std::endl;
   // Include main BatchMake script
   file <<"\n#Include main batchMake script"<<std::endl;
   if (!method.compare("useScalar-ANTS"))

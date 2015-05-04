@@ -6,20 +6,25 @@ GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
 \n\
+If( ${ScalarMeasurement} == 'FA')\n\
+  set(ScalarMeasurementFlag -f)\n\
+Else( ${ScalarMeasurement} )\n\
+  set(ScalarMeasurementFlag -m)\n\
+EndIf( ${ScalarMeasurement} )\n\
 If(${useScalar} == FALSE )\n\
-  # FA map creation\n\
+# Scalar measurement (FA or MD) map creation\n\
   echo()\n\
-  echo('FA map creation...')\n\
-  echo('fixed FA map creation...')\n\
-  If (${outputFixedFAVolume} == '')\n\
-    set (fixedFAMap ${OutputDir}/${fixedVolumeHead}_FA.nrrd)\n\
-  Else(${outputFixedFAVolume})\n\
-    set (fixedFAMap ${outputFixedFAVolume})\n\
-  EndIf(${outputFixedFAVolume})\n\
+  echo( ${ScalarMeasurement}' map creation...')\n\
+  echo('fixed '${ScalarMeasurement}' map creation...')\n\
+  If (${outputFixedScalarVolume} == '')\n\
+    set (fixedScalarMap ${OutputDir}/${fixedVolumeHead}_${ScalarMeasurement}.nrrd)\n\
+  Else(${outputFixedScalarVolume})\n\
+    set (fixedScalarMap ${outputFixedScalarVolume})\n\
+  EndIf(${outputFixedScalarVolume})\n\
   If (${fixedMaskVolume} != '')\n\
-    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume} --correction ${TensorCorrection})\n\
+    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} ${ScalarMeasurementFlag} ${fixedScalarMap} --mask ${fixedMaskVolume} --correction ${TensorCorrection})\n\
   Else(${fixedMaskVolume})\n\
-   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --correction ${TensorCorrection})\n\
+   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} ${ScalarMeasurementFlag} ${fixedScalarMap} --correction ${TensorCorrection})\n\
   EndIf (${fixedMaskVolume})\n\
   Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
   If(${errordtiprocess} != '')\n\
@@ -27,16 +32,16 @@ If(${useScalar} == FALSE )\n\
     exit()\n\
   Endif(${errordtiprocess})\n\
 Endif(${useScalar} == FALSE )\n\
-echo('moving FA map creation...')\n\
-If (${outputMovingFAVolume} == '')\n\
-  set (movingFAMap ${OutputDir}/${movingVolumeHead}_FA.nrrd)\n\
-Else(${outputMovingFAVolume})\n\
-  set (movingFAMap ${outputMovingFAVolume})\n\
-EndIf(${outputMovingFAVolume})\n\
+echo('moving '${ScalarMeasurement}' map creation...')\n\
+If (${outputMovingScalarVolume} == '')\n\
+  set (movingScalarMap ${OutputDir}/${movingVolumeHead}_${ScalarMeasurement}.nrrd)\n\
+Else(${outputMovingScalarVolume})\n\
+  set (movingScalarMap ${outputMovingScalarVolume})\n\
+EndIf(${outputMovingScalarVolume})\n\
 If (${movingMaskVolume} != '')\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --mask ${movingMaskVolume} --correction ${TensorCorrection})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} ${ScalarMeasurementFlag} ${movingScalarMap} --mask ${movingMaskVolume} --correction ${TensorCorrection})\n\
 Else(${movingMaskVolume})\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --correction ${TensorCorrection})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} ${ScalarMeasurementFlag} ${movingScalarMap} --correction ${TensorCorrection})\n\
 EndIf(${movingMaskVolume})\n\
 Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
 If(${errordtiprocess} != '')\n\
@@ -60,7 +65,7 @@ set (DeformationField '')\n\
     set(IsWarping 0)\n\
   EndIf()\n\
 \n\
-  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedFAMap},${movingFAMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase} --gaussian-smoothing-sigmas ${gaussianSmoothingSigmas})\n\
+  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedScalarMap},${movingScalarMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase} --gaussian-smoothing-sigmas ${gaussianSmoothingSigmas})\n\
 \n\
   If (${initialAffine} != '')\n\
     set (commandANTS ${commandANTS} -a ${initialAffine})\n\
@@ -114,11 +119,11 @@ set (DeformationField '')\n\
 set(Transform ${ANTSOutbase}Affine.txt)\n\
 set (DeformationField ${ANTSOutbase}Warp.nii.gz)\n\
 \n\
-# Applying deformation to FA map\n\
-If (${outputResampledFAVolume} != '')\n\
+# Applying deformation to scalar measurement (FA or MD) map\n\
+If (${outputResampledScalarVolume} != '')\n\
   echo()\n\
-  echo('FA resampling...')\n\
-  set (commandWarpImageMultiTransform ${WarpImageMultiTransformCmd} 3 ${movingFAMap} ${outputResampledFAVolume} -R ${outputFixedFAVolume})\n\
+  echo(${ScalarMeasurement}' resampling...')\n\
+  set (commandWarpImageMultiTransform ${WarpImageMultiTransformCmd} 3 ${movingScalarMap} ${outputResampledScalarVolume} -R ${outputFixedScalarVolume})\n\
   If(${IsWarping} == 1)\n\
     set (commandWarpImageMultiTransform ${commandWarpImageMultiTransform} ${DeformationField} ${Transform})\n\
   Else(${IsWarping})\n\
@@ -130,7 +135,7 @@ If (${outputResampledFAVolume} != '')\n\
     echo('Error WarpImageMultiTransform: ' ${errorWarpImageMultiTransform})\n\
     exit()\n\
   Endif(${errorWarpImageMultiTransform})\n\
-EndIf(${outputResampledFAVolume})\n\
+EndIf(${outputResampledScalarVolume})\n\
 \n\
 # DTI resampling\n\
 echo()\n\
@@ -184,12 +189,12 @@ If (${outputTransform} != '')\n\
 EndIf (${outputTransform})\n\
 \n\
 #Delete temporary files\n\
-If (${outputFixedFAVolume} == '')\n\
-#  DeleteFile(${fixedFAMap})\n\
-EndIf(${outputFixedFAVolume})\n\
-If (${outputMovingFAVolume} == '')\n\
-#  DeleteFile(${movingFAMap})\n\
-EndIf(${outputMovingFAVolume})"
+If (${outputFixedScalarVolume} == '')\n\
+#  DeleteFile(${fixedScalarMap})\n\
+EndIf(${outputFixedScalarVolume})\n\
+If (${outputMovingScalarVolume} == '')\n\
+#  DeleteFile(${movingScalarMap})\n\
+EndIf(${outputMovingScalarVolume})"
 
 ////////////////////////////////////////////////////////////////////////
 // if using BRAINS
@@ -200,20 +205,25 @@ GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
 \n\
+If( ${ScalarMeasurement} == 'FA')\n\
+  set(ScalarMeasurementFlag -f)\n\
+Else( ${ScalarMeasurement} )\n\
+  set(ScalarMeasurementFlag -m)\n\
+EndIf( ${ScalarMeasurement} )\n\
 If(${useScalar} == FALSE )\n\
-  # FA map creation\n\
+  # Scalar Measurement (FA or MD) map creation\n\
   echo()\n\
-  echo('FA map creation...')\n\
-  echo('fixed FA map creation...')\n\
-  If (${outputFixedFAVolume} == '')\n\
-    set (fixedFAMap ${OutputDir}/${fixedVolumeHead}_FA.nrrd)\n\
-  Else(${outputFixedFAVolume})\n\
-    set (fixedFAMap ${outputFixedFAVolume})\n\
-  EndIf(${outputFixedFAVolume})\n\
+  echo(${ScalarMeasurement}' map creation...')\n\
+  echo('fixed '${ScalarMeasurement}' map creation...')\n\
+  If (${outputFixedScalarVolume} == '')\n\
+    set (fixedScalarMap ${OutputDir}/${fixedVolumeHead}_${ScalarMeasurement}.nrrd)\n\
+  Else(${outputFixedScalarVolume})\n\
+    set (fixedScalarMap ${outputFixedScalarVolume})\n\
+  EndIf(${outputFixedScalarVolume})\n\
   If (${fixedMaskVolume} != '')\n\
-    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --mask ${fixedMaskVolume} --correction ${TensorCorrection})\n\
+    set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} ${ScalarMeasurementFlag} ${fixedScalarMap} --mask ${fixedMaskVolume} --correction ${TensorCorrection})\n\
   Else(${fixedMaskVolume})\n\
-   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} -f ${fixedFAMap} --correction ${TensorCorrection})\n\
+   set (commanddtiprocess ${dtiprocessCmd} --dti_image ${fixedVolume} ${ScalarMeasurementFlag} ${fixedScalarMap} --correction ${TensorCorrection})\n\
   EndIf (${fixedMaskVolume})\n\
   Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
   If(${errordtiprocess} != '')\n\
@@ -222,16 +232,16 @@ If(${useScalar} == FALSE )\n\
   Endif(${errordtiprocess})\n\
 EndIf(${useScalar} == FALSE )\n\
 \n\
-echo('moving FA map creation...')\n\
-If (${outputMovingFAVolume} == '')\n\
-  set (movingFAMap ${OutputDir}/${movingVolumeHead}_FA.nrrd)\n\
-Else(${outputMovingFAVolume})\n\
-  set (movingFAMap ${outputMovingFAVolume})\n\
-EndIf(${outputMovingFAVolume})\n\
+echo('moving '${ScalarMeasurement}' map creation...')\n\
+If (${outputMovingScalarVolume} == '')\n\
+  set (movingScalarMap ${OutputDir}/${movingVolumeHead}_${ScalarMeasurement}.nrrd)\n\
+Else(${outputMovingScalarVolume})\n\
+  set (movingScalarMap ${outputMovingScalarVolume})\n\
+EndIf(${outputMovingScalarVolume})\n\
 If (${movingMaskVolume} != '')\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --mask ${movingMaskVolume} --correction ${TensorCorrection})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} ${ScalarMeasurementFlag} ${movingScalarMap} --mask ${movingMaskVolume} --correction ${TensorCorrection})\n\
 Else(${movingMaskVolume})\n\
-  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} -f ${movingFAMap} --correction ${TensorCorrection})\n\
+  set (commanddtiprocess ${dtiprocessCmd} --dti_image ${movingVolume} ${ScalarMeasurementFlag} ${movingScalarMap} --correction ${TensorCorrection})\n\
 EndIf(${movingMaskVolume})\n\
 Run (outputdtiprocess ${commanddtiprocess} errordtiprocess)\n\
 If(${errordtiprocess} != '')\n\
@@ -265,20 +275,20 @@ EndIf(${BRAINSRegistrationType})\n\
 echo()\n\
 echo(${TransformType} ' registration...')\n\
 \n\
-If (${outputResampledFAVolume} != '')\n\
-  set (ResampledFAMap ${outputResampledFAVolume})\n\
-Else(${outputResampledFAVolume})\n\
-  set (ResampledFAMap ${OutputDir}/${movingVolumeHead}_FA_${RegSuffix}.nrrd)\n\
-Endif(${outputResampledFAVolume})\n\
+If (${outputResampledScalarVolume} != '')\n\
+  set (ResampledScalarMap ${outputResampledScalarVolume})\n\
+Else(${outputResampledScalarVolume})\n\
+  set (ResampledScalarMap ${OutputDir}/${movingVolumeHead}_${ScalarMeasurement}_${RegSuffix}.nrrd)\n\
+Endif(${outputResampledScalarVolume})\n\
 If (${outputTransform} != '')\n\
   set (Transform ${outputTransform})\n\
 Else(${outputTransform})\n\
   set (Transform ${OutputDir}/${movingVolumeHead}_BRAINSFit_${RegSuffix}.txt)\n\
 Endif(${outputTransform})\n\
 If (${initialAffine} != '')\n\
-  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initialTransform ${initialAffine} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\
+  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedScalarMap} --movingVolume ${movingScalarMap} --initialTransform ${initialAffine} --outputTransform ${Transform} --outputVolume ${ResampledScalarMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\
 Else(${initialAffine})\n\
-  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --initializeTransformMode ${BRAINSinitializeTransformMode} --outputTransform ${Transform} --outputVolume ${ResampledFAMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\
+  set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedScalarMap} --movingVolume ${movingScalarMap} --initializeTransformMode ${BRAINSinitializeTransformMode} --outputTransform ${Transform} --outputVolume ${ResampledScalarMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\
 Endif(${initialAffine})\n\
 Run (outputBRAINSFit ${commandBRAINSFit} errorBRAINSFit)\n\
 If(${errorBRAINSFit} != '')\n\
@@ -286,24 +296,24 @@ If(${errorBRAINSFit} != '')\n\
 #  exit()\n\
 Endif(${errorBRAINSFit})\n\
 If (${IsDemonsWarping} == 1)\n\
-  DeleteFile(${ResampledFAMap})\n\
+  DeleteFile(${ResampledScalarMap})\n\
 EndIf(${IsDemonsWarping})\n\
 \n\
 # Warping\n\
 If (${IsDemonsWarping} == 1)\n\
   echo()\n\
   echo('Warping...')\n\
-  If (${outputResampledFAVolume} != '')\n\
-    set (ResampledFAMap ${outputResampledFAVolume})\n\
-  Else(${outputResampledFAVolume})\n\
-    set (ResampledFAMap ${OutputDir}/${movingVolumeHead}_FA_warp.nrrd)\n\
-  EndIf(${outputResampledFAVolume})\n\
+  If (${outputResampledScalarVolume} != '')\n\
+    set (ResampledScalarMap ${outputResampledScalarVolume})\n\
+  Else(${outputResampledScalarVolume})\n\
+    set (ResampledScalarMap ${OutputDir}/${movingVolumeHead}_${ScalarMeasurement}_warp.nrrd)\n\
+  EndIf(${outputResampledScalarVolume})\n\
   If (${outputDeformationFieldVolume} != '')\n\
     set (DeformationField ${outputDeformationFieldVolume})\n\
   Else(${outputDeformationFieldVolume})\n\
-    set (DeformationField ${OutputDir}/${movingVolumeHead}_FA_warpfield.nrrd)\n\
+    set (DeformationField ${OutputDir}/${movingVolumeHead}_${ScalarMeasurement}_warpfield.nrrd)\n\
   EndIf(${outputDeformationFieldVolume})\n\
-  set (commandBRAINSDemonWarp ${BRAINSDemonWarpCmd} --fixedVolume ${fixedFAMap} --movingVolume ${movingFAMap} --outputVolume ${ResampledFAMap} --outputDeformationFieldVolume ${DeformationField} --outputPixelType ushort --interpolationMode Linear --registrationFilterType ${BRAINSRegistrationType} --histogramMatch --numberOfHistogramBins ${BRAINSnumberOfHistogramLevels} --numberOfMatchPoints ${BRAINSnumberOfMatchPoints} --initializeWithTransform ${Transform} --numberOfPyramidLevels ${BRAINSnumberOfPyramidLevels} --arrayOfPyramidLevelIterations ${BRAINSarrayOfPyramidLevelIterations})\n\
+  set (commandBRAINSDemonWarp ${BRAINSDemonWarpCmd} --fixedVolume ${fixedScalarMap} --movingVolume ${movingScalarMap} --outputVolume ${ResampledScalarMap} --outputDeformationFieldVolume ${DeformationField} --outputPixelType ushort --interpolationMode Linear --registrationFilterType ${BRAINSRegistrationType} --histogramMatch --numberOfHistogramBins ${BRAINSnumberOfHistogramLevels} --numberOfMatchPoints ${BRAINSnumberOfMatchPoints} --initializeWithTransform ${Transform} --numberOfPyramidLevels ${BRAINSnumberOfPyramidLevels} --arrayOfPyramidLevelIterations ${BRAINSarrayOfPyramidLevelIterations})\n\
   \n\
   If (${BRAINSinitialDeformationField} != '')\n\
     set (commandBRAINSDemonWarp ${commandBRAINSDemonWarp} --initializeWithDeformationField ${BRAINSinitialDeformationField})\n\
@@ -345,15 +355,15 @@ Endif(${errorResampleDTI})\n\
 #If (${outputDeformationFieldVolume} == '')\n\
 #  DeleteFile(${DeformationField})\n\
 #EndIf(${outputDeformationFieldVolume})\n\
-If (${outputFixedFAVolume} == '')\n\
-#  DeleteFile(${fixedFAMap})\n\
-EndIf(${outputFixedFAVolume})\n\
-If (${outputMovingFAVolume} == '')\n\
-#  DeleteFile(${movingFAMap})\n\
-EndIf(${outputMovingFAVolume})\n\
-If (${outputResampledFAVolume} == '')\n\
-#  DeleteFile(${ResampledFAMap})\n\
-EndIf(${outputResampledFAVolume})"
+If (${outputFixedScalarVolume} == '')\n\
+#  DeleteFile(${fixedScalarMap})\n\
+EndIf(${outputFixedScalarVolume})\n\
+If (${outputMovingScalarVolume} == '')\n\
+#  DeleteFile(${movingScalarMap})\n\
+EndIf(${outputMovingScalarVolume})\n\
+If (${outputResampledScalarVolume} == '')\n\
+#  DeleteFile(${ResampledScalarMap})\n\
+EndIf(${outputResampledScalarVolume})"
 
 
 ////////////////////////////////////////////////////////////////////////

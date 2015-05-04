@@ -2,8 +2,8 @@
 <executable>
   <category>Diffusion.Diffusion Tensor Images</category>
   <title>DTI-Reg</title>
-  <description>DTI-Reg performs pair-wise DTI registration, using FA maps to drive the registration</description>
-  <version>1.1.7</version>
+  <description>DTI-Reg performs pair-wise DTI registration, using FA or MD maps to drive the registration</description>
+  <version>1.1.8</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (SCI, University of Utah), Adrien Kaiser (NIRAL, UNC-Chapel Hill), Francois Budin (NIRAL, UNC-Chapel Hill)</contributor>
@@ -79,11 +79,20 @@
       <name>method</name>
       <longflag>method</longflag>
       <label>Computational method</label>
-      <description>Use scalar FA map to drive the registration via: Method 1)BRAINS -BRAINSFit/BRAINSDemonWarp-  or Method 2)ANTS</description>
+      <description>Use scalar FA or MD map to drive the registration via: Method 1)BRAINS -BRAINSFit/BRAINSDemonWarp-  or Method 2)ANTS</description>
       <default>useScalar-BRAINS</default>
       <element>useScalar-BRAINS</element>
       <element>useScalar-ANTS</element>
 <!--      <element>useDTITK</element>-->
+    </string-enumeration>
+    <string-enumeration>
+      <name>scalarMeasurement</name>
+      <longflag>scalarMeasurement</longflag>
+      <label>Scalar Measurement</label>
+      <description>Select if DTI-Reg uses the Fractional Anisotropy (FA) or the Mean Diffusivity (MD) map to drive the registration (used with useScalar-BRAINS and useScalar-ANTS)</description>
+      <default>FA</default>
+      <element>FA</element>
+      <element>MD</element>
     </string-enumeration>
   </parameters>
   <parameters>
@@ -126,28 +135,28 @@
     </image>
 
     <image type="scalar">
-      <name>outputFixedFAVolume</name>
-      <longflag>outputFixedFAVolume</longflag>
-      <label>Fixed FA Volume</label>
-      <description>fixed FA Volume</description>
+      <name>outputFixedScalarVolume</name>
+      <longflag deprecatedalias="outputFixedFAVolume">outputFixedScalarVolume</longflag>
+      <label>Fixed Scalar Measurement (FA or MD) Volume</label>
+      <description>Fixed Scalar Measurement (FA or MD) Volume</description>
       <default></default>
       <channel>output</channel>
     </image>
 
     <image type="scalar">
-      <name>outputMovingFAVolume</name>
-      <longflag>outputMovingFAVolume</longflag>
-      <label>Moving FA Volume</label>
-      <description>moving FA Volume</description>
+      <name>outputMovingScalarVolume</name>
+      <longflag deprecatedalias="outputMovingFAVolume">outputMovingScalarVolume</longflag>
+      <label>Moving Scalar Measurement (FA or MD) Volume</label>
+      <description>Moving Scalar Measurement (FA or MD) Volume</description>
       <default></default>
       <channel>output</channel>
     </image>
 
     <image type="scalar">
-      <name>outputResampledFAVolume</name>
-      <longflag>outputResampledFAVolume</longflag>
-      <label>Resampled FA Volume</label>
-      <description>Resampled FA Volume</description>
+      <name>outputResampledScalarVolume</name>
+      <longflag deprecatedalias="outputResampledFAVolume">outputResampledScalarVolume</longflag>
+      <label>Resampled Scalar Measurement (FA or MD) Volume</label>
+      <description>Resampled Scalar Measurement (FA or MD) Volume</description>
       <default></default>
       <channel>output</channel>
     </image>
@@ -318,7 +327,7 @@
       <name>ANTSOutbase</name>
       <longflag>ANTSOutbase</longflag>
       <label>Outbase for ANTS</label>
-      <description>Prefix for ANTS linear transformation and deformation field output files (default outbase: moving FA map prefix). Transform file is named "ANTSOutbase"Affine.txt and deformationfield is named "ANTSOutbase"Warp.nii.gz (default ANTS naming convention)</description>
+      <description>Prefix for ANTS linear transformation and deformation field output files (default outbase: moving FA or MD map prefix). Transform file is named "ANTSOutbase"Affine.txt and deformationfield is named "ANTSOutbase"Warp.nii.gz (default ANTS naming convention)</description>
       <default></default>
       <channel>output</channel>
     </string>
