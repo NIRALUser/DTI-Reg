@@ -21,7 +21,7 @@ macro( FindToolMacro path name )
   endif(NOT ${path} )
 endmacro( FindToolMacro )
 
-FindToolMacro(DTIProcessTOOL dtiprocess )
+FindToolMacro(dtiprocessTOOL dtiprocess )
 FindToolMacro(ANTSTOOL ANTS)
 FindToolMacro(WARPIMAGEMULTITRANSFORMTOOL WarpImageMultiTransform)
 FindToolMacro(WARPTENSORIMAGEMULTITRANSFORMTOOL WarpTensorImageMultiTransform)
