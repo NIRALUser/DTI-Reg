@@ -380,15 +380,6 @@ int main (int argc, char *argv[])
       file <<"set (WarpImageMultiTransformCmd "<<WarpImageMultiTransformCmd<<")"<<std::endl; 
     }
       
-    std::string WarpTensorImageMultiTransformCmd = WarpTensorImageMultiTransformTool;
-    if( SetPath(WarpTensorImageMultiTransformCmd, "WarpTensorImageMultiTransform" , ProgramsPathsVector ) )
-    {
-      return EXIT_FAILURE;
-    }
-    else
-    {
-      file <<"set (WarpTensorImageMultiTransformCmd "<<WarpTensorImageMultiTransformCmd<<")"<<std::endl; 
-    }   
   } // if (!method.compare("useScalar-ANTS"))
   std::string dtiprocessCmd = dtiprocessTool;
   if( SetPath(dtiprocessCmd, "dtiprocess" , ProgramsPathsVector ) )

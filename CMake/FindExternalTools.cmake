@@ -24,7 +24,6 @@ endmacro( FindToolMacro )
 FindToolMacro(dtiprocessTOOL dtiprocess )
 FindToolMacro(ANTSTOOL ANTS)
 FindToolMacro(WARPIMAGEMULTITRANSFORMTOOL WarpImageMultiTransform)
-FindToolMacro(WARPTENSORIMAGEMULTITRANSFORMTOOL WarpTensorImageMultiTransform)
 FindToolMacro(ResampleDTIlogEuclideanTOOL ResampleDTIlogEuclidean)
 FindToolMacro(ITKTransformToolsTOOL ITKTransformTools)
 

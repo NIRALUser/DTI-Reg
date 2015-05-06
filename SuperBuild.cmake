@@ -16,7 +16,42 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/Common.cmake)
 #-----------------------------------------------------------------------------
 #If it is build as an extension
 #-----------------------------------------------------------------------------
+if(CMAKE_VERSION VERSION_LESS 2.8.3)
+  include(${SlicerExecutionModel_CMAKE_DIR}/Pre283CMakeParseArguments.cmake)
+else()
+  include(CMakeParseArguments)
+endif()
 
+macro(COMPILE_EXTERNAL_TOOLS)
+  set(options "")
+  set(oneValueArgs
+    TOOL_PROJECT_NAME
+    )
+  set(multiValueArgs
+    TOOL_NAMES
+    )
+  CMAKE_PARSE_ARGUMENTS(LOCAL
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+    )
+  option(COMPILE_EXTERNAL_${LOCAL_TOOL_PROJECT_NAME} "Compile External ${LOCAL_TOOL_PROJECT_NAME}" OFF )
+  if( COMPILE_EXTERNAL_${LOCAL_TOOL_PROJECT_NAME} )
+    list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ${LOCAL_TOOL_PROJECT_NAME} )
+    list( APPEND LIST_TOOLS ${LOCAL_TOOL_NAMES} )
+    foreach( var ${LOCAL_TOOL_NAMES} )
+      set( ${var}_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/${LOCAL_TOOL_PROJECT_NAME}-install )
+      set( ${var}TOOL ${${var}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${var} CACHE PATH "Path to a program." FORCE )
+    endforeach()
+  else()
+    list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES ${LOCAL_TOOL_PROJECT_NAME} )
+    list( REMOVE_ITEM LIST_TOOLS ${LOCAL_TOOL_NAMES} )
+    foreach( var ${LOCAL_TOOL_NAMES})
+      unset( ${var}TOOL CACHE )
+    endforeach()
+  endif()
+endmacro()
 #-----------------------------------------------------------------------------
 # Git protocole option
 #-----------------------------------------------------------------------------
@@ -91,8 +126,6 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_STYLE_UTILS" OFF
   )
 
-option(COMPILE_EXTERNAL_dtiprocess "Compile External dtiprocessToolkit" OFF )
-option(COMPILE_EXTERNAL_ITKTransformTools "Compile External ITKTransformTools" OFF )
 option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchMake" OFF)
@@ -105,35 +138,20 @@ SETIFEMPTY( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 #------------------------------------------------------------------------------
 
 set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 SlicerExecutionModel BatchMake )
-
+set(USE_ITK_Module_MGHIO TRUE)
+set(${PROJECT_NAME}_BUILD_DICOM_SUPPORT TRUE )
 if(BUILD_STYLE_UTILS)
   list(APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES Cppcheck KWStyle Uncrustify)
 else()
     list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES Cppcheck KWStyle Uncrustify )
 endif()
 list(APPEND LIST_TOOLS "")
-if( COMPILE_EXTERNAL_dtiprocess )
-  option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
-  list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
-  list( APPEND LIST_TOOLS dtiprocess )
-  set( dtiprocess_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTIProcess-install )
-  set( dtiprocessTOOL ${dtiprocess_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/dtiprocess CACHE PATH "Path to a program." FORCE )
-else()
-  unset( USE_SYSTEM_VTK CACHE )
-  list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES DTIProcess )
-  list( REMOVE_ITEM LIST_TOOLS dtiprocess )
-  unset( dtiprocessTOOL CACHE )
-endif()
-if( COMPILE_EXTERNAL_ITKTransformTools )
-  list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
-  list(APPEND LIST_TOOLS ITKTransformTools )
-  set( ITKTransformTools_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/ITKTransformTools-install )
-  set( ITKTransformToolsTOOL ${ITKTransformTools_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/ITKTransformTools CACHE PATH "Path to a program." FORCE )
-else()
-  unset( ITKTransformToolsTOOL CACHE )
-  list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKTransformTools )
-  list( REMOVE_ITEM LIST_TOOLS ITKTransformTools )
-endif()
+
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES dtiprocess TOOL_PROJECT_NAME DTIProcess)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ITKTransformTools TOOL_PROJECT_NAME ITKTransformTools)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ResampleDTIlogEuclidean TOOL_PROJECT_NAME ResampleDTIlogEuclidean)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES BRAINSFit BRAINSDemonWarp TOOL_PROJECT_NAME BRAINSTools)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS TOOL_PROJECT_NAME ANTs)
 
 include(FindExternalTools)
 
@@ -197,6 +215,7 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   SITE:STRING
   BUILDNAME:STRING
   ${PROJECT_NAME}_BUILD_DICOM_SUPPORT:BOOL
+  CMAKE_MODULE_PATH:PATH
   INSTALL_RUNTIME_DESTINATION:STRING
   )
 
@@ -278,7 +297,6 @@ ExternalProject_Add(${proj}
     ${Slicer_CLIMODULES_BIN_DIR_OPTION}
     -DANTSTOOL:PATH=${ANTSTOOL}
     -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WARPIMAGEMULTITRANSFORMTOOL}
-    -DWARPTENSORIMAGEMULTITRANSFORMTOOL:PATH=${WARPTENSORIMAGEMULTITRANSFORMTOOL}
     -DBRAINSFitTOOL:PATH=${BRAINSFitTOOL}
     -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
     -DResampleDTITOOL:PATH=${ResampleDTITOOL}

@@ -73,7 +73,7 @@ if(PLATFORM_CHECK)
     message(FATAL_ERROR "Only Mac OSX >= 10.5 are supported !")
   endif()
 endif()
-
+include(SlicerMacroGetOperatingSystemArchitectureBitness)
 #-----------------------------------------------------------------------------
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

@@ -3,6 +3,5 @@
 #define BRAINSDemonWarpTool "@BRAINSDemonWarpTOOL@"
 #define ANTSTool "@ANTSTOOL@"
 #define WarpImageMultiTransformTool "@WARPIMAGEMULTITRANSFORMTOOL@"
-#define WarpTensorImageMultiTransformTool "@WARPTENSORIMAGEMULTITRANSFORMTOOL@"
 #define ResampleDTITool "@ResampleDTIlogEuclideanTOOL@"
 #define ITKTransformToolsTool "@ITKTransformToolsTOOL@"

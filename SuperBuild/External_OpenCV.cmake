@@ -1,9 +1,6 @@
 if( NOT EXTERNAL_SOURCE_DIRECTORY )
   set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
 endif()
-if( NOT EXTERNAL_BINARY_DIRECTORY )
-  set( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-endif()
 
 # Make sure this file is included only once by creating globally unique varibles
 # based on the name of this included file.
@@ -24,8 +21,8 @@ ProjectDependancyPush(CACHED_proj ${proj})
 # Make sure that the ExtProjName/IntProjName variables are unique globally
 # even if other External_${ExtProjName}.cmake files are sourced by
 # SlicerMacroCheckExternalProjectDependency
-set(extProjName DTIProcess) #The find_package known name
-set(proj        DTIProcess) #This local name
+set(extProjName OpenCV) #The find_package known name
+set(proj        OpenCV) #This local name
 set(${extProjName}_REQUIRED_VERSION "")  #If a required version is necessary, then set this, else leave blank
 
 #if(${USE_SYSTEM_${extProjName}})
@@ -37,17 +34,15 @@ if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
   message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
 endif()
 
-if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
-  option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
-  #message(STATUS "${__indent}Adding project ${proj}")
-  # Set dependency list
-  set(${proj}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel )
-  if( BUILD_DWIAtlas )
-    list( APPEND ${proj}_DEPENDENCIES Boost )
-  endif()
+# Set dependency list
+set(${proj}_DEPENDENCIES "")
 
-  # Include dependent projects if any
-  SlicerMacroCheckExternalProjectDependency(${proj})
+# Include dependent projects if any
+SlicerMacroCheckExternalProjectDependency(${proj})
+
+if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
+  #message(STATUS "${__indent}Adding project ${proj}")
+
   # Set CMake OSX variable to pass down the external project
   set(CMAKE_OSX_EXTERNAL_PROJECT_ARGS)
   if(APPLE)
@@ -56,36 +51,64 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
       -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
   endif()
-  if( BUILD_DWIAtlas )
-    set( DWIAtlasVars
-        -DBOOST_ROOT:PATH=${BOOST_ROOT}
-        -DBOOST_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
-        -DBUILD_dwiAtlas:BOOL=ON
-       )
-  endif()
+
   ### --- Project specific additions here
   set(${proj}_CMAKE_OPTIONS
-    ${DWIAtlasVars}
-    -DBOOST_ROOT:PATH=${BOOST_ROOT}
-    -DBOOST_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
-    -DUSE_SYSTEM_ITK:BOOL=ON
-    -DUSE_SYSTEM_VTK:BOOL=ON
-    -DUSE_SYSTEM_SlicerExecutionModel:BOOL=ON
-    -DDTIProcess_SUPERBUILD:BOOL=OFF
-    -DEXECUTABLES_ONLY:BOOL=ON
-    -DBUILD_CropDTI:BOOL=OFF
-    -DBUILD_PolyDataMerge:BOOL=OFF
-    -DBUILD_PolyDataTransform:BOOL=OFF
+      -DBUILD_EXAMPLES:BOOL=OFF
+      -DBUILD_TESTING:BOOL=OFF
+      -DBUILD_NEW_PYTHON_SUPPORT:BOOL=OFF
+      -DBUILD_TESTS:BOOL=OFF
+      -DWITH_FFMPEG:BOOL=OFF
+      -DWITH_JASPER:BOOL=OFF
+      -DWITH_OPENEXR:BOOL=OFF
+      -DWITH_PVAPI:BOOL=OFF
+      -DWITH_JPEG:BOOL=OFF
+      -DWITH_TIFF:BOOL=OFF
+      -DWITH_PNG:BOOL=OFF
+## The following might cause build issues, here for testing
+      -DENABLE_SSE:BOOL=ON
+      -DENABLE_SSE2:BOOL=ON
+      -DENABLE_SSE3:BOOL=ON
+      -DENABLE_SSE41:BOOL=ON
+      -DENABLE_SSE42:BOOL=ON
+      -DENABLE_SSSE3:BOOL=ON
+## The follwing tries to get rid of OPENCV build issue
+      -DBUILD_opencv_calib3d:BOOL=OFF
+      -DBUILD_opencv_contrib:BOOL=OFF
+      -DBUILD_opencv_core:BOOL=ON
+      -DBUILD_opencv_features2d:BOOL=OFF
+      -DBUILD_opencv_flann:BOOL=ON
+      -DBUILD_opencv_highgui:BOOL=OFF
+      -DBUILD_opencv_imgproc:BOOL=OFF
+      -DBUILD_opencv_legacy:BOOL=OFF
+      -DBUILD_opencv_ml:BOOL=ON
+      -DBUILD_opencv_nonfree:BOOL=OFF
+      -DBUILD_opencv_objdetect:BOOL=OFF
+      -DBUILD_opencv_photo:BOOL=OFF
+      -DBUILD_opencv_python:BOOL=OFF
+      -DBUILD_opencv_stitching:BOOL=OFF
+      -DBUILD_opencv_ts:BOOL=OFF
+      -DBUILD_opencv_video:BOOL=OFF
+      -DBUILD_opencv_videostab:BOOL=OFF
+      -DBUILD_opencv_world:BOOL=OFF
+## Turn off GPU supports
+      -DWITH_CUDA:BOOL=OFF
+      -DWITH_CUFFT:BOOL=OFF
+      -DWITH_OPENCL:BOOL=OFF
+      -DWITH_OPENCLAMDFFT:BOOL=OFF
+
+      -DBUILD_SHARED_LIBS:BOOL=OFF
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}/${proj}-install
     )
 
   ### --- End Project specific additions
-  set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/DTIProcessToolkit.git)
-  set( ${proj}_GIT_TAG 111e151f361512ca3050e798de2d4eba586fa4d2 )
+  set(${proj}_REPOSITORY "${git_protocol}://github.com/BRAINSia/opencv.git") # USE THIS FOR UPDATED VERSION
+  set(${proj}_GIT_TAG "20131101_Upstream") # USE THIS FOR UPDATED VERSION
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
-    BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
+    BINARY_DIR ${proj}-build
     LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards
     LOG_BUILD     0  # Wrap build in script to to ignore log output from dashboards
     LOG_TEST      0  # Wrap test in script to to ignore log output from dashboards
@@ -96,21 +119,25 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
       ${COMMON_EXTERNAL_PROJECT_ARGS}
       ${${proj}_CMAKE_OPTIONS}
-      ## We really do want to install to remove uncertainty about where the tools are
-      ## (on Windows, tools might be in subfolders, like "Release", "Debug",...)
-      -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
+## We really do want to install in order to limit # of include paths INSTALL_COMMAND ""
     DEPENDS
       ${${proj}_DEPENDENCIES}
   )
-  set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build)
+  set(${extProjName}_DIR ${CMAKE_BINARY_DIR}/${proj}-install/share/OpenCV/)
 else()
   if(${USE_SYSTEM_${extProjName}})
-    find_package(${extProjName} ${${extProjName}_REQUIRED_VERSION} REQUIRED)
-    message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
+    if(NOT ${${extProjName}_DIR})
+      message(FATAL_ERROR "${extProjName}_DIR is required but not set.")
+    endif()
+    if(NOT IS_DIRECTORY "${${extProjName}_DIR}")
+      message(FATAL_ERROR "${extProjName}_DIR is set but doesn't exist: ${${extProjName}_DIR}")
+    endif()
   endif()
-  # The project is provided using ${extProjName}_DIR, nevertheless since other
-  # project may depend on ${extProjName}, let's add an 'empty' one
-  SlicerMacroEmptyExternalProject(${proj} "${${proj}_DEPENDENCIES}")
+  if( NOT TARGET ${proj} )
+    # The project is provided using ${extProjName}_DIR, nevertheless since other
+    # project may depend on ${extProjName}, let's add an 'empty' one
+    SlicerMacroEmptyExternalProject(${proj} "${${proj}_DEPENDENCIES}")
+  endif()
 endif()
 
 list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH)

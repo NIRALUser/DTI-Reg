@@ -1,9 +1,6 @@
 if( NOT EXTERNAL_SOURCE_DIRECTORY )
   set( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/ExternalSources )
 endif()
-if( NOT EXTERNAL_BINARY_DIRECTORY )
-  set( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-endif()
 
 # Make sure this file is included only once by creating globally unique varibles
 # based on the name of this included file.
@@ -24,8 +21,8 @@ ProjectDependancyPush(CACHED_proj ${proj})
 # Make sure that the ExtProjName/IntProjName variables are unique globally
 # even if other External_${ExtProjName}.cmake files are sourced by
 # SlicerMacroCheckExternalProjectDependency
-set(extProjName DTIProcess) #The find_package known name
-set(proj        DTIProcess) #This local name
+set(extProjName zlib) #The find_package known name
+set(proj        zlib) #This local name
 set(${extProjName}_REQUIRED_VERSION "")  #If a required version is necessary, then set this, else leave blank
 
 #if(${USE_SYSTEM_${extProjName}})
@@ -33,21 +30,29 @@ set(${extProjName}_REQUIRED_VERSION "")  #If a required version is necessary, th
 #endif()
 
 # Sanity checks
-if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
-  message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
+if(DEFINED ${extProjName}_DIR)
+  # sometimes on subsequent configure runs, zlib_DIR will be zlib_DIR-NOTFOUND, but
+  # the zlib vars will be set properly
+  if( NOT (IS_DIRECTORY "${ZLIB_INCLUDE_DIR}" AND EXISTS "${ZLIB_LIBRARY}" ) )
+    if(NOT EXISTS ${${extProjName}_DIR})
+      message(FATAL_ERROR
+        "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
+    endif()
+  endif()
 endif()
 
-if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
-  option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
-  #message(STATUS "${__indent}Adding project ${proj}")
-  # Set dependency list
-  set(${proj}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel )
-  if( BUILD_DWIAtlas )
-    list( APPEND ${proj}_DEPENDENCIES Boost )
-  endif()
+# Set dependency list
+set(${proj}_DEPENDENCIES "")
+#if(${PROJECT_NAME}_BUILD_DICOM_SUPPORT)
+#  list(APPEND ${proj}_DEPENDENCIES DCMTK)
+#endif()
 
-  # Include dependent projects if any
-  SlicerMacroCheckExternalProjectDependency(${proj})
+# Include dependent projects if any
+SlicerMacroCheckExternalProjectDependency(${proj})
+
+if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
+  #message(STATUS "${__indent}Adding project ${proj}")
+
   # Set CMake OSX variable to pass down the external project
   set(CMAKE_OSX_EXTERNAL_PROJECT_ARGS)
   if(APPLE)
@@ -56,36 +61,34 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
       -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
   endif()
-  if( BUILD_DWIAtlas )
-    set( DWIAtlasVars
-        -DBOOST_ROOT:PATH=${BOOST_ROOT}
-        -DBOOST_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
-        -DBUILD_dwiAtlas:BOOL=ON
-       )
-  endif()
-  ### --- Project specific additions here
-  set(${proj}_CMAKE_OPTIONS
-    ${DWIAtlasVars}
-    -DBOOST_ROOT:PATH=${BOOST_ROOT}
-    -DBOOST_INCLUDE_DIR:PATH=${BOOST_INCLUDE_DIR}
-    -DUSE_SYSTEM_ITK:BOOL=ON
-    -DUSE_SYSTEM_VTK:BOOL=ON
-    -DUSE_SYSTEM_SlicerExecutionModel:BOOL=ON
-    -DDTIProcess_SUPERBUILD:BOOL=OFF
-    -DEXECUTABLES_ONLY:BOOL=ON
-    -DBUILD_CropDTI:BOOL=OFF
-    -DBUILD_PolyDataMerge:BOOL=OFF
-    -DBUILD_PolyDataTransform:BOOL=OFF
-    )
 
+  if(NOT CMAKE_CONFIGURATION_TYPES)
+    list(APPEND EXTERNAL_PROJECT_OPTIONAL_ARGS
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
+  endif()
+
+  set(${proj}_CMAKE_OPTIONS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/${proj}-install
+      ## CXX should not be needed, but it a cmake default test
+      -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
+      -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
+      -DCMAKE_C_FLAGS:STRING=${ep_common_c_flags}
+      -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    )
+  if( ZLIB_MANGLE )
+    list( APPEND ${proj}_CMAKE_OPTIONS
+           -DZLIB_MANGLE_PREFIX:STRING=slicer_zlib_
+        )
+  endif()
   ### --- End Project specific additions
-  set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/DTIProcessToolkit.git)
-  set( ${proj}_GIT_TAG 111e151f361512ca3050e798de2d4eba586fa4d2 )
+  set(${proj}_REPOSITORY "${git_protocol}://github.com/commontk/zlib.git")
+  set(${proj}_GIT_TAG "66a753054b356da85e1838a081aa94287226823e")
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
-    BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
+    BINARY_DIR ${proj}-build
+    INSTALL_DIR ${proj}-install
     LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards
     LOG_BUILD     0  # Wrap build in script to to ignore log output from dashboards
     LOG_TEST      0  # Wrap test in script to to ignore log output from dashboards
@@ -96,21 +99,30 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
       ${COMMON_EXTERNAL_PROJECT_ARGS}
       ${${proj}_CMAKE_OPTIONS}
-      ## We really do want to install to remove uncertainty about where the tools are
-      ## (on Windows, tools might be in subfolders, like "Release", "Debug",...)
-      -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
+## We really do want to install in order to limit # of include paths INSTALL_COMMAND ""
     DEPENDS
       ${${proj}_DEPENDENCIES}
-  )
-  set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build)
+    )
+  set(${extProjName}_DIR ${CMAKE_BINARY_DIR}/${proj}-install)
+  set(SLICER_ZLIB_ROOT ${${extProjName}_DIR})
+  set(SLICER_ZLIB_INCLUDE_DIR ${${extProjName}_DIR}/include )
+  if(WIN32)
+    set(SLICER_ZLIB_LIBRARY     ${${extProjName}_DIR}/lib/zlib.lib )
+  else()
+    set(SLICER_ZLIB_LIBRARY     ${${extProjName}_DIR}/lib/libzlib.a )
+  endif()
+  set(ZLIB_INCLUDE_DIR "${SLICER_ZLIB_INCLUDE_DIR}")
+  set(ZLIB_LIBRARY "${SLICER_ZLIB_LIBRARY}")
 else()
   if(${USE_SYSTEM_${extProjName}})
-    find_package(${extProjName} ${${extProjName}_REQUIRED_VERSION} REQUIRED)
+    find_package(ZLIB ${${extProjName}_REQUIRED_VERSION} REQUIRED)
     message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
   endif()
-  # The project is provided using ${extProjName}_DIR, nevertheless since other
-  # project may depend on ${extProjName}, let's add an 'empty' one
-  SlicerMacroEmptyExternalProject(${proj} "${${proj}_DEPENDENCIES}")
+  if( NOT TARGET ${proj} )
+    # The project is provided using ${extProjName}_DIR, nevertheless since other
+    # project may depend on ${extProjName}, let's add an 'empty' one
+    SlicerMacroEmptyExternalProject(${proj} "${${proj}_DEPENDENCIES}")
+  endif()
 endif()
 
 list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH)
