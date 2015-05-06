@@ -151,7 +151,7 @@ COMPILE_EXTERNAL_TOOLS( TOOL_NAMES dtiprocess TOOL_PROJECT_NAME DTIProcess)
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ITKTransformTools TOOL_PROJECT_NAME ITKTransformTools)
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ResampleDTIlogEuclidean TOOL_PROJECT_NAME ResampleDTIlogEuclidean)
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES BRAINSFit BRAINSDemonWarp TOOL_PROJECT_NAME BRAINSTools)
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS TOOL_PROJECT_NAME ANTs)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS WarpImageMultiTransform TOOL_PROJECT_NAME ANTs)
 
 include(FindExternalTools)
 
@@ -275,6 +275,18 @@ endif()
 #------------------------------------------------------------------------------
 # Configure and build
 #------------------------------------------------------------------------------
+option(CONFIGURE_TOOLS_PATHS "Use CMake to find where the tools are and hard-code their path in the executable" ON)
+if( NOT CONFIGURE_TOOLS_PATHS )
+  foreach( var ${LIST_TOOLS})
+    set( ${var}TOOL "" CACHE PATH "Path to a program." FORCE )
+    mark_as_advanced( FORCE ${var}TOOL)
+  endforeach()
+else()
+  foreach( var ${LIST_TOOLS})
+    mark_as_advanced(CLEAR ${var}TOOL)
+  endforeach()
+endif()
+
 if( Slicer_CLIMODULES_BIN_DIR )
   set( Slicer_CLIMODULES_BIN_DIR_OPTION -DSlicer_CLIMODULES_BIN_DIR:STRING=${Slicer_CLIMODULES_BIN_DIR} )
 endif()
@@ -296,11 +308,12 @@ ExternalProject_Add(${proj}
     -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
     ${Slicer_CLIMODULES_BIN_DIR_OPTION}
     -DANTSTOOL:PATH=${ANTSTOOL}
-    -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WARPIMAGEMULTITRANSFORMTOOL}
+    -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WarpImageMultiTransformTOOL}
     -DBRAINSFitTOOL:PATH=${BRAINSFitTOOL}
     -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
-    -DResampleDTITOOL:PATH=${ResampleDTITOOL}
+    -DResampleDTITOOL:PATH=${ResampleDTIlogEuclideanTOOL}
     -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
+    -DITKTransformToolsTOOL:PATH=${ITKTransformToolsTOOL}
     -DCMAKE_INSTALL_PREFIX:PATH=${DTI-Reg_INSTALL_DIRECTORY}
   )
 
