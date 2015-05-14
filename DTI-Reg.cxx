@@ -301,6 +301,14 @@ int main (int argc, char *argv[])
   {
     file <<"set (outputDeformationFieldVolume \'\')"<<std::endl;
   }
+  if (outputInverseDeformationFieldVolume.compare(""))
+  {
+    file <<"set (outputInverseDeformationFieldVolume "<<outputInverseDeformationFieldVolume<<")"<<std::endl;
+  }
+  else
+  {
+    file <<"set (outputInverseDeformationFieldVolume \'\')"<<std::endl;
+  }
   if (!method.compare("useScalar-BRAINS"))
   {
     file <<"\n# BRAINS Registration Parameters"<<std::endl;

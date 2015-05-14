@@ -3,7 +3,7 @@
   <category>Diffusion.Diffusion Tensor Images</category>
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration, using FA or MD maps to drive the registration</description>
-  <version>1.1.8</version>
+  <version>1.1.9</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (SCI, University of Utah), Adrien Kaiser (NIRAL, UNC-Chapel Hill), Francois Budin (NIRAL, UNC-Chapel Hill)</contributor>
@@ -130,6 +130,15 @@
       <longflag alias="output_field" deprecatedalias="outputDeformationFieldVolume">outputDisplacementField</longflag>
       <description>Output displacement field vector image</description>
       <label>Output Displacement Field Volume</label>
+      <default></default>
+      <channel>output</channel>
+    </image>
+
+    <image type="vector">
+      <name>outputInverseDeformationFieldVolume</name>
+      <longflag>outputInverseDeformationFieldVolume</longflag>
+      <description>Output inverse displacement field vector image (only for ANTS)</description>
+      <label>Output Inverse Displacement Field Volume</label>
       <default></default>
       <channel>output</channel>
     </image>

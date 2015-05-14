@@ -153,7 +153,8 @@ Else(${IsWarping})\n\
   set (commandWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} -f ${Transform})\n\
 EndIf(${IsWarping})\n\
 Run (outputWarpTensorImageMultiTransform ${commandWarpTensorImageMultiTransform} errorWarpTensorImageMultiTransform)\n\
-If(${errorWarpTensorImageMultiTransform} != '')\n\
+FileExists(fileCreated ${ResampledDTI})\n\
+If(${fileCreated} != 1)\n\
   echo('Error WarpTensorImageMultiTransform: ' ${errorWarpTensorImageMultiTransform})\n\
   exit()\n\
 Endif(${errorWarpTensorImageMultiTransform})\n\
@@ -170,8 +171,33 @@ If(${IsWarping} == 1)\n\
       exit()\n\
     Endif(${errorConcatenationCmd})\n\
   EndIf(${outputDeformationFieldVolume})\n\
+  If (${outputInverseDeformationFieldVolume} != '')\n\
+    echo()\n\
+    echo('Computing inverse deformation field...')\n\
+    set(Transform_inv ${ANTSOutbase}Affine_inv.txt)\n\
+    set( CmdInvert ${ITKTransformToolsCmd} invert ${Transform} ${Transform_inv} )\n\
+    run( outputCmdInvert ${CmdInvert} errorCmdInvert)\n\
+    echo( ${outputCmdInvert} )\n\
+    If(${errorCmdInvert} != '')\n\
+      echo('Error ITKTransformTools: ' ${errorCmdInvert})\n\
+      exit()\n\
+    Endif(${errorCmdInvert})\n\
+    set(InverseDeformationField ${ANTSOutbase}InverseWarp.nii.gz)\n\
+    set(ConcatenationCmd ${ITKTransformToolsCmd} concatenate ${outputInverseDeformationFieldVolume} -r ${movingVolume} ${Transform_inv} ${InverseDeformationField} displacement )\n\
+    Run(outputConcatenationCmd ${ConcatenationCmd} errorConcatenationCmd)\n\
+    echo(${outputConcatenationCmd})\n\
+    If(${errorConcatenationCmd} != '')\n\
+      echo('Error ITKTransformTools: ' ${errorConcatenationCmd})\n\
+      exit()\n\
+    Endif(${errorConcatenationCmd})\n\
+  EndIf(${outputInverseDeformationFieldVolume})\n\
 Else(${IsWarping} == 1)\n\
-  echo('Warning: '${outputDeformationFieldVolume}' is specified but registration is only rigid or affine. This value will not be used.')\n\
+  If (${outputDeformationFieldVolume} != '')\n\
+    echo('Warning: '${outputDeformationFieldVolume}' is specified but registration is only rigid or affine. This value will not be used.')\n\
+  EndIf(${outputDeformationFieldVolume})\n\
+  If (${outputInverseDeformationFieldVolume} != '')\n\
+    echo('Warning: '${outputInverseDeformationFieldVolume}' is specified but registration is only rigid or affine. This value will not be used.')\n\
+  EndIf(${outputInverseDeformationFieldVolume})\n\
 EndIf(${IsWarping})\n\
 \n\
 If (${outputTransform} != '')\n\
@@ -205,6 +231,9 @@ GetFilename(fixedVolumeTail ${fixedVolume} NAME)\n\
 GetFilename(movingVolumeHead ${movingVolume} NAME_WITHOUT_EXTENSION)\n\
 GetFilename(movingVolumeTail ${movingVolume} NAME)\n\
 \n\
+If( ${outputInverseDeformationFieldVolume} != '' )\n\
+  echo('Warning: '${outputInverseDeformationFieldVolume}' is specified but registration is performed with BRAINSDemonWarp. This value will not be used.')\n\
+EndIf()\n\
 If( ${ScalarMeasurement} == 'FA')\n\
   set(ScalarMeasurementFlag -f)\n\
 Else( ${ScalarMeasurement} )\n\
