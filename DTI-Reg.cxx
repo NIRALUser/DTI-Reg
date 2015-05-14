@@ -202,32 +202,10 @@ int main (int argc, char *argv[])
     bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(outputVolume);
   }
 #endif
-  //To avoid printing an error message, we have to set --gaussian-smoothing-sigmas
-  //It has to have the same number of values then the levels of downsampling
-  //We first find how many 'x' are in the iteration number (ANTSIterations)
-  std::string gaussianSmoothingSigmas ;
-  if( !method.compare("useScalar-ANTS" ) && ANTSRegistrationType.compare("Affine") && ANTSRegistrationType.compare("Rigid") )
-  {
-    size_t levels = std::count(ANTSIterations.begin(), ANTSIterations.end(), 'x') + 1 ;
-    for( size_t i = 0 ; i < levels - 1 ; i++ )
-    {
-      double val = pow( 2.0, static_cast<int>( levels - i - 1 ) ) ;
-      ostringstream convert ;
-      convert << val ;
-      gaussianSmoothingSigmas += convert.str() ;
-      gaussianSmoothingSigmas += "x" ;
-    }
-    gaussianSmoothingSigmas += "1" ;
-  }
-  else
-  {
-    gaussianSmoothingSigmas = "\'\'" ;
-  }
   if( outputBSplineTransform.empty() )
   {
       outputBSplineTransform = "\'\'" ;
   }
-  file <<"set (gaussianSmoothingSigmas "<<gaussianSmoothingSigmas<<")"<<std::endl;
   file <<"set (outputBSplineTransform "<<outputBSplineTransform<<")"<<std::endl;
   file <<"set (OutputDir "<<outputDir<<")"<<std::endl;
   file <<"\n# Optional input mask volumes"<<std::endl;

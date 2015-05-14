@@ -65,7 +65,7 @@ set (DeformationField '')\n\
     set(IsWarping 0)\n\
   EndIf()\n\
 \n\
-  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedScalarMap},${movingScalarMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase} --gaussian-smoothing-sigmas ${gaussianSmoothingSigmas})\n\
+  set (commandANTS ${ANTSCmd} 3 -m ${ANTSSimilarityMetric}[${fixedScalarMap},${movingScalarMap},1,${ANTSSimilarityParameter}] -o ${ANTSOutbase} )\n\
 \n\
   If (${initialAffine} != '')\n\
     set (commandANTS ${commandANTS} -a ${initialAffine})\n\
