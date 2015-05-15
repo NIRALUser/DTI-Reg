@@ -353,7 +353,7 @@
     </string-vector>
     <string-enumeration>
       <name>correction</name>
-      <longflag>--correction</longflag>
+      <longflag>correction</longflag>
       <description>Use correction options when the tensors are computed if not semi-definite positive (both with ResampleDTIlogEuclidean and dtiprocess).</description>
       <label>Tensors Correction</label>
       <element>zero</element>
