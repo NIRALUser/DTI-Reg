@@ -203,7 +203,6 @@ EndIf(${IsWarping})\n\
 If (${outputTransform} != '')\n\
   echo()\n\
   echo('Copying Transform file...')\n\
-#  set( Cmd /Applications/Slicer.app/Contents/Extensions-22599/DTIAtlasBuilder/lib/Slicer-4.3/ExternalBin/MO2Aff ${Transform} ${outputTransform} )\n\
   set( Cmd ${ITKTransformToolsCmd} MO2Aff ${Transform} ${outputTransform} )\n\
   echo(${Cmd})\n\
   Run(outputCmd ${Cmd} errorCmd)\n\

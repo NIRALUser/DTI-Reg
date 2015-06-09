@@ -12,8 +12,21 @@
 #include "DTI-Reg-bms.h"
 
 
-int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector )
+int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector , std::string givenPath )
 {
+  if( !givenPath.empty() )
+  {
+    if( itksys::SystemTools::FileExists( givenPath , true ) )
+    {
+      pathString = givenPath ;
+      return 0 ;
+    }
+    else
+    {
+      std::cerr << givenPath << " is not a file" << std::endl ;
+      return 1 ;
+    }
+  }
   std::string cmakePathString = pathString ;
   if( !ProgramsPathsVector.empty() )
   {
@@ -314,7 +327,7 @@ int main (int argc, char *argv[])
        
     file <<"\n#External Tools"<<std::endl;
     std::string BRAINSFitCmd = BRAINSFitTool;
-    if( SetPath(BRAINSFitCmd, "BRAINSFit" , ProgramsPathsVector ) )
+    if( SetPath(BRAINSFitCmd, "BRAINSFit" , ProgramsPathsVector , BRAINSFitPath ) )
     {
       return EXIT_FAILURE;
     }
@@ -323,7 +336,7 @@ int main (int argc, char *argv[])
       file <<"set (BRAINSFitCmd "<<BRAINSFitCmd<<")"<<std::endl;
     }
     std::string BRAINSDemonWarpCmd = BRAINSDemonWarpTool;
-    if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , ProgramsPathsVector ) )
+    if( SetPath(BRAINSDemonWarpCmd, "BRAINSDemonWarp" , ProgramsPathsVector , BRAINSDemonWarpPath ) )
     {
       return EXIT_FAILURE;
     }
@@ -353,7 +366,7 @@ int main (int argc, char *argv[])
     file <<"set (ANTSUseHistogramMatching "<<ANTSUseHistogramMatching<<")"<<std::endl;
     file <<"\n#External Tools"<<std::endl;
     std::string ANTSCmd = ANTSTool;
-    if( SetPath(ANTSCmd, "ANTS" , ProgramsPathsVector ) )
+    if( SetPath(ANTSCmd, "ANTS" , ProgramsPathsVector , ANTSPath ) )
     {
 	    return EXIT_FAILURE;
     }
@@ -363,7 +376,7 @@ int main (int argc, char *argv[])
     }
       
     std::string WarpImageMultiTransformCmd = WarpImageMultiTransformTool;
-    if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , ProgramsPathsVector ) )
+    if( SetPath(WarpImageMultiTransformCmd, "WarpImageMultiTransform" , ProgramsPathsVector , WarpImageMultiTransformPath ) )
     {
       return EXIT_FAILURE;
     }
@@ -374,7 +387,7 @@ int main (int argc, char *argv[])
       
   } // if (!method.compare("useScalar-ANTS"))
   std::string dtiprocessCmd = dtiprocessTool;
-  if( SetPath(dtiprocessCmd, "dtiprocess" , ProgramsPathsVector ) )
+  if( SetPath(dtiprocessCmd, "dtiprocess" , ProgramsPathsVector , dtiprocessPath ) )
   {
     return EXIT_FAILURE;
   }
@@ -383,7 +396,7 @@ int main (int argc, char *argv[])
     file <<"set (dtiprocessCmd "<<dtiprocessCmd<<")"<<std::endl;
   }
   std::string ResampleDTICmd = ResampleDTITool;
-  if( SetPath(ResampleDTICmd, "ResampleDTIlogEuclidean" , ProgramsPathsVector ) )
+  if( SetPath(ResampleDTICmd, "ResampleDTIlogEuclidean" , ProgramsPathsVector , ResampleDTIPath ) )
   {
     return EXIT_FAILURE;
   }
@@ -392,7 +405,7 @@ int main (int argc, char *argv[])
     file <<"set (ResampleDTICmd "<<ResampleDTICmd<<")"<<std::endl;
   }
   std::string ITKTransformToolsCmd = ITKTransformToolsTool;
-  if( SetPath(ITKTransformToolsCmd, "ITKTransformTools" , ProgramsPathsVector ) )
+  if( SetPath(ITKTransformToolsCmd, "ITKTransformTools" , ProgramsPathsVector , ITKTransformToolsPath ) )
   {
     return EXIT_FAILURE;
   }

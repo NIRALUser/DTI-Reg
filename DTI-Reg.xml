@@ -367,7 +367,56 @@
       <label>Number Of Threads</label>
       <longflag>numberOfThreads</longflag>
       <description>Sets the number of threads used by multithreaded ITK filters (set to 0 to use maximum number of cores)</description>
-      <default>3</default>
+      <default>0</default>
     </integer>
-  </parameters> 
+    <file>
+      <name>ANTSPath</name>
+      <longflag>ANTSPath</longflag>
+      <label>ANTS executable Path</label>
+      <description>Specify which executable to use for ANTS</description>
+      <default></default>
+    </file>
+    <file>
+      <name>BRAINSFitPath</name>
+      <longflag>BRAINSFitPath</longflag>
+      <label>BRAINSFit executable Path</label>
+      <description>Specify which executable to use for BRAINSFit</description>
+      <default></default>
+    </file>
+    <file>
+      <name>BRAINSDemonWarpPath</name>
+      <longflag>BRAINSDemonWarpPath</longflag>
+      <label>BRAINSDemonWarp executable Path</label>
+      <description>Specify which executable to use for BRAINSDemonWarp</description>
+      <default></default>
+    </file>
+    <file>
+      <name>WarpImageMultiTransformPath</name>
+      <longflag>WarpImageMultiTransformPath</longflag>
+      <label>WarpImageMultiTransform executable Path</label>
+      <description>Specify which executable to use for WarpImageMultiTransform</description>
+      <default></default>
+    </file>
+    <file>
+      <name>dtiprocessPath</name>
+      <longflag>dtiprocessPath</longflag>
+      <label>dtiprocess executable Path</label>
+      <description>Specify which executable to use for dtiprocess</description>
+      <default></default>
+    </file>
+    <file>
+      <name>ResampleDTIPath</name>
+      <longflag>ResampleDTIPath</longflag>
+      <label>ResampleDTI executable Path</label>
+      <description>Specify which executable to use for ResampleDTI (or ResampleDTIlogEuclidean)</description>
+      <default></default>
+    </file>
+    <file>
+      <name>ITKTransformToolsPath</name>
+      <longflag>ITKTransformToolsPath</longflag>
+      <label>ITKTransformTools executable Path</label>
+      <description>Specify which executable to use for ITKTransformTools</description>
+      <default></default>
+    </file>
+  </parameters>
 </executable>
