@@ -3,7 +3,7 @@
   <category>Diffusion.Diffusion Tensor Images</category>
   <title>DTI-Reg</title>
   <description>DTI-Reg performs pair-wise DTI registration, using FA or MD maps to drive the registration</description>
-  <version>1.1.9</version>
+  <version>1.1.10</version>
   <documentation-url>http://www.nitrc.org/projects/dtireg/</documentation-url>
   <license></license>
   <contributor>Clement Vachet (SCI, University of Utah), Adrien Kaiser (NIRAL, UNC-Chapel Hill), Francois Budin (NIRAL, UNC-Chapel Hill)</contributor>
@@ -361,6 +361,13 @@
       <element>abs</element>
       <element>nearest</element>
       <default>none</default>
-   </string-enumeration>
+    </string-enumeration>
+    <integer>
+      <name>numberOfThreads</name>
+      <label>Number Of Threads</label>
+      <longflag>numberOfThreads</longflag>
+      <description>Sets the number of threads used by multithreaded ITK filters (set to 0 to use maximum number of cores)</description>
+      <default>3</default>
+    </integer>
   </parameters> 
 </executable>

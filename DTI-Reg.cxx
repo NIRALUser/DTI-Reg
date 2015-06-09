@@ -51,7 +51,13 @@ int SetPath( std::string &pathString , const char* name , std::vector< std::stri
 int main (int argc, char *argv[])
 {
   PARSE_ARGS;
-//  std::vector< std::string > path_vec ; // initialized by the cmd line vector ProgramsPathsVector
+  if( numberOfThreads != 0 )
+  {
+    std::ostringstream ssNumberOfThreads ;
+    ssNumberOfThreads << "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=" << numberOfThreads ;
+    itksys::SystemTools::PutEnv( ssNumberOfThreads.str().c_str() ) ;
+  }
+  //  std::vector< std::string > path_vec ; // initialized by the cmd line vector ProgramsPathsVector
 
   // Added by Adrien Kaiser : the tools are either in the same directory than the DTI-Reg executable ran or in the PATH
   // Get the directory where the DTI-Reg executable is
