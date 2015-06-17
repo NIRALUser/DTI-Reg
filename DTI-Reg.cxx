@@ -11,6 +11,9 @@
 #include "DTI-Reg_Config.h"
 #include "DTI-Reg-bms.h"
 
+#ifdef Slicer_Extension
+  #include <vtkSlicerConfigure.h> //configured in the inner-build directory of Slicer
+#endif
 
 int SetPath( std::string &pathString , const char* name , std::vector< std::string >  ProgramsPathsVector , std::string givenPath )
 {
@@ -77,29 +80,31 @@ int main (int argc, char *argv[])
   std::string RanCommandDirectory = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(argv[0]).c_str() );
   if(RanCommandDirectory=="")
   {
-    RanCommandDirectory="."; // If called by itself = either in the PATH or in the current directory : will be found either way by find_program
+    RanCommandDirectory="."; // If called by itself = either in the PATH or in the current directory : will be find either way by find_program
   }
-  // Add it in the ProgramsPathsVector
-  ProgramsPathsVector.push_back(RanCommandDirectory);
-#ifdef Slicer_CLIMODULES_BIN_DIR
+#ifdef Slicer_Extension
   //We add "ExternalBin" to the directory that have to be looked in for the other software
   ProgramsPathsVector.push_back( RanCommandDirectory + "/../ExternalBin" ) ;
   //Since Slicer r23212, dependent extensions can be downloaded automatically. DTIProcess will therefore not be installed in ExternalBin
   // but it will be in the DTIProcess extension directory. We add this path to where DTIReg looks for other software
-  ProgramsPathsVector.push_back( RanCommandDirectory + "/../../../../DTIProcess/lib/Slicer4.3/cli-modules" ) ;
+  ProgramsPathsVector.push_back( RanCommandDirectory + "/../../../../DTIProcess/" + std::string(Slicer_CLIMODULES_BIN_DIR) ) ;
+  //We also need to find ResampleDTIlogEuclidean which is also an extension
+  ProgramsPathsVector.push_back( RanCommandDirectory + "/../../../../ResampleDTIlogEuclidean/" + std::string(Slicer_CLIMODULES_BIN_DIR) ) ;
 #ifdef __APPLE__
-  std::string BRAINSPath = std::string( "/../../../../../" ) + std::string( Slicer_CLIMODULES_BIN_DIR ) ;
-  ProgramsPathsVector.push_back( RanCommandDirectory + BRAINSPath ) ;
+  // on Mac, slicer does not provide a PATH variable that includes the built-in CLIs
+  // so we add it here (for BRAINS).
+  std::string slicerHome ;
+  if( itksys::SystemTools::GetEnv("SLICER_HOME", slicerHome) )
+  {
+    // Slicer_CLIMODULES_BIN_DIR is defined in vtkSlicerConfigure.h which is configured in the inner-build
+    // directory of Slicer
+    ProgramsPathsVector.push_back( slicerHome + "/" + Slicer_CLIMODULES_BIN_DIR ) ;
+  }
 #endif
+#else
+  // Add it in the ProgramsPathsVector, if DTI-Reg is not built as an extension.
+  ProgramsPathsVector.push_back(RanCommandDirectory);
 #endif
-  // If DTI-Reg is a Slicer Extension in the DTIAtlasBuilder package, give the path to the folder containing external non cli tools
-  #ifdef Slicer_CLIMODULES_BIN_DIR  
-  std::string LinuxWindowsExternalBinDir = RanCommandDirectory + "/../../../ExternalBin"; // On linux or windows, the executable will be in Ext/lib/Slicer4.2/cli_modules and the tools will be in Ext/ExternalBin
-  std::string MacExternalBinDir = RanCommandDirectory + "/../ExternalBin"; // On mac, the executable will be in Ext/cli_modules and the tools will be in Ext/ExternalBin
-  ProgramsPathsVector.push_back(LinuxWindowsExternalBinDir);
-  ProgramsPathsVector.push_back(MacExternalBinDir);
-  #endif
-// for(int i=0;i<ProgramsPathsVector.size();i++) std::cout<<ProgramsPathsVector[i]<<std::endl;
 
   std::cout<<"DTI-Reg: ";
 
@@ -115,7 +120,7 @@ int main (int argc, char *argv[])
     std::cerr << "To display help, please type: DTI-Reg --help"<<std::endl;
     return EXIT_FAILURE ;    
   }
-#ifdef Slicer_CLIMODULES_BIN_DIR
+#ifdef Slicer_Extension
   //If it is an extension, than we want to have access to either the transformed DTI or
   //to a transform
   //We verify that either are defined
@@ -212,7 +217,7 @@ int main (int argc, char *argv[])
   {
     file <<"set (initialAffine \'\')"<<std::endl;
   }
-#ifdef Slicer_CLIMODULES_BIN_DIR
+#ifdef Slicer_Extension
   //if it is an extension, and if no output volume is given, we want to use the input
   // directory (ie: Slicer temp directory) as our output directory
   if( outputVolume.empty() )
