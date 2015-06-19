@@ -12,10 +12,6 @@ if(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED)
 endif()
 set(${CMAKE_CURRENT_LIST_FILENAME}_FILE_INCLUDED 1)
 
-# Include dependent projects if any
-set(extProjName SlicerExecutionModel) #The find_package known name
-set(proj ${extProjName})              #This local name
-
 ## External_${extProjName}.cmake files can be recurisvely included,
 ## and cmake variables are global, so when including sub projects it
 ## is important make the extProjName and proj variables
@@ -23,6 +19,10 @@ set(proj ${extProjName})              #This local name
 ## Store global variables before overwriting (then restore at end of this file.)
 ProjectDependancyPush(CACHED_extProjName ${extProjName})
 ProjectDependancyPush(CACHED_proj ${proj})
+
+# Include dependent projects if any
+set(extProjName SlicerExecutionModel) #The find_package known name
+set(proj ${extProjName})              #This local name
 
 #if(${USE_SYSTEM_${extProjName}})
 #  unset(${extProjName}_DIR CACHE)

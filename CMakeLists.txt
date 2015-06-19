@@ -20,6 +20,17 @@ project(${LOCAL_PROJECT_NAME})
 option(${LOCAL_PROJECT_NAME}_SUPERBUILD "Build ${LOCAL_PROJECT_NAME} and the projects it depends on via SuperBuild.cmake." ON)
 mark_as_advanced(${LOCAL_PROJECT_NAME}_SUPERBUILD)
 
+#-----------------------------------------------------------------------------
+# Update CMake module path
+#------------------------------------------------------------------------------
+set(CMAKE_MODULE_PATH
+  ${${PROJECT_NAME}_SOURCE_DIR}/CMake
+  ${${PROJECT_NAME}_BINARY_DIR}/CMake
+  ${CMAKE_MODULE_PATH}
+  )
+
+include(SlicerExtensionsConfigureMacros)
+
 option(STATIC_DTI-Reg "Build static DTI-Reg" ON)
 
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
@@ -32,7 +43,8 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set(EXTENSION_ICONURL "https://raw.githubusercontent.com/NIRALUser/DTI-Reg/master/DTI-Reg-icon.png")
   set(EXTENSION_SCREENSHOTURLS "http://www.slicer.org/slicerWiki/images/c/c5/DTI-Reg_-_Misaligned_DTIs.png http://www.slicer.org/slicerWiki/images/1/12/DTI-Reg_-_Aligned_DTIs_-_Coronal.png")
   set(EXTENSION_DEPENDS "DTIProcess ResampleDTIlogEuclidean") # Specified as a space separated list or 'NA' if any
-  set(EXTENSION_BUILD_SUBDIRECTORY DTI-Reg-build)
+#  set(EXTENSION_BUILD_SUBDIRECTORY DTI-Reg-build)
+  set(EXTENSION_BUILD_SUBDIRECTORY . )
   set(SUPERBUILD_TOPLEVEL_PROJECT DTI-Reg)
 endif()
 

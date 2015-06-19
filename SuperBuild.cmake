@@ -48,9 +48,15 @@ macro(COMPILE_EXTERNAL_TOOLS)
       set( ${var}TOOL ${${var}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${var} CACHE PATH "Path to a program." FORCE )
     endforeach()
   else()
-    list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES ${LOCAL_TOOL_PROJECT_NAME} )
-    list( REMOVE_ITEM LIST_TOOLS ${LOCAL_TOOL_NAMES} )
-    foreach( var ${LOCAL_TOOL_NAMES})
+    list( FIND LIST_TOOLS ${LOCAL_TOOL_PROJECT_NAME} pos )
+    if( "${pos}" GREATER "-1" )
+      list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES ${LOCAL_TOOL_PROJECT_NAME} )
+    endif()
+    foreach( var ${LOCAL_TOOL_NAMES} )
+      list( FIND LIST_TOOLS ${var} pos )
+      if( "${pos}" GREATER "-1" )
+        list( REMOVE_ITEM LIST_TOOLS ${var} )
+      endif()
       unset( ${var}TOOL CACHE )
     endforeach()
   endif()
@@ -129,6 +135,14 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_STYLE_UTILS" OFF
   )
 
+
+SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+SETIFEMPTY( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
+
+set(${LOCAL_PROJECT_NAME}_DEPENDENCIES "")
+set(LIST_TOOLS "")
+
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
   # We need to recompile ITK because we need BatchMake to be compiled statically.
   # Therefore we recompile all the libraries even though Slicer has already built the libraries we need.
@@ -137,21 +151,33 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set( COMPILE_EXTERNAL_ResampleDTIlogEuclidean OFF CACHE BOOL "Compile External ResampleDTIlogEuclidean" FORCE )
   set( COMPILE_EXTERNAL_ITKTransformTools ON CACHE BOOL "Compile External ITKTransformTools" FORCE )
   set( COMPILE_EXTERNAL_ANTs ON CACHE BOOL "Compile External ANTs" FORCE )
-  set( DTI-Reg_INSTALL_COMMAND INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "DTI-Reg build as a Slicer extension: no install")
+  set( NOCLI ITKTransformTools ANTS WarpImageMultiTransform)
+  foreach( VAR ${NOCLI} )
+    list( APPEND EXTENSION_NO_CLI ${VAR} )
+  endforeach()
+  set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )
+endif()
+
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES dtiprocess TOOL_PROJECT_NAME DTIProcess)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ITKTransformTools TOOL_PROJECT_NAME ITKTransformTools)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ResampleDTIlogEuclidean TOOL_PROJECT_NAME ResampleDTIlogEuclidean)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES BRAINSFit BRAINSDemonWarp TOOL_PROJECT_NAME BRAINSTools)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS WarpImageMultiTransform TOOL_PROJECT_NAME ANTs)
+
+if( NOT DTI-Reg_BUILD_SLICER_EXTENSION )
+  #Do not configure external tools paths: We don't want to hard code paths for the extension.
+  include(FindExternalTools)
 endif()
 
 option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchMake" OFF)
 
-SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-SETIFEMPTY( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
 #------------------------------------------------------------------------------
 # ${LOCAL_PROJECT_NAME} dependency list
 #------------------------------------------------------------------------------
 
-set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 SlicerExecutionModel BatchMake )
+list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 SlicerExecutionModel BatchMake )
 set(USE_ITK_Module_MGHIO TRUE)
 #set(${PROJECT_NAME}_BUILD_DICOM_SUPPORT TRUE )
 set(${PROJECT_NAME}_BUILD_ZLIB_SUPPORT TRUE )
@@ -160,30 +186,7 @@ if(BUILD_STYLE_UTILS)
 else()
     list( REMOVE_ITEM ${LOCAL_PROJECT_NAME}_DEPENDENCIES Cppcheck KWStyle Uncrustify )
 endif()
-list(APPEND LIST_TOOLS "")
 
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES dtiprocess TOOL_PROJECT_NAME DTIProcess)
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ITKTransformTools TOOL_PROJECT_NAME ITKTransformTools)
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ResampleDTIlogEuclidean TOOL_PROJECT_NAME ResampleDTIlogEuclidean)
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES BRAINSFit BRAINSDemonWarp TOOL_PROJECT_NAME BRAINSTools)
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS WarpImageMultiTransform TOOL_PROJECT_NAME ANTs)
-
-if( DTI-Reg_BUILD_SLICER_EXTENSION )
-  set( NOCLI ITKTransformTools ANTS WarpImageMultiTransform)
-  # You cannot pass lists as cmake arguments. We create a string instead,
-  # and we will need to convert into a list when we need to use it.
-  foreach( VAR ${NOCLI} )
-    if( DEFINED EXTENSION_NO_CLI_PATHS )
-      set( EXTENSION_NO_CLI_PATHS "${EXTENSION_NO_CLI_PATHS} ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}")
-    else()
-      set( EXTENSION_NO_CLI_PATHS "${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}")
-    endif()
-  endforeach()
-  set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )
-else()
-  #Do not configure external tools paths: We don't want to hard code paths for the extension.
-  include(FindExternalTools)
-endif()
 #-----------------------------------------------------------------------------
 # Define Superbuild global variables
 #-----------------------------------------------------------------------------
@@ -276,12 +279,9 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   BatchMake_DIR:PATH
   GenerateCLP_DIR:PATH
   SlicerExecutionModel_DIR:PATH
-  COMPILE_EXTERNAL_dtiprocess:BOOL
-  COMPILE_EXTERNAL_ITKTransformTools:BOOL
   DTI-Reg_BUILD_SLICER_EXTENSION:BOOL
   STATIC_DTI-Reg:BOOL
   )
-
 
 _expand_external_project_vars()
 set(COMMON_EXTERNAL_PROJECT_ARGS ${${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_ARGS})
@@ -317,10 +317,6 @@ else()
   endforeach()
 endif()
 
-if( Slicer_CLIMODULES_BIN_DIR )
-  set( Slicer_CLIMODULES_BIN_DIR_OPTION -DSlicer_CLIMODULES_BIN_DIR:STRING=${Slicer_CLIMODULES_BIN_DIR} )
-endif()
-
 set(proj ${LOCAL_PROJECT_NAME})
 list(APPEND LIST_TOOLS DTI-Reg )
 set( DTI-RegTOOL DTI-Reg )
@@ -336,7 +332,6 @@ ExternalProject_Add(${proj}
     ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
     ${COMMON_EXTERNAL_PROJECT_ARGS}
     -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
-    ${Slicer_CLIMODULES_BIN_DIR_OPTION}
     -DANTSTOOL:PATH=${ANTSTOOL}
     -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WarpImageMultiTransformTOOL}
     -DBRAINSFitTOOL:PATH=${BRAINSFitTOOL}
@@ -345,8 +340,6 @@ ExternalProject_Add(${proj}
     -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
     -DITKTransformToolsTOOL:PATH=${ITKTransformToolsTOOL}
     -DCMAKE_INSTALL_PREFIX:PATH=${DTI-Reg_INSTALL_DIRECTORY}
-    -DEXTENSION_NO_CLI_PATHS:String="${EXTENSION_NO_CLI_PATHS}"
-  ${DTI-Reg_INSTALL_COMMAND}
   )
 
 ## Force rebuilding of the main subproject every time building from super structure
@@ -358,8 +351,25 @@ ExternalProject_Add_Step(${proj} forcebuild
     ALWAYS 1
   )
 
-foreach( VAR ${LIST_TOOLS} )
-  install(PROGRAMS ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
+if( DTI-Reg_BUILD_SLICER_EXTENSION )
+  unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+  # Create fake imported target to avoid importing Slicer target: See SlicerConfig.cmake:line 820
+  add_library(SlicerBaseLogic SHARED IMPORTED)
+  find_package(Slicer REQUIRED)
+  include(${Slicer_USE_FILE})
+  resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+  set(NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
+  foreach( VAR ${EXTENSION_NO_CLI})
+    install( PROGRAMS ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension} DESTINATION ${NOCLI_INSTALL_DIR} )
+  endforeach()
+  install( PROGRAMS ${DTI-Reg_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/DTI-Reg DESTINATION ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION} )
+  set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
+  include(${Slicer_EXTENSION_CPACK})
+else()
+  foreach( VAR ${LIST_TOOLS} )
+    install(PROGRAMS ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
             DESTINATION ${INSTALL_RUNTIME_DESTINATION}
          )
-endforeach()
+  endforeach()
+endif()
+
