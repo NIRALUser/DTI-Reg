@@ -1,5 +1,6 @@
 
 include(CMakeDependentOption)
+include(ExternalData)
 
 ## A simple macro to set variables ONLY if it has not been set
 ## This is needed when stand-alone packages are combined into
@@ -19,6 +20,11 @@ endif(NOT SETIFEMPTY)
 #-----------------------------------------------------------------------------
 # Build option(s)
 #-----------------------------------------------------------------------------
+option(BUILD_TESTING "Build Testing" ON)
+if(BUILD_TESTING)
+  include(CTest)
+endif()
+
 option(${LOCAL_PROJECT_NAME}_INSTALL_DEVELOPMENT "Install development support include and libraries for external packages." OFF)
 mark_as_advanced(${LOCAL_PROJECT_NAME}_INSTALL_DEVELOPMENT)
 

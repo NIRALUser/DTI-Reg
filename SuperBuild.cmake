@@ -8,9 +8,6 @@ enable_language(C)
 enable_language(CXX)
 
 #-----------------------------------------------------------------------------
-enable_testing()
-include(CTest)
-#-----------------------------------------------------------------------------
 if(WIN32)
   set(fileextension .exe)
 endif()
@@ -45,7 +42,7 @@ macro(COMPILE_EXTERNAL_TOOLS)
     list( APPEND LIST_TOOLS ${LOCAL_TOOL_NAMES} )
     foreach( var ${LOCAL_TOOL_NAMES} )
       set( ${var}_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/${LOCAL_TOOL_PROJECT_NAME}-install )
-      set( ${var}TOOL ${${var}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${var} CACHE PATH "Path to a program." FORCE )
+      set( ${var}TOOL ${${var}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${var}${fileextension} CACHE PATH "Path to a program." FORCE )
     endforeach()
   else()
     list( FIND LIST_TOOLS ${LOCAL_TOOL_PROJECT_NAME} pos )
@@ -71,7 +68,6 @@ if(NOT USE_GIT_PROTOCOL_${CMAKE_PROJECT_NAME})
 endif()
 
 find_package(Git REQUIRED)
-
 
 #-----------------------------------------------------------------------------
 # Enable and setup External project global properties
@@ -139,9 +135,14 @@ CMAKE_DEPENDENT_OPTION(
 SETIFEMPTY( EXTERNAL_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 SETIFEMPTY( EXTERNAL_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
+SETIFEMPTY( INSTALL_LIBRARY_DESTINATION lib )
+SETIFEMPTY( INSTALL_ARCHIVE_DESTINATION lib )
 
 set(${LOCAL_PROJECT_NAME}_DEPENDENCIES "")
 set(LIST_TOOLS "")
+#------------------------------------------------------------------------------
+# Configure extension
+#------------------------------------------------------------------------------
 
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
   # We need to recompile ITK because we need BatchMake to be compiled statically.
@@ -151,11 +152,22 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set( COMPILE_EXTERNAL_ResampleDTIlogEuclidean OFF CACHE BOOL "Compile External ResampleDTIlogEuclidean" FORCE )
   set( COMPILE_EXTERNAL_ITKTransformTools ON CACHE BOOL "Compile External ITKTransformTools" FORCE )
   set( COMPILE_EXTERNAL_ANTs ON CACHE BOOL "Compile External ANTs" FORCE )
-  set( NOCLI ITKTransformTools ANTS WarpImageMultiTransform)
-  foreach( VAR ${NOCLI} )
-    list( APPEND EXTENSION_NO_CLI ${VAR} )
-  endforeach()
+  set( EXTENSION_NO_CLI ITKTransformTools ANTS WarpImageMultiTransform)
   set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )
+endif()
+
+#------------------------------------------------------------------------------
+# Configure tools paths
+#------------------------------------------------------------------------------
+option(CONFIGURE_TOOLS_PATHS "Use CMake to find where the tools are and hard-code their path in the executable" ON)
+if( NOT CONFIGURE_TOOLS_PATHS )
+  foreach( var ${LIST_TOOLS})
+    mark_as_advanced( FORCE ${var}TOOL)
+  endforeach()
+else()
+  foreach( var ${LIST_TOOLS})
+    mark_as_advanced(CLEAR ${var}TOOL)
+  endforeach()
 endif()
 
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES dtiprocess TOOL_PROJECT_NAME DTIProcess)
@@ -165,7 +177,8 @@ COMPILE_EXTERNAL_TOOLS( TOOL_NAMES BRAINSFit BRAINSDemonWarp TOOL_PROJECT_NAME B
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS WarpImageMultiTransform TOOL_PROJECT_NAME ANTs)
 
 if( NOT DTI-Reg_BUILD_SLICER_EXTENSION )
-  #Do not configure external tools paths: We don't want to hard code paths for the extension.
+  # Do not configure external tools paths: extension will be run on a different computer,
+  # we don't need to find the tools on the computer on which the extension is built
   include(FindExternalTools)
 endif()
 
@@ -248,6 +261,9 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   BUILDNAME:STRING
   ${PROJECT_NAME}_BUILD_DICOM_SUPPORT:BOOL
   CMAKE_MODULE_PATH:PATH
+  INSTALL_RUNTIME_DESTINATION:PATH
+  INSTALL_LIBRARY_DESTINATION:PATH
+  INSTALL_ARCHIVE_DESTINATION:PATH
   )
 
 _expand_external_project_vars()
@@ -281,7 +297,28 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   SlicerExecutionModel_DIR:PATH
   DTI-Reg_BUILD_SLICER_EXTENSION:BOOL
   STATIC_DTI-Reg:BOOL
+  DTIProcess_DIR:PATH # Just for extension
+  ResampleDTIlogEuclidean_DIR:PATH # Just for extension
   )
+
+if( CONFIGURE_TOOLS_PATHS )
+  list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
+    ANTSTOOL:PATH
+    WarpImageMultiTransformTOOL:PATH
+    BRAINSFitTOOL:PATH
+    BRAINSDemonWarpTOOL:PATH
+    ResampleDTITOOL:PATH
+    dtiprocessTOOL:PATH
+    ITKTransformToolsTOOL:PATH
+    )
+endif()
+
+foreach( VAR ${LIST_TOOLS} )
+  set( ${VAR}_INSTALL_DIRECTORY ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension} )
+  list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
+    ${VAR}_INSTALL_DIRECTORY:PATH
+    )
+endforeach()
 
 _expand_external_project_vars()
 set(COMMON_EXTERNAL_PROJECT_ARGS ${${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_ARGS})
@@ -308,7 +345,6 @@ endif()
 option(CONFIGURE_TOOLS_PATHS "Use CMake to find where the tools are and hard-code their path in the executable" ON)
 if( NOT CONFIGURE_TOOLS_PATHS )
   foreach( var ${LIST_TOOLS})
-    set( ${var}TOOL "" CACHE PATH "Path to a program." FORCE )
     mark_as_advanced( FORCE ${var}TOOL)
   endforeach()
 else()
@@ -332,17 +368,10 @@ ExternalProject_Add(${proj}
     ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
     ${COMMON_EXTERNAL_PROJECT_ARGS}
     -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
-    -DANTSTOOL:PATH=${ANTSTOOL}
-    -DWARPIMAGEMULTITRANSFORMTOOL:PATH=${WarpImageMultiTransformTOOL}
-    -DBRAINSFitTOOL:PATH=${BRAINSFitTOOL}
-    -DBRAINSDemonWarpTOOL:PATH=${BRAINSDemonWarpTOOL}
-    -DResampleDTITOOL:PATH=${ResampleDTIlogEuclideanTOOL}
-    -DdtiprocessTOOL:PATH=${dtiprocessTOOL}
-    -DITKTransformToolsTOOL:PATH=${ITKTransformToolsTOOL}
     -DCMAKE_INSTALL_PREFIX:PATH=${DTI-Reg_INSTALL_DIRECTORY}
   )
 
-## Force rebuilding of the main subproject every time building from super structure
+# Force rebuilding of the main subproject every time building from super structure
 ExternalProject_Add_Step(${proj} forcebuild
     COMMAND ${CMAKE_COMMAND} -E remove
     ${CMAKE_CURRENT_BUILD_DIR}/${proj}-prefix/src/${proj}-stamp/${proj}-build
@@ -351,6 +380,7 @@ ExternalProject_Add_Step(${proj} forcebuild
     ALWAYS 1
   )
 
+
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
   unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
   # Create fake imported target to avoid importing Slicer target: See SlicerConfig.cmake:line 820
@@ -358,18 +388,27 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   find_package(Slicer REQUIRED)
   include(${Slicer_USE_FILE})
   resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
-  set(NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
+  set( NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
+  set( ResampleDTIlogEuclideanTOOL ${ResampleDTIlogEuclidean_DIR}/${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/ResampleDTIlogEuclidean${fileextension} )
+  set( dtiprocessTOOL ${DTIProcess_DIR}/DTIProcess-build/bin/dtiprocess )
+  if(BUILD_TESTING)
+    add_subdirectory(Testing)
+  endif()
   foreach( VAR ${EXTENSION_NO_CLI})
-    install( PROGRAMS ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension} DESTINATION ${NOCLI_INSTALL_DIR} )
+    install( PROGRAMS ${${VAR}TOOL} DESTINATION ${NOCLI_INSTALL_DIR} )
   endforeach()
   install( PROGRAMS ${DTI-Reg_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/DTI-Reg DESTINATION ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION} )
   set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
   include(${Slicer_EXTENSION_CPACK})
 else()
+  if(BUILD_TESTING)
+    add_subdirectory(Testing)
+  endif()
   foreach( VAR ${LIST_TOOLS} )
-    install(PROGRAMS ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension}
+    install(PROGRAMS ${${VAR}TOOL}
             DESTINATION ${INSTALL_RUNTIME_DESTINATION}
          )
   endforeach()
 endif()
+
 
