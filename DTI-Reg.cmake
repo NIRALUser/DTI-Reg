@@ -15,9 +15,6 @@ include(${ITK_USE_FILE})
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
 
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config.h.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
-
 set(DTI-Reg_SOURCE DTI-Reg-bms.h)
 
 if( ${STATIC_DTI-Reg} )
@@ -39,3 +36,12 @@ SEMMacroBuildCLI(
 if(BUILD_TESTING)
   add_subdirectory(Testing)
 endif()
+
+if(CONFIGURE_TOOLS_PATHS)
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config_with_config.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h")
+else()
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/DTI-Reg_Config_no_config.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h" COPYONLY)
+endif()
+

@@ -117,7 +117,7 @@
       <channel>output</channel>
     </transform>
 
-    <transform fileExtensions=".tfm" type="bspline">
+    <transform fileExtensions=".h5" type="bspline">
       <name>outputBSplineTransform</name>
       <longflag>BRAINSBSplineTransform</longflag>
       <description>BSpline output transform (BRAINS)</description>

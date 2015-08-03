@@ -311,7 +311,7 @@ Endif(${outputResampledScalarVolume})\n\
 If (${outputTransform} != '')\n\
   set (Transform ${outputTransform})\n\
 Else(${outputTransform})\n\
-  set (Transform ${OutputDir}/${movingVolumeHead}_BRAINSFit_${RegSuffix}.txt)\n\
+  set (Transform ${OutputDir}/${movingVolumeHead}_BRAINSFit_${RegSuffix}.h5)\n\
 Endif(${outputTransform})\n\
 If (${initialAffine} != '')\n\
   set (commandBRAINSFit ${BRAINSFitCmd} --fixedVolume ${fixedScalarMap} --movingVolume ${movingScalarMap} --initialTransform ${initialAffine} --outputTransform ${Transform} --outputVolume ${ResampledScalarMap} --outputVolumePixelType ushort --transformType ${TransformType} --interpolationMode Linear)\n\

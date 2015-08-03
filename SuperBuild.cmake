@@ -154,6 +154,10 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set( COMPILE_EXTERNAL_ANTs ON CACHE BOOL "Compile External ANTs" FORCE )
   set( EXTENSION_NO_CLI ITKTransformTools ANTS WarpImageMultiTransform)
   set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )
+  # Import DTIProcess targets for the tests
+  # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
+  include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
+  include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
 endif()
 
 #------------------------------------------------------------------------------
@@ -297,21 +301,15 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   SlicerExecutionModel_DIR:PATH
   DTI-Reg_BUILD_SLICER_EXTENSION:BOOL
   STATIC_DTI-Reg:BOOL
-  DTIProcess_DIR:PATH # Just for extension
-  ResampleDTIlogEuclidean_DIR:PATH # Just for extension
+  ANTSTOOL:PATH
+  WarpImageMultiTransformTOOL:PATH
+  BRAINSFitTOOL:PATH
+  BRAINSDemonWarpTOOL:PATH
+  ResampleDTIlogEuclideanTOOL:PATH
+  dtiprocessTOOL:PATH
+  ITKTransformToolsTOOL:PATH
+  CONFIGURE_TOOLS_PATHS:BOOL
   )
-
-if( CONFIGURE_TOOLS_PATHS )
-  list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
-    ANTSTOOL:PATH
-    WarpImageMultiTransformTOOL:PATH
-    BRAINSFitTOOL:PATH
-    BRAINSDemonWarpTOOL:PATH
-    ResampleDTITOOL:PATH
-    dtiprocessTOOL:PATH
-    ITKTransformToolsTOOL:PATH
-    )
-endif()
 
 foreach( VAR ${LIST_TOOLS} )
   set( ${VAR}_INSTALL_DIRECTORY ${${VAR}_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/${VAR}${fileextension} )
@@ -380,20 +378,17 @@ ExternalProject_Add_Step(${proj} forcebuild
     ALWAYS 1
   )
 
-
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
   unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
   # Create fake imported target to avoid importing Slicer target: See SlicerConfig.cmake:line 820
   add_library(SlicerBaseLogic SHARED IMPORTED)
   find_package(Slicer REQUIRED)
   include(${Slicer_USE_FILE})
-  resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
-  set( NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
-  set( ResampleDTIlogEuclideanTOOL ${ResampleDTIlogEuclidean_DIR}/${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/ResampleDTIlogEuclidean${fileextension} )
-  set( dtiprocessTOOL ${DTIProcess_DIR}/DTIProcess-build/bin/dtiprocess )
   if(BUILD_TESTING)
     add_subdirectory(Testing)
   endif()
+  resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+  set( NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
   foreach( VAR ${EXTENSION_NO_CLI})
     install( PROGRAMS ${${VAR}TOOL} DESTINATION ${NOCLI_INSTALL_DIR} )
   endforeach()
@@ -401,9 +396,6 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
   include(${Slicer_EXTENSION_CPACK})
 else()
-  if(BUILD_TESTING)
-    add_subdirectory(Testing)
-  endif()
   foreach( VAR ${LIST_TOOLS} )
     install(PROGRAMS ${${VAR}TOOL}
             DESTINATION ${INSTALL_RUNTIME_DESTINATION}
