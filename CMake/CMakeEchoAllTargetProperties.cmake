@@ -1,3 +1,5 @@
+# Code copied from: http://www.kitware.com/blog/home/post/390
+
 function(echo_target_property tgt prop)
   # v for value, d for defined, s for set
   get_property(v TARGET ${tgt} PROPERTY ${prop})
