@@ -152,7 +152,7 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set( COMPILE_EXTERNAL_ResampleDTIlogEuclidean OFF CACHE BOOL "Compile External ResampleDTIlogEuclidean" FORCE )
   set( COMPILE_EXTERNAL_ITKTransformTools ON CACHE BOOL "Compile External ITKTransformTools" FORCE )
   set( COMPILE_EXTERNAL_ANTs ON CACHE BOOL "Compile External ANTs" FORCE )
-  set( EXTENSION_NO_CLI ITKTransformTools ANTS WarpImageMultiTransform)
+  set( EXTENSION_NO_CLI ITKTransformTools ANTS )
   set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )
   # Import DTIProcess targets for the tests
   # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
@@ -178,7 +178,7 @@ COMPILE_EXTERNAL_TOOLS( TOOL_NAMES dtiprocess TOOL_PROJECT_NAME DTIProcess)
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ITKTransformTools TOOL_PROJECT_NAME ITKTransformTools)
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ResampleDTIlogEuclidean TOOL_PROJECT_NAME ResampleDTIlogEuclidean)
 COMPILE_EXTERNAL_TOOLS( TOOL_NAMES BRAINSFit BRAINSDemonWarp TOOL_PROJECT_NAME BRAINSTools)
-COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS WarpImageMultiTransform TOOL_PROJECT_NAME ANTs)
+COMPILE_EXTERNAL_TOOLS( TOOL_NAMES ANTS TOOL_PROJECT_NAME ANTs)
 
 if( NOT DTI-Reg_BUILD_SLICER_EXTENSION )
   # Do not configure external tools paths: extension will be run on a different computer,
@@ -302,7 +302,6 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   DTI-Reg_BUILD_SLICER_EXTENSION:BOOL
   STATIC_DTI-Reg:BOOL
   ANTSTOOL:PATH
-  WarpImageMultiTransformTOOL:PATH
   BRAINSFitTOOL:PATH
   BRAINSDemonWarpTOOL:PATH
   ResampleDTIlogEuclideanTOOL:PATH

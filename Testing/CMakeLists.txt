@@ -10,6 +10,7 @@ include(CMakeEchoAllTargetProperties)
 
 # Build and install tests (only if in inner-build)
 # If in outer-build directory, only allow to run the tests
+SETIFEMPTY( INSTALL_RUNTIME_DESTINATION bin )
 if( NOT ${LOCAL_PROJECT_NAME}_SUPERBUILD )
   add_executable(${CLP}Test ${CLP}Test.cxx)
   add_dependencies(${CLP}Test ${CLP})
@@ -26,7 +27,6 @@ endif()
 set( LIST_TOOLS_TESTS
     dtiprocess
     ANTS
-    WarpImageMultiTransform
     ResampleDTIlogEuclidean
     ITKTransformTools
     BRAINSFit
@@ -53,8 +53,6 @@ endif()
 add_test(NAME ${CLP}HelpTest COMMAND ${CLP} --help )
 # Finds ANTS and runs it to show help
 add_test(NAME ANTSHelpTest COMMAND ${ANTSPATH} -h )
-# Finds WarpImageMultiTransform and runs it to show help
-add_test(NAME WarpImageMultiTransformHelpTest COMMAND ${WarpImageMultiTransformPATH} -h )
 # Finds ResampleDTIlogEuclidean and runs it to show help
 add_test(NAME ResampleDTIlogEuclideanHelpTest COMMAND ${SEM_LAUNCH_COMMAND} ${ResampleDTIlogEuclideanPATH} --help )
 # Finds dtiprocess and runs it to show help
@@ -95,7 +93,6 @@ ModuleEntryPoint
 --dtiprocessPath ${dtiprocessPATH}
 --ResampleDTIPath ${ResampleDTIlogEuclideanPATH}
 --ITKTransformToolsPath ${ITKTransformToolsPATH}
---WarpImageMultiTransformPath ${WarpImageMultiTransformPATH}
 )
 
 # No Output - error if build as extension
