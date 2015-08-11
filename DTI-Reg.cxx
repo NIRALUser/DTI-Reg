@@ -179,7 +179,12 @@ int main (int argc, char *argv[])
 #endif
   // Write BatchMake script
   std::string outputDir, bmsScriptPrefix;
-  if ( outputVolume.compare("") ) // outputVolume NON empty
+  bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(movingVolume);
+  if( selectedOutputFolder.compare("") )
+  {
+    outputDir = itksys::SystemTools::GetRealPath( selectedOutputFolder ) ;
+  }
+  else if ( outputVolume.compare("") ) // outputVolume NON empty
   {
     outputDir = itksys::SystemTools::GetRealPath( itksys::SystemTools::GetFilenamePath(outputVolume).c_str() );
     if( outputDir.empty() )
@@ -191,7 +196,6 @@ int main (int argc, char *argv[])
   else  // No outputVolume given
   {
     outputDir = ".";
-    bmsScriptPrefix = itksys::SystemTools::GetFilenameWithoutExtension(movingVolume);
   }
   std::string BatchMakeScriptFile = outputDir + "/" + bmsScriptPrefix + "_DTI-Reg.bms";
   std::ofstream file( BatchMakeScriptFile.c_str());
