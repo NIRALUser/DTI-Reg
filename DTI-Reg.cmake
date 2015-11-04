@@ -32,7 +32,7 @@ SEMMacroBuildCLI(
   ADDITIONAL_SRCS ${DTI-Reg_SOURCE}
   TARGET_LIBRARIES ${ITK_LIBRARIES} ${BatchMake_LIBRARIES}
 )
-
+export(TARGETS ${MODULE_NAME} FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-exports.cmake)
 if(BUILD_TESTING)
   add_subdirectory(Testing)
 endif()

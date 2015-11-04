@@ -354,11 +354,12 @@ set(proj ${LOCAL_PROJECT_NAME})
 list(APPEND LIST_TOOLS DTI-Reg )
 set( DTI-RegTOOL DTI-Reg )
 set( DTI-Reg_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install )
+set(proj_build ${proj}-build)
 ExternalProject_Add(${proj}
   DEPENDS ${${LOCAL_PROJECT_NAME}_DEPENDENCIES}
   DOWNLOAD_COMMAND ""
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  BINARY_DIR ${LOCAL_PROJECT_NAME}-build
+  BINARY_DIR ${proj}-build
   CMAKE_GENERATOR ${gen}
   CMAKE_ARGS
     --no-warn-unused-cli # HACK Only expected variables should be passed down.
@@ -391,6 +392,7 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   foreach( VAR ${EXTENSION_NO_CLI})
     install( PROGRAMS ${${VAR}TOOL} DESTINATION ${NOCLI_INSTALL_DIR} )
   endforeach()
+  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/ImportDTI-RegExtensionExecutables.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ImportDTI-RegExtensionExecutables.cmake)
   install( PROGRAMS ${DTI-Reg_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/DTI-Reg DESTINATION ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION} )
   set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
   include(${Slicer_EXTENSION_CPACK})
