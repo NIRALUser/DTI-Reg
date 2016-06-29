@@ -355,28 +355,6 @@ list(APPEND LIST_TOOLS DTI-Reg )
 set( DTI-RegTOOL DTI-Reg )
 set( DTI-Reg_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install )
 set(proj_build ${proj}-build)
-ExternalProject_Add(${proj}
-  DEPENDS ${${LOCAL_PROJECT_NAME}_DEPENDENCIES}
-  DOWNLOAD_COMMAND ""
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  BINARY_DIR ${proj}-build
-  CMAKE_GENERATOR ${gen}
-  CMAKE_ARGS
-    --no-warn-unused-cli # HACK Only expected variables should be passed down.
-    ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
-    ${COMMON_EXTERNAL_PROJECT_ARGS}
-    -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
-    -DCMAKE_INSTALL_PREFIX:PATH=${DTI-Reg_INSTALL_DIRECTORY}
-  )
-
-# Force rebuilding of the main subproject every time building from super structure
-ExternalProject_Add_Step(${proj} forcebuild
-    COMMAND ${CMAKE_COMMAND} -E remove
-    ${CMAKE_CURRENT_BUILD_DIR}/${proj}-prefix/src/${proj}-stamp/${proj}-build
-    DEPENDEES configure
-    DEPENDERS build
-    ALWAYS 1
-  )
 
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
   unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
@@ -404,4 +382,25 @@ else()
   endforeach()
 endif()
 
+ExternalProject_Add(${proj}
+  DEPENDS ${${LOCAL_PROJECT_NAME}_DEPENDENCIES}
+  DOWNLOAD_COMMAND ""
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+  BINARY_DIR ${proj}-build
+  CMAKE_GENERATOR ${gen}
+  CMAKE_ARGS
+    --no-warn-unused-cli # HACK Only expected variables should be passed down.
+    ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
+    ${COMMON_EXTERNAL_PROJECT_ARGS}
+    -D${LOCAL_PROJECT_NAME}_SUPERBUILD:BOOL=OFF
+    -DCMAKE_INSTALL_PREFIX:PATH=${DTI-Reg_INSTALL_DIRECTORY}
+  )
 
+# Force rebuilding of the main subproject every time building from super structure
+ExternalProject_Add_Step(${proj} forcebuild
+    COMMAND ${CMAKE_COMMAND} -E remove
+    ${CMAKE_CURRENT_BUILD_DIR}/${proj}-prefix/src/${proj}-stamp/${proj}-build
+    DEPENDEES configure
+    DEPENDERS build
+    ALWAYS 1
+  )
