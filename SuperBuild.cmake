@@ -11,6 +11,45 @@ enable_language(CXX)
 if(WIN32)
   set(fileextension .exe)
 endif()
+
+if( DTI-Reg_BUILD_SLICER_EXTENSION )
+  #-----------------------------------------------------------------------------
+  # Extension meta-information
+  set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTI-Reg")
+  set(EXTENSION_CATEGORY "Diffusion")
+  set(EXTENSION_CONTRIBUTORS "Francois Budin (UNC), Clement Vachet (SCI), Martin Styner (UNC)")
+  set(EXTENSION_DESCRIPTION "DTI-Reg is an application that performs pair-wise DTI registration, using scalar FA (or MD) map to drive the registration. Individual steps of the pair-wise registration pipeline are performed via external applications - some of them being 3D Slicer modules. Starting with two input DTI images, scalar FA maps are generated via dtiprocess. Registration is then performed between these FA maps, via BRAINSFit/BRAINSDemonWarp or ANTS -Advanced Normalization Tools-, which provide different registration schemes: rigid, affine, BSpline, diffeomorphic, logDemons. The final deformation is then applied to the source DTI image via ResampleDTIlogEuclidean.")
+  set(EXTENSION_ICONURL "https://raw.githubusercontent.com/NIRALUser/DTI-Reg/master/DTI-Reg-icon.png")
+  set(EXTENSION_SCREENSHOTURLS "http://www.slicer.org/slicerWiki/images/c/c5/DTI-Reg_-_Misaligned_DTIs.png http://www.slicer.org/slicerWiki/images/1/12/DTI-Reg_-_Aligned_DTIs_-_Coronal.png")
+  set(EXTENSION_DEPENDS "DTIProcess ResampleDTIlogEuclidean") # Specified as a space separated list or 'NA' if any
+#  set(EXTENSION_BUILD_SUBDIRECTORY DTI-Reg-build)
+  set(EXTENSION_BUILD_SUBDIRECTORY . )
+  set(SUPERBUILD_TOPLEVEL_PROJECT DTI-Reg)
+
+  # Slicer
+  find_package(Slicer REQUIRED)
+  include(${Slicer_USE_FILE})
+  include(SlicerExtensionsConfigureMacros)
+  mark_as_superbuild(Slicer_DIR)
+
+  #------------------------------------------------------------------------------
+  # Configure extension
+  #------------------------------------------------------------------------------
+  
+  # We need to recompile ITK because we need BatchMake to be compiled statically.
+  # Therefore we recompile all the libraries even though Slicer has already built the libraries we need.
+  set( COMPILE_EXTERNAL_DTIProcess OFF CACHE BOOL "Compile External DTIProcess" FORCE )
+  set( COMPILE_EXTERNAL_BRAINSTools OFF CACHE BOOL "Compile External BRAINSTools" FORCE )
+  set( COMPILE_EXTERNAL_ResampleDTIlogEuclidean OFF CACHE BOOL "Compile External ResampleDTIlogEuclidean" FORCE )
+  set( COMPILE_EXTERNAL_ITKTransformTools ON CACHE BOOL "Compile External ITKTransformTools" FORCE )
+  set( COMPILE_EXTERNAL_ANTs ON CACHE BOOL "Compile External ANTs" FORCE )
+  set( EXTENSION_NO_CLI ITKTransformTools ANTS )
+  set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )  
+
+  unsetForSlicer(NAMES ITK_DIR SlicerExecutionModel_DIR BUILD_SHARED_LIBS RapidJSON_DIR RapidJSON_INCLUDE_DIR JsonCpp_INCLUDE_DIR JsonCpp_LIBRARY)
+
+endif()
+
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_SOURCE_DIR}/Common.cmake)
 #-----------------------------------------------------------------------------
@@ -140,25 +179,6 @@ SETIFEMPTY( INSTALL_ARCHIVE_DESTINATION lib )
 
 set(${LOCAL_PROJECT_NAME}_DEPENDENCIES "")
 set(LIST_TOOLS "")
-#------------------------------------------------------------------------------
-# Configure extension
-#------------------------------------------------------------------------------
-
-if( DTI-Reg_BUILD_SLICER_EXTENSION )
-  # We need to recompile ITK because we need BatchMake to be compiled statically.
-  # Therefore we recompile all the libraries even though Slicer has already built the libraries we need.
-  set( COMPILE_EXTERNAL_DTIProcess OFF CACHE BOOL "Compile External DTIProcess" FORCE )
-  set( COMPILE_EXTERNAL_BRAINSTools OFF CACHE BOOL "Compile External BRAINSTools" FORCE )
-  set( COMPILE_EXTERNAL_ResampleDTIlogEuclidean OFF CACHE BOOL "Compile External ResampleDTIlogEuclidean" FORCE )
-  set( COMPILE_EXTERNAL_ITKTransformTools ON CACHE BOOL "Compile External ITKTransformTools" FORCE )
-  set( COMPILE_EXTERNAL_ANTs ON CACHE BOOL "Compile External ANTs" FORCE )
-  set( EXTENSION_NO_CLI ITKTransformTools ANTS )
-  set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )
-  # Import DTIProcess targets for the tests
-  # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
-  include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
-  include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
-endif()
 
 #------------------------------------------------------------------------------
 # Configure tools paths
@@ -189,12 +209,14 @@ endif()
 option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_BatchMake "Build using an externally defined version of BatchMake" OFF)
+option(USE_SYSTEM_ANTs "Build using an externally defined version of ANTs" OFF)
 
 #------------------------------------------------------------------------------
 # ${LOCAL_PROJECT_NAME} dependency list
 #------------------------------------------------------------------------------
 
 list( APPEND ${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 SlicerExecutionModel BatchMake )
+
 set(USE_ITK_Module_MGHIO TRUE)
 #set(${PROJECT_NAME}_BUILD_DICOM_SUPPORT TRUE )
 set(${PROJECT_NAME}_BUILD_ZLIB_SUPPORT TRUE )
@@ -357,15 +379,15 @@ set( DTI-Reg_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install )
 set(proj_build ${proj}-build)
 
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
-  unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
-  # Create fake imported target to avoid importing Slicer target: See SlicerConfig.cmake:line 820
-  add_library(SlicerBaseLogic SHARED IMPORTED)
-  find_package(Slicer REQUIRED)
-  include(${Slicer_USE_FILE})
-  if(BUILD_TESTING)
-    add_subdirectory(Testing)
-  endif()
-  resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+  # unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+  # # Create fake imported target to avoid importing Slicer target: See SlicerConfig.cmake:line 820
+  # add_library(SlicerBaseLogic SHARED IMPORTED)
+  # find_package(Slicer REQUIRED)
+  # include(${Slicer_USE_FILE})
+  # if(BUILD_TESTING)
+  #   add_subdirectory(Testing)
+  # endif()
+  # resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
   set( NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
   foreach( VAR ${EXTENSION_NO_CLI})
     install( PROGRAMS ${${VAR}TOOL} DESTINATION ${NOCLI_INSTALL_DIR} )
@@ -380,6 +402,12 @@ else()
             DESTINATION ${INSTALL_RUNTIME_DESTINATION}
          )
   endforeach()
+
+  # Import DTIProcess targets for the tests
+  # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
+  include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
+  include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
+
 endif()
 
 ExternalProject_Add(${proj}
