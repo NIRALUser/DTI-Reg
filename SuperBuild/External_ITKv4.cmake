@@ -157,6 +157,8 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DITK_WRAPPING:BOOL=OFF #${BUILD_SHARED_LIBS} ## HACK:  QUICK CHANGE
       -DITK_USE_SYSTEM_DCMTK:BOOL=${${PROJECT_NAME}_BUILD_DICOM_SUPPORT}
       -DModule_ITKIOPhilipsREC:BOOL=ON
+      -DModule_ITKIODCMTK:BOOL=ON
+      -DModule_ITKIOMINC:BOOL=ON
       ${${proj}_TIFF_ARGS}
       ${${proj}_JPEG_ARGS}
       ${${proj}_ZLIB_ARGS}
@@ -168,8 +170,8 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     )
   ### --- End Project specific additions
   set(${proj}_REPOSITORY ${git_protocol}://itk.org/ITK.git)
-  set(${proj}_GIT_TAG 120b3420a9edc6488aa8f91bc8e657fb619fcabe)
-  set(ITK_VERSION_ID ITK-4.8)
+  set(${proj}_GIT_TAG 0cb4a4dea8070c8aff24e307eee104337a0783aa)
+  set(ITK_VERSION_ID ITK-4.11)
 
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
@@ -192,6 +194,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   )
   set(${extProjName}_DIR ${CMAKE_BINARY_DIR}/${proj}-install/lib/cmake/${ITK_VERSION_ID})
 else()
+
   if(${USE_SYSTEM_${extProjName}})
     find_package(${extProjName} ${ITK_VERSION_MAJOR} REQUIRED)
     message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")

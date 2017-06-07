@@ -29,9 +29,9 @@ set(proj ${extProjName})              #This local name
 #endif()
 
 # Sanity checks
-if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
-  message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
-endif()
+# if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
+#   message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
+# endif()
 
 # Set dependency list
 set(${proj}_DEPENDENCIES ITKv4)
@@ -39,7 +39,6 @@ set(${proj}_DEPENDENCIES ITKv4)
 SlicerMacroCheckExternalProjectDependency(${proj})
 
 if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
-
   # Set CMake OSX variable to pass down the external project
   set(CMAKE_OSX_EXTERNAL_PROJECT_ARGS)
   if(APPLE)
@@ -55,7 +54,7 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
     )
   ### --- End Project specific additions
   set(${proj}_REPOSITORY "${git_protocol}://github.com/Slicer/SlicerExecutionModel.git")
-  set(${proj}_GIT_TAG 18cdc5a9d489f381acd7666668efa8d57ef08e47)
+  set(${proj}_GIT_TAG 61bb14d57ff45c8de0f506e23b6ec982fcdf0da2)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}

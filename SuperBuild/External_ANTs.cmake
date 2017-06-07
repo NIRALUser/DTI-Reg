@@ -82,7 +82,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
  endif()
   ### --- End Project specific additions
   set(${proj}_REPOSITORY "https://github.com/stnava/ANTs.git")
-  set(${proj}_GIT_TAG 2b1ba60a4d10b7dcd53caf2739c79b332e4e615b)
+  set(${proj}_GIT_TAG e340b5f72ff006b3e634600cea784639d7761504)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
@@ -106,6 +106,10 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   set(USE_ANTS ON)
 else()
   if(${USE_SYSTEM_${extProjName}})
+    set(${extProjName}_SOURCE_DIR ""
+      CACHE PATH "Set ANTs source dir")
+    set(${extProjName}_LIBRARY_DIR "" 
+      CACHE PATH "Set ANTs Library")
     if(NOT DEFINED ${extProjName}_SOURCE_DIR OR NOT DEFINED ${extProjName}_LIBRARY_DIR)
       message(FATAL_ERROR "To use system ${extProjName}, set ${extProjName}_SOURCE_DIR and ${extProjName}_LIBRARY_DIR")
     elseif(NOT EXISTS "${${extProjName}_SOURCE_DIR}")
