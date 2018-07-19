@@ -375,7 +375,11 @@ endif()
 set(proj ${LOCAL_PROJECT_NAME})
 list(APPEND LIST_TOOLS DTI-Reg )
 set( DTI-RegTOOL DTI-Reg )
-set( DTI-Reg_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install )
+
+if(NOT DTI-Reg_INSTALL_DIRECTORY)
+  set( DTI-Reg_INSTALL_DIRECTORY ${EXTERNAL_BINARY_DIRECTORY}/DTI-Reg-install )
+endif()
+
 set(proj_build ${proj}-build)
 
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
@@ -405,8 +409,13 @@ else()
 
   # Import DTIProcess targets for the tests
   # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
-  include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
-  include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
+  if(DTIProcess_DIR)
+    include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
+  endif()
+
+  if(ResampleDTIlogEuclidean_DIR)
+    include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
+  endif()
 
 endif()
 
