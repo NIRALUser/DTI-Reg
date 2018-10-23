@@ -41,7 +41,7 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
   #message(STATUS "${__indent}Adding project ${proj}")
   ExternalProject_Add(${proj}
       GIT_REPOSITORY ${git_protocol}://github.com/NIRALUser/BatchMake.git
-      GIT_TAG 5e1c185b564ac2acef35ba68fbde370c19ba33de
+      GIT_TAG 053132904247f3665d838623593aa6499002215c
       SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
       BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
       CMAKE_GENERATOR ${gen}

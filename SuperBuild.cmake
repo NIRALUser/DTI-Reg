@@ -46,7 +46,8 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set( EXTENSION_NO_CLI ITKTransformTools ANTS )
   set( CONFIGURE_TOOLS_PATHS OFF CACHE BOOL "Use CMake to find where the tools are and hard-code their path in the executable" FORCE )  
 
-  unsetForSlicer(NAMES ITK_DIR SlicerExecutionModel_DIR BUILD_SHARED_LIBS RapidJSON_DIR RapidJSON_INCLUDE_DIR JsonCpp_INCLUDE_DIR JsonCpp_LIBRARY)
+  set( USE_SYSTEM_ITK ON CACHE BOOL "Build using an externally defined version of ITK" FORCE )
+  set( USE_SYSTEM_VTK ON CACHE BOOL "Build using an externally defined version of VTK" FORCE )
 
 endif()
 
