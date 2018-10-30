@@ -383,43 +383,6 @@ endif()
 
 set(proj_build ${proj}-build)
 
-if( DTI-Reg_BUILD_SLICER_EXTENSION )
-  # unsetForSlicer( NAMES SlicerExecutionModel_DIR DCMTK_DIR ITK_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
-  # # Create fake imported target to avoid importing Slicer target: See SlicerConfig.cmake:line 820
-  # add_library(SlicerBaseLogic SHARED IMPORTED)
-  # find_package(Slicer REQUIRED)
-  # include(${Slicer_USE_FILE})
-  # if(BUILD_TESTING)
-  #   add_subdirectory(Testing)
-  # endif()
-  # resetForSlicer( NAMES ITK_DIR SlicerExecutionModel_DIR CMAKE_C_COMPILER CMAKE_CXX_COMPILER CMAKE_CXX_FLAGS CMAKE_C_FLAGS zlib_DIR ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
-  set( NOCLI_INSTALL_DIR ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION}/../ExternalBin)
-  foreach( VAR ${EXTENSION_NO_CLI})
-    install( PROGRAMS ${${VAR}TOOL} DESTINATION ${NOCLI_INSTALL_DIR} )
-  endforeach()
-  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/ImportDTI-RegExtensionExecutables.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ImportDTI-RegExtensionExecutables.cmake)
-  install( PROGRAMS ${DTI-Reg_INSTALL_DIRECTORY}/${INSTALL_RUNTIME_DESTINATION}/DTI-Reg DESTINATION ${SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION} )
-  set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
-  include(${Slicer_EXTENSION_CPACK})
-else()
-  foreach( VAR ${LIST_TOOLS} )
-    install(PROGRAMS ${${VAR}TOOL}
-            DESTINATION ${INSTALL_RUNTIME_DESTINATION}
-         )
-  endforeach()
-
-  # Import DTIProcess targets for the tests
-  # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
-  if(DTIProcess_DIR)
-    include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
-  endif()
-
-  if(ResampleDTIlogEuclidean_DIR)
-    include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
-  endif()
-
-endif()
-
 ExternalProject_Add(${proj}
   DEPENDS ${${LOCAL_PROJECT_NAME}_DEPENDENCIES}
   DOWNLOAD_COMMAND ""
@@ -442,3 +405,25 @@ ExternalProject_Add_Step(${proj} forcebuild
     DEPENDERS build
     ALWAYS 1
   )
+
+if( DTI-Reg_BUILD_SLICER_EXTENSION )
+  set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR}/DTI-Reg-build;${EXTENSION_NAME};ALL;/")
+  include(${Slicer_EXTENSION_CPACK})
+else()
+  foreach( VAR ${LIST_TOOLS} )
+    install(PROGRAMS ${${VAR}TOOL}
+            DESTINATION ${INSTALL_RUNTIME_DESTINATION}
+         )
+  endforeach()
+
+  # Import DTIProcess targets for the tests
+  # DTIProcess_DIR is set because DTI-Reg is defined as dependent of the extension DTIProcess
+  if(DTIProcess_DIR)
+    include( ${DTIProcess_DIR}/ImportDTIProcessExtensionExecutables.cmake )
+  endif()
+
+  if(ResampleDTIlogEuclidean_DIR)
+    include( ${ResampleDTIlogEuclidean_DIR}/ResampleDTIlogEuclidean-exports.cmake )
+  endif()
+
+endif()
