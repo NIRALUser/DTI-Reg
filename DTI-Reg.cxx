@@ -83,6 +83,19 @@ int main (int argc, char *argv[])
     RanCommandDirectory="."; // If called by itself = either in the PATH or in the current directory : will be find either way by find_program
   }
 #ifdef Slicer_Extension
+  
+  int startsize = ProgramsPathsVector.size();
+  std::size_t firstch = RanCommandDirectory.rfind("DTI-Reg");
+
+  ProgramsPathsVector.push_back("DTIProcess");
+  ProgramsPathsVector.push_back("ResampleDTIlogEuclidean");
+
+  for(int i = startsize; i < ProgramsPathsVector.size(); i++){
+    std::string fullpath = RanCommandDirectory;
+    std::string currenttool = ProgramsPathsVector[i];
+    ProgramsPathsVector[i] = fullpath.replace(firstch, std::string("DTI-Reg").size(), currenttool);
+  }
+
   //We add "ExternalBin" to the directory that have to be looked in for the other software
   ProgramsPathsVector.push_back( RanCommandDirectory + "/../ExternalBin" ) ;
   //Since Slicer r23212, dependent extensions can be downloaded automatically. DTIProcess will therefore not be installed in ExternalBin

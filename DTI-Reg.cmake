@@ -38,7 +38,7 @@ if( DTI-Reg_BUILD_SLICER_EXTENSION )
   
   find_package(Slicer REQUIRED)
   include(${Slicer_USE_FILE})
-  
+
   SET(INSTALL_RUNTIME_DESTINATION ${Slicer_INSTALL_CLIMODULES_BIN_DIR})
   SET(INSTALL_LIBRARY_DESTINATION ${Slicer_INSTALL_CLIMODULES_LIB_DIR})
   SET(INSTALL_ARCHIVE_DESTINATION ${Slicer_INSTALL_CLIMODULES_LIB_DIR})
@@ -97,16 +97,22 @@ if(ITKTransformTools_DIR)
 endif()
 
 if(ANTs_DIR)
+  set(ants_tools
+    ANTS
+    WarpImageMultiTransform)
 
-  # find_program(ITKTransformTools_LOCATION 
-  #   ITKTransformTools
-  #   HINTS ${ITKTransformTools_DIR}/bin)
+  foreach(ants_bin ${ants_tools})
+    find_program(ants_bin_LOCATION 
+      ${ants_bin}
+      HINTS ${ANTs_DIR}/bin)
 
-  # if(ITKTransformTools_LOCATION)
-  #   install(PROGRAMS ${ITKTransformTools_LOCATION}
-  #     DESTINATION ${INSTALL_RUNTIME_DESTINATION_EXTERNAL}
-  #     COMPONENT RUNTIME)
-  # endif()
+    if(ants_bin_LOCATION)
+      install(PROGRAMS ${ants_bin_LOCATION}
+        DESTINATION ${INSTALL_RUNTIME_DESTINATION_EXTERNAL}
+        COMPONENT RUNTIME)
+    endif()
+
+  endforeach()
 endif()
 
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
