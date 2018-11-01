@@ -102,12 +102,12 @@ if(ANTs_DIR)
     WarpImageMultiTransform)
 
   foreach(ants_bin ${ants_tools})
-    find_program(ants_bin_LOCATION 
+
+    find_program(${ants_bin}_LOCATION 
       ${ants_bin}
       HINTS ${ANTs_DIR}/bin)
-
-    if(ants_bin_LOCATION)
-      install(PROGRAMS ${ants_bin_LOCATION}
+    if(${ants_bin}_LOCATION)
+      install(PROGRAMS ${${ants_bin}_LOCATION}
         DESTINATION ${INSTALL_RUNTIME_DESTINATION_EXTERNAL}
         COMPONENT RUNTIME)
     endif()
