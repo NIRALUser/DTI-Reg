@@ -100,6 +100,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   )
   set(${extProjName}_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/ExternalSources/${proj})
   set(${extProjName}_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib)
+  set(${extProjName}_DIR ${CMAKE_CURRENT_BINARY_DIR}/${proj}-install)
   set(USE_ANTS ON)
 else()
   if(${USE_SYSTEM_${extProjName}})

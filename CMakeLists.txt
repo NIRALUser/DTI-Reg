@@ -33,6 +33,8 @@ include(SlicerExtensionsConfigureMacros)
 
 option(STATIC_DTI-Reg "Build static DTI-Reg" ON)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/Common.cmake)
+
 #-----------------------------------------------------------------------------
 # Superbuild script
 #-----------------------------------------------------------------------------
