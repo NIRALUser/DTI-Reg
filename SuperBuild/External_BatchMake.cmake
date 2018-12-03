@@ -37,6 +37,10 @@ set(${proj}_DEPENDENCIES ITKv4)
 
 SlicerMacroCheckExternalProjectDependency(${proj})
 
+if(UNIX)
+  set(CMAKE_CXX_FLAGS_BatchMake -std=c++11)
+endif()
+
 if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
   #message(STATUS "${__indent}Adding project ${proj}")
   ExternalProject_Add(${proj}
@@ -58,6 +62,7 @@ if(NOT DEFINED ${extProjName}_DIR AND NOT ${USE_SYSTEM_${extProjName}})
         -DGRID_SUPPORT:BOOL=OFF
         -DUSE_SPLASHSCREEN:BOOL=OFF
         -DITK_DIR:PATH=${ITK_DIR}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS_BatchMake}
         ${BatchMakeCURLCmakeArg}
       INSTALL_COMMAND ""
       DEPENDS  ${${proj}_DEPENDENCIES}

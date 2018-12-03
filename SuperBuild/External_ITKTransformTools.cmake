@@ -80,6 +80,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ## We really do want to install to remove uncertainty about where the tools are
       ## (on Windows, tools might be in subfolders, like "Release", "Debug",...)
       -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
+      -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
     DEPENDS
       ${${proj}_DEPENDENCIES}
   )
