@@ -68,7 +68,13 @@ SEMMacroBuildCLI(
   INSTALL_LIBRARY_DESTINATION ${INSTALL_LIBRARY_DESTINATION}
   INSTALL_ARCHIVE_DESTINATION ${INSTALL_ARCHIVE_DESTINATION}
 )
-export(TARGETS ${MODULE_NAME} FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-exports.cmake)
+
+install( TARGETS ${MODULE_NAME} 
+  EXPORT ${MODULE_NAME}Targets
+  RUNTIME DESTINATION ${INSTALL_RUNTIME_DESTINATION} 
+  PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}"
+  )
+
 if(BUILD_TESTING)
   add_subdirectory(Testing)
 endif()
@@ -81,6 +87,58 @@ else()
                 "${CMAKE_CURRENT_BINARY_DIR}/DTI-Reg_Config.h" COPYONLY)
 endif()
 
+
+if(NOT DTI-Reg_BUILD_SLICER_EXTENSION)
+
+  set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
+  set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+  set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
+
+  if(WIN32 AND NOT CYGWIN)
+    set(DEF_INSTALL_CMAKE_DIR CMake)
+  else()
+    set(DEF_INSTALL_CMAKE_DIR lib/CMake/DTI-Reg)
+  endif()
+  set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
+    "Installation directory for CMake files")
+
+  # Make relative paths absolute (needed later on)
+  foreach(p LIB BIN INCLUDE CMAKE)
+    set(var INSTALL_${p}_DIR)
+    if(NOT IS_ABSOLUTE "${${var}}")
+      set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+    endif()
+  endforeach()
+
+  ### This is the config file for niral_utilities
+  # Create the FooBarConfig.cmake and FooBarConfigVersion files
+  file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
+     "${INSTALL_INCLUDE_DIR}")
+  # ... for the build tree
+  set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+  set(CONF_LIBRARIES ${MODULE_NAME})
+
+  configure_file(DTI-RegConfig.cmake.in
+    "${PROJECT_BINARY_DIR}/DTI-RegConfig.cmake" @ONLY)
+  # ... for the install tree
+  set(CONF_INCLUDE_DIRS "\${DTI-Reg_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+  configure_file(DTI-RegConfig.cmake.in
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/DTI-RegConfig.cmake" @ONLY)
+
+  install(FILES
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/DTI-RegConfig.cmake"
+    #"${PROJECT_BINARY_DIR}/FooBarConfigVersion.cmake"
+    DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+   
+  # Install the export set for use with the install-tree
+
+  install(EXPORT ${MODULE_NAME}Targets DESTINATION
+  "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+  export(TARGETS DTI-Reg
+    FILE "${PROJECT_BINARY_DIR}/${MODULE_NAME}Targets.cmake"
+    )
+endif()
 
 if(ITKTransformTools_DIR)
 
