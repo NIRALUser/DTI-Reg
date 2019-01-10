@@ -154,7 +154,8 @@ if(ITKTransformTools_DIR)
   
 endif()
 
-if(ANTs_DIR)
+option(ANTs_INSTALL "Install ANTs executables" ON)
+if(ANTs_DIR AND ANTs_INSTALL)
   set(ants_tools
     ANTS
     WarpImageMultiTransform)
