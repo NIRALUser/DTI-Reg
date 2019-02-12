@@ -37,7 +37,7 @@ set(${proj}_DEPENDENCIES ITKv4)
 
 SlicerMacroCheckExternalProjectDependency(${proj})
 
-if(UNIX)
+if(UNIX AND (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7))
   set(CMAKE_CXX_FLAGS_BatchMake -std=c++11)
 endif()
 
