@@ -99,7 +99,8 @@ endif()
 if(ANTs_DIR)
   set(ants_tools
     ANTS
-    WarpImageMultiTransform)
+    WarpImageMultiTransform
+    antsJointFusion)
 
   foreach(ants_bin ${ants_tools})
 
