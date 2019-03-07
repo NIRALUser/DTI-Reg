@@ -72,11 +72,13 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DBUILD_TESTING:BOOL=OFF
       -DBUILD_ALL_ANTS_APPS:BOOL=ON
       -DBUILD_SHARED_LIBS:BOOL=OFF
-      -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
       -DUSE_VTK:BOOL=OFF
    )
  if(${PRIMARY_PROJECT_NAME}_USE_QT)
    list(APPEND ${proj}_CMAKE_OPTIONS -DANTS_USE_QT:BOOL=ON)
+ endif()
+ if(CMAKE_CXX_STANDARD)
+  list(APPEND ${proj}_CMAKE_OPTIONS -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD})
  endif()
   ### --- End Project specific additions
   set(${proj}_REPOSITORY "https://github.com/ANTsX/ANTs.git")

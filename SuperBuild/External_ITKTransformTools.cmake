@@ -59,9 +59,13 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     -DUSE_SYSTEM_ITK:BOOL=ON
     )
 
+  if(CMAKE_CXX_STANDARD)
+  list(APPEND ${proj}_CMAKE_OPTIONS -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD})
+ endif()
+
   ### --- End Project specific additions
   set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/ITKTransformTools.git )
-  set( ${proj}_GIT_TAG 918e3963df51433c621d8bc976a6577b09721f69 )
+  set( ${proj}_GIT_TAG release )
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
@@ -80,7 +84,6 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ## We really do want to install to remove uncertainty about where the tools are
       ## (on Windows, tools might be in subfolders, like "Release", "Debug",...)
       -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
-      -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
     DEPENDS
       ${${proj}_DEPENDENCIES}
   )
