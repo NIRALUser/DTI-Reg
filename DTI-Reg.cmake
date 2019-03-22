@@ -175,6 +175,24 @@ if(ANTs_DIR AND ANTs_INSTALL)
   endforeach()
 endif()
 
+if(teem_DIR)
+
+  find_program(UNU_PATH 
+    unu
+    HINTS ${teem_DIR}/bin ${teem_DIR} ${teem_DIR}/../bin
+    NO_SYSTEM_ENVIRONMENT_PATH)
+
+  if (${LOCAL_PROJECT_NAME}_BUILD_SLICER_EXTENSION)
+    install(PROGRAMS ${UNU_PATH}
+      DESTINATION ${INSTALL_RUNTIME_DESTINATION}/../ExternalBin
+      COMPONENT RUNTIME)
+  else()
+    install(PROGRAMS ${UNU_PATH}
+      DESTINATION ${INSTALL_RUNTIME_DESTINATION}
+      COMPONENT RUNTIME)
+  endif()
+endif()
+
 if( DTI-Reg_BUILD_SLICER_EXTENSION )
   set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
   include(${Slicer_EXTENSION_CPACK})
