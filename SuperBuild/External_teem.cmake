@@ -38,7 +38,13 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   ### --- End Project specific additions
   set(${proj}_REPOSITORY "${git_protocol}://github.com/mschmieder/teem.git")
   set(${proj}_GIT_TAG master)
-  ExternalProject_Add(${proj}_dt
+
+  set(${proj}_target ${proj})
+  if(TARGET ${proj})
+    set(${proj}_target ${proj}_dt)
+  endif()
+
+  ExternalProject_Add(${${proj}_target}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
@@ -56,7 +62,9 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )
-  set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install/cmake/)
+  set(${extProjName}_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-install)
+
+  
 
 else()
   if(${USE_SYSTEM_${extProjName}})
