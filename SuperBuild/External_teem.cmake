@@ -38,7 +38,13 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   ### --- End Project specific additions
   set(${proj}_REPOSITORY "${git_protocol}://github.com/mschmieder/teem.git")
   set(${proj}_GIT_TAG master)
-  ExternalProject_Add(${proj}_dt
+
+  set(chage_target_name "")
+  if( DTI-Reg_BUILD_SLICER_EXTENSION )
+    set(chage_target_name "_dt")#THIS IS A HACK BECAUSE SLICER HAS A teem TARGET already
+  endif()
+
+  ExternalProject_Add(${proj}${chage_target_name}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
