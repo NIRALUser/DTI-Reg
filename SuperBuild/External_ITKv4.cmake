@@ -170,7 +170,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ${${proj}_CMAKE_ADDITIONAL_OPTIONS}
     )
   ### --- End Project specific additions
-  set(${proj}_REPOSITORY ${git_protocol}://itk.org/ITK.git)
+  set(${proj}_REPOSITORY ${git_protocol}://github.com/InsightSoftwareConsortium/ITK)
   set(${proj}_GIT_TAG 0cb4a4dea8070c8aff24e307eee104337a0783aa)
   set(ITK_VERSION_ID ITK-4.11)
 
